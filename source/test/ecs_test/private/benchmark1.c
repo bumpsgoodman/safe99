@@ -4,8 +4,11 @@
 #include "ecs.h"
 #include "util/assert.h"
 
-#include "component/position.h"
-#include "component/velocity.h"
+typedef struct
+{
+    float x;
+    float y;
+} position_t, velocity_t;
 
 ecs_id_t g_pos;
 ecs_id_t g_vel;
@@ -25,6 +28,8 @@ int main(void)
 
     QueryPerformanceFrequency(&frequency);
     QueryPerformanceCounter(&prev_counter);
+
+    printf("%llu entities, %llu components에 대한 테스트\n\n", num_max_entities, 2ull);
 
     printf("초기화 시간 측정\n");
     QueryPerformanceCounter(&prev_counter);
@@ -46,9 +51,9 @@ int main(void)
     for (ecs_id_t i = 0; i < num_max_entities; ++i)
     {
         ecs_id_t e0 = ecs_create_entity(&world);
-        //ecs_add_component(&world, e0, 2, g_pos, g_vel);
-        ecs_set_component(&world, e0, g_pos, &(position_t){ 1.0f, 1.0f });
-        ecs_set_component(&world, e0, g_vel, &(velocity_t){ 2.0f, 2.0f });
+        ecs_add_component(&world, e0, 2, g_pos, g_vel);
+        //ecs_set_component(&world, e0, g_pos, &(position_t){ 1.0f, 1.0f });
+        //ecs_set_component(&world, e0, g_vel, &(velocity_t){ 2.0f, 2.0f });
     }
     QueryPerformanceCounter(&cur_counter);
     d_elapsed_tick = ((double)cur_counter.QuadPart - (double)prev_counter.QuadPart) / (double)frequency.QuadPart * 1000.0;
@@ -93,8 +98,8 @@ void update_pos(const ecs_view_t* p_view)
             p_pos[j].x += p_vel[j].x;
             p_pos[j].y += p_vel[j].y;
 
-            printf("pos: [%.3f, %.3f]\n", p_pos[j].x, p_pos[j].y);
-            printf("vel: [%.3f, %.3f]\n\n", p_vel[j].x, p_vel[j].y);
+            //printf("pos: [%.3f, %.3f]\n", p_pos[j].x, p_pos[j].y);
+            //printf("vel: [%.3f, %.3f]\n\n", p_vel[j].x, p_vel[j].y);
         }
     }
 }
