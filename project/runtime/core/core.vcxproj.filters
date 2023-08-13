@@ -51,6 +51,9 @@
     <ClInclude Include="..\..\..\source\runtime\core\public\defines.h">
       <Filter>public</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\util\timer.h">
+      <Filter>public\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\runtime\core\private\generic\static_memory_pool.c">
@@ -76,6 +79,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\runtime\core\private\generic\dynamic_vector.c">
       <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\runtime\core\private\util\timer.c">
+      <Filter>private\util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

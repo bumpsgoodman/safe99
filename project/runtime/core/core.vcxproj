@@ -184,6 +184,7 @@
     <ClInclude Include="..\..\..\source\runtime\core\public\generic\static_memory_pool.h" />
     <ClInclude Include="..\..\..\source\runtime\core\public\util\assert.h" />
     <ClInclude Include="..\..\..\source\runtime\core\public\util\hash_function.h" />
+    <ClInclude Include="..\..\..\source\runtime\core\public\util\timer.h" />
     <ClInclude Include="..\..\..\source\runtime\core\\public\util\safe_delete.h" />
   </ItemGroup>
   <ItemGroup>
@@ -195,6 +196,7 @@
     <ClCompile Include="..\..\..\source\runtime\core\private\generic\map.c" />
     <ClCompile Include="..\..\..\source\runtime\core\private\generic\static_memory_pool.c" />
     <ClCompile Include="..\..\..\source\runtime\core\private\util\hash_function.c" />
+    <ClCompile Include="..\..\..\source\runtime\core\private\util\timer.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
