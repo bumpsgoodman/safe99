@@ -17,8 +17,6 @@ typedef struct
 ecs_id_t g_pos;
 ecs_id_t g_vel;
 
-ecs_id_t g_update_pos_sys;
-
 void update_pos(const ecs_view_t* p_view)
 {
     for (size_t i = 0; i < p_view->num_archetypes; ++i)
