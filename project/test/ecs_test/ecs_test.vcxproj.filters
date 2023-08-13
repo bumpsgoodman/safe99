@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="public">
+      <UniqueIdentifier>{95af7177-69de-4a4c-a193-5a3bfb9a6616}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private">
+      <UniqueIdentifier>{d43c9e55-2db2-44a9-9c7d-e2e93b8f299b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="public\component">
+      <UniqueIdentifier>{66a46306-edf8-406e-a53f-bc1d2a058c4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="public\system">
+      <UniqueIdentifier>{4ea66e3e-0629-4d72-a252-b283f6c83fbd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\test\ecs_test\private\sample1.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\test\ecs_test\private\benchmark1.c">
+      <Filter>private</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\test\ecs_test\public\component\position.h">
+      <Filter>public\component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\test\ecs_test\public\component\velocity.h">
+      <Filter>public\component</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

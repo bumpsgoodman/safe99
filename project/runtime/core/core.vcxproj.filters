@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="public">
+      <UniqueIdentifier>{5488f4a1-c728-499b-8497-746720ea8b1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private">
+      <UniqueIdentifier>{f651d0f4-61ac-441d-b1de-4fb7a406565c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="public\util">
+      <UniqueIdentifier>{0d5a5dee-af63-41f4-9dbf-2eb8dc9c856e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private\generic">
+      <UniqueIdentifier>{c2e1b9d2-def5-402a-b042-9a08d9af510f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="public\generic">
+      <UniqueIdentifier>{9de68be6-454d-474d-a211-0f756df49ec7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private\util">
+      <UniqueIdentifier>{55a25a97-ce01-4eff-aa29-740344bd9d45}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\runtime\core\\public\util\safe_delete.h">
+      <Filter>public\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\util\assert.h">
+      <Filter>public\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\generic\static_memory_pool.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\generic\chunked_memory_pool.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\generic\list.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\util\hash_function.h">
+      <Filter>public\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\generic\map.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\generic\fixed_vector.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\generic\dynamic_vector.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\runtime\core\public\defines.h">
+      <Filter>public</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\runtime\core\private\generic\static_memory_pool.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\runtime\core\private\dll_main.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\runtime\core\private\generic\chunked_memory_pool.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\runtime\core\private\generic\list.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\runtime\core\private\util\hash_function.c">
+      <Filter>private\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\runtime\core\private\generic\map.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\runtime\core\private\generic\fixed_vector.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\runtime\core\private\generic\dynamic_vector.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
