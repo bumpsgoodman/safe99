@@ -2,6 +2,28 @@
 
 ## ECS(Entity Component System) 지원
 
+### ECS란?
+
+- Entity는 고유한 id를 가집니다.
+
+- Component는 속성을 가집니다.
+
+- System은 entity가 가지고 있는 component를 조작합니다.
+
+이 세 가지가 따로 존재하기 때문에 데이터를 한 곳에 묶어서 캐시 적중률을 높일 수 있게 됩니다.
+
+ECS를 구현함에 있어서 보통 SparseSet 방식과 Archetype 방식을 사용합니다. (safe99에선 Archetype 채택)
+
+더 자세한 내용은 SanderMertens의 [ECS FAQ](https://github.com/SanderMertens/ecs-faq) 참고
+
+### safe99 ECS 특징
+
+1. Entity, Component, System 각각 최대 16,777,216개의 id를 가질 수 있습니다.
+
+2. Entity는 최대 65,536 세대를 가질 수 있습니다.
+
+3. view를 이용하여 쉽고 간편한 iteration이 가능합니다.
+
 ### ECS 예제 코드
 ``` c
 #include <stdio.h>
@@ -65,11 +87,18 @@ int main(void)
 <img src="sample/sample1.jpg"  width="20%"/>
 
 ### 성능 측정
-<img src="sample/benchmark1.jpg"  width="40%"/>
-
 1,000,000개의 entity를 생성하고 2개의 copmponent 추가 시 걸리는 시간 측정
 
+<img src="sample/benchmark1.jpg"  width="40%"/>
+
+## TODO
+ 1. D3D 11 지원
+
+ 2. ECS에서 각 System에 타이머 설정 기능
+
 ## 요구사항
+최소 프로세서: x86/x64 SSE3 지원 프로세서 (현시점 SSE3 지원하지 않는 프로세서도 가능)
+
 지원 OS: x86/x64 Windows
 
 미지원 OS: Unix/Linux 계열
