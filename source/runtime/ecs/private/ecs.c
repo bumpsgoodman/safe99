@@ -281,12 +281,12 @@ ecs_id_t ecs_register_component(ecs_world_t* p_world, const char* p_component_na
 
     const size_t len = strlen(p_component_name);
     const ecs_hash_t hash = hash64_fnv1a(p_component_name, len);
-    const ecs_id_t* p_component = (ecs_id_t*)map_get_value_or_null(&p_world->registered_components, &hash, sizeof(ecs_hash_t));
+    const ecs_id_t* p_component = (ecs_id_t*)map_get_value_by_hash_or_null(&p_world->registered_components, hash, &hash, sizeof(ecs_hash_t));
     if (p_component == NULL)
     {
         const ecs_id_t component = map_get_num_elements(&p_world->registered_components) | ECS_FLAG_COMPONENT;
 
-        map_insert(&p_world->registered_components, &hash, sizeof(ecs_hash_t), &component, sizeof(ecs_id_t));
+        map_insert_by_hash(&p_world->registered_components, hash, &hash, sizeof(ecs_hash_t), &component, sizeof(ecs_id_t));
         p_world->pa_component_size[PURE_ECS_ID(component)] = component_size;
 
         return component;
@@ -308,12 +308,12 @@ ecs_id_t ecs_register_system(ecs_world_t* p_world, const char* p_system_name, ec
 
     const size_t len = strlen(p_system_name);
     const ecs_hash_t hash = hash64_fnv1a(p_system_name, len);
-    const ecs_id_t* p_ecs_id = (ecs_id_t*)map_get_value_or_null(&p_world->registered_systems, &hash, sizeof(ecs_hash_t));
+    const ecs_id_t* p_ecs_id = (ecs_id_t*)map_get_value_by_hash_or_null(&p_world->registered_systems, hash, &hash, sizeof(ecs_hash_t));
     if (p_ecs_id == NULL)
     {
         const ecs_id_t ecs_id = map_get_num_elements(&p_world->registered_systems) | ECS_FLAG_SYSTEM;
 
-        map_insert(&p_world->registered_systems, &hash, sizeof(ecs_hash_t), &ecs_id, sizeof(ecs_id_t));
+        map_insert_by_hash(&p_world->registered_systems, hash, &hash, sizeof(ecs_hash_t), &ecs_id, sizeof(ecs_id_t));
 
         system_t* p_system = p_world->pa_systems + PURE_ECS_ID(ecs_id);
         p_system->p_func = p_func;
@@ -353,7 +353,7 @@ ecs_id_t ecs_get_component_id(ecs_world_t* p_world, const char* p_component_name
 
     const size_t len = strlen(p_component_name);
     const ecs_hash_t hash = hash64_fnv1a(p_component_name, len);
-    const ecs_id_t* p_component = (ecs_id_t*)map_get_value_or_null(&p_world->registered_components, &hash, sizeof(ecs_hash_t));
+    const ecs_id_t* p_component = (ecs_id_t*)map_get_value_by_hash_or_null(&p_world->registered_components, hash, &hash, sizeof(ecs_hash_t));
     if (p_component == NULL)
     {
         return 0;
@@ -369,7 +369,7 @@ ecs_id_t ecs_get_system_id(ecs_world_t* p_world, const char* p_system_name)
 
     const size_t len = strlen(p_system_name);
     const ecs_hash_t hash = hash64_fnv1a(p_system_name, len);
-    const ecs_id_t* p_system = (ecs_id_t*)map_get_value_or_null(&p_world->registered_systems, &hash, sizeof(ecs_hash_t));
+    const ecs_id_t* p_system = (ecs_id_t*)map_get_value_by_hash_or_null(&p_world->registered_systems, hash, &hash, sizeof(ecs_hash_t));
     if (p_system == NULL)
     {
         return 0;
@@ -394,8 +394,7 @@ ecs_id_t ecs_create_entity(ecs_world_t* p_world)
     if (p_queue->front == p_queue->rear)
     {
         entity = p_world->entity_count++ | ECS_FLAG_ENTITY;
-    }
-    else
+    } else
     {
         p_queue->front = (p_queue->front + 1) % (p_world->num_max_entities + 1);
         entity = p_queue->pa_entities[p_queue->front];
@@ -436,8 +435,7 @@ bool ecs_destroy_entity(ecs_world_t* p_world, const ecs_id_t entity)
     if (ENTITY_GEN(entity) >= MAX_ENTITY_GEN_FLAG)
     {
         next_entity = PURE_ECS_ID(entity) | ECS_FLAG_ENTITY;
-    }
-    else
+    } else
     {
         next_entity = entity + ENTITY_GEN_FLAG;
     }
@@ -543,8 +541,7 @@ bool ecs_add_component(ecs_world_t* p_world, const ecs_id_t entity, const size_t
     if (p_archetype == NULL)
     {
         memset(next_mask.p_masks, 0, 8 * NUM_MASKS(p_world->num_max_components));
-    }
-    else
+    } else
     {
         const ecs_mask_t* p_mask = &p_archetype->mask;
         memcpy(next_mask.p_masks, p_mask->p_masks, 8 * NUM_MASKS(p_world->num_max_components));
@@ -582,9 +579,10 @@ bool ecs_add_component(ecs_world_t* p_world, const ecs_id_t entity, const size_t
     }
 
     next_mask.hash = hash64_fnv1a((const char*)next_mask.p_masks, 8 * NUM_MASKS(p_world->num_max_components));
-    archetype_t* p_next_archetype = (archetype_t*)map_get_value_or_null(&p_world->archetype_map,
-                                                                        &next_mask.hash,
-                                                                        sizeof(ecs_id_t));
+    archetype_t* p_next_archetype = (archetype_t*)map_get_value_by_hash_or_null(&p_world->archetype_map,
+                                                                                next_mask.hash,
+                                                                                &next_mask.hash,
+                                                                                sizeof(ecs_id_t));
     if (p_next_archetype == NULL)
     {
         if (!create_archetype(p_world, &next_mask, &p_next_archetype))
@@ -592,8 +590,7 @@ bool ecs_add_component(ecs_world_t* p_world, const ecs_id_t entity, const size_t
             ASSERT(false, "Failed to create next archetype");
             goto failed_to_create_archetype;
         }
-    }
-    else
+    } else
     {
         chunked_memory_pool_dealloc(&p_world->mask_pool, next_mask.p_masks);
     }
@@ -701,9 +698,10 @@ bool ecs_remove_component(ecs_world_t* p_world, const ecs_id_t entity, const siz
     }
 
     next_mask.hash = hash64_fnv1a((const char*)next_mask.p_masks, 8 * NUM_MASKS(p_world->num_max_components));
-    archetype_t* p_next_archetype = (archetype_t*)map_get_value_or_null(&p_world->archetype_map,
-                                                                        &next_mask.hash,
-                                                                        sizeof(ecs_id_t));
+    archetype_t* p_next_archetype = (archetype_t*)map_get_value_by_hash_or_null(&p_world->archetype_map,
+                                                                                next_mask.hash,
+                                                                                &next_mask.hash,
+                                                                                sizeof(ecs_id_t));
     if (p_next_archetype == NULL)
     {
         const size_t num_masks = NUM_MASKS(p_world->num_max_components);
@@ -714,7 +712,7 @@ bool ecs_remove_component(ecs_world_t* p_world, const ecs_id_t entity, const siz
             {
                 break;
             }
-            
+
             ++count;
         }
 
@@ -723,8 +721,7 @@ bool ecs_remove_component(ecs_world_t* p_world, const ecs_id_t entity, const siz
             ASSERT(false, "Failed to create next archetype");
             goto failed_to_create_archetype;
         }
-    }
-    else
+    } else
     {
         chunked_memory_pool_dealloc(&p_world->mask_pool, next_mask.p_masks);
     }
@@ -753,12 +750,12 @@ bool ecs_update_system(ecs_world_t* p_world, const ecs_id_t system)
     ASSERT(PURE_ECS_ID(system) < map_get_num_elements(&p_world->registered_systems), "Invalid system");
 
     system_t* p_system = p_world->pa_systems + PURE_ECS_ID(system);
-    
+
     ecs_view_t view = { 0, };
     view.p_world = p_world;
     view.p_archetypes = *(archetype_t**)dynamic_vector_get_elements_ptr_or_null(&p_system->archetypes);
     view.num_archetypes = dynamic_vector_get_num_elements(&p_system->archetypes);
-    
+
     p_system->p_func(&view);
 
     return true;
@@ -768,7 +765,7 @@ void* ecs_get_instances_or_null(const ecs_view_t* p_view, const size_t archetype
 {
     ASSERT(p_view != NULL, "p_world == NULL");
     ASSERT(IS_COMPONENT(component), "Not component");
-    
+
     if (archetype_index >= p_view->num_archetypes)
     {
         return NULL;
@@ -803,10 +800,10 @@ static bool create_archetype(ecs_world_t* p_world, const ecs_mask_t* p_mask, arc
     // map에 archetype 추가
     {
         archetype_t archetype = { 0, };
-        map_insert(&p_world->archetype_map, &p_mask->hash, sizeof(ecs_id_t), &archetype, sizeof(archetype_t));
+        map_insert_by_hash(&p_world->archetype_map, p_mask->hash, &p_mask->hash, sizeof(ecs_id_t), &archetype, sizeof(archetype_t));
     }
 
-    archetype_t* p_archetype = (archetype_t*)map_get_value_or_null(&p_world->archetype_map, &p_mask->hash, sizeof(ecs_id_t));
+    archetype_t* p_archetype = (archetype_t*)map_get_value_by_hash_or_null(&p_world->archetype_map, p_mask->hash, &p_mask->hash, sizeof(ecs_id_t));
 
     // component map 초기화
     if (!map_init(&p_archetype->component_map, sizeof(ecs_id_t), sizeof(size_t), p_mask->num_components))

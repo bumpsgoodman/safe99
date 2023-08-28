@@ -52,8 +52,8 @@ int main(void)
     {
         ecs_id_t e0 = ecs_create_entity(&world);
         ecs_add_component(&world, e0, 2, g_pos, g_vel);
-        //ecs_set_component(&world, e0, g_pos, &(position_t){ 1.0f, 1.0f });
-        //ecs_set_component(&world, e0, g_vel, &(velocity_t){ 2.0f, 2.0f });
+        ecs_set_component(&world, e0, g_pos, &(position_t){ 1.0f, 1.0f });
+        ecs_set_component(&world, e0, g_vel, &(velocity_t){ 2.0f, 2.0f });
     }
     QueryPerformanceCounter(&cur_counter);
     d_elapsed_tick = ((double)cur_counter.QuadPart - (double)prev_counter.QuadPart) / (double)frequency.QuadPart * 1000.0;

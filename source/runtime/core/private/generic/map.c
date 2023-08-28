@@ -189,6 +189,70 @@ bool map_insert(map_t* p_map, const void* p_key, const size_t key_size, const vo
     return true;
 }
 
+bool map_insert_by_hash(map_t* p_map, const uint64_t hash, const void* p_key, const size_t key_size, const void* p_value, const size_t value_size)
+{
+    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_key != NULL, "p_key == NULL");
+    ASSERT(p_value != NULL, "p_value == NULL");
+
+    if (p_map->key_size != key_size)
+    {
+        ASSERT(false, "mismatch key size");
+        return false;
+    }
+
+    if (p_map->value_size != value_size)
+    {
+        ASSERT(false, "mismatch value size");
+        return false;
+    }
+
+    if (p_map->num_elements >= p_map->num_max_elements)
+    {
+        expand(p_map);
+    }
+
+    const size_t index = hash % p_map->bucket_size;
+
+    list_t* p_list = p_map->pa_bucket + index;
+
+    // 이미 같은 키가 있는지 검사
+    // 같은 키가 있다면 값 바꾸기
+    {
+        list_node_t* p_node = p_list->p_head;
+        while (p_node != NULL && memcmp(((key_value_t*)p_node->p_element)->p_key, p_key, key_size) != 0)
+        {
+            p_node = p_node->p_next;
+        }
+
+        if (p_node != NULL)
+        {
+            key_value_t* key_value = (key_value_t*)p_node->p_element;
+            memcpy(key_value->p_value, p_value, value_size);
+
+            return true;
+        }
+    }
+
+    list_node_t* p_node = (list_node_t*)chunked_memory_pool_alloc_or_null(&p_map->node_pool);
+    key_value_t* key_value = p_map->pa_key_values + p_map->num_elements;
+
+    // 키-값 복사
+    key_value->p_key = chunked_memory_pool_alloc_or_null(&p_map->key_pool);
+    key_value->p_value = chunked_memory_pool_alloc_or_null(&p_map->value_pool);
+    memcpy(key_value->p_key, p_key, key_size);
+    memcpy(key_value->p_value, p_value, value_size);
+
+    key_value->index = index; // 제거할 때 필요
+
+    p_node->p_element = key_value;
+    list_add_tail(&p_list->p_head, &p_list->p_tail, p_node);
+
+    ++p_map->num_elements;
+
+    return true;
+}
+
 bool map_remove(map_t* p_map, const void* p_key, const size_t key_size)
 {
     ASSERT(p_map != NULL, "p_map == NULL");
@@ -201,6 +265,61 @@ bool map_remove(map_t* p_map, const void* p_key, const size_t key_size)
     }
 
     const uint64_t hash = hash64_fnv1a((const char*)p_key, key_size);
+    const size_t index = hash % p_map->bucket_size;
+
+    list_t* p_list = p_map->pa_bucket + index;
+
+    // 키 찾기
+    list_node_t* p_node = p_list->p_head;
+    while (p_node != NULL && memcmp(((key_value_t*)p_node->p_element)->p_key, p_key, key_size) != 0)
+    {
+        p_node = p_node->p_next;
+    }
+
+    if (p_node == NULL)
+    {
+        return false;
+    }
+
+    key_value_t* p_key_value = (key_value_t*)p_node->p_element;
+    key_value_t* p_last_key_value = p_map->pa_key_values + (p_map->num_elements - 1);
+    void* p_deleted_key = p_key_value->p_key;
+    void* p_deleted_value = p_key_value->p_value;
+    *p_key_value = *p_last_key_value;
+
+    list_t* p_last_list = p_map->pa_bucket + p_last_key_value->index;
+    list_node_t* p_last_node = p_last_list->p_head;
+    while (p_last_node != NULL
+           && memcmp(p_last_key_value->p_key, ((key_value_t*)p_last_node->p_element)->p_key, key_size) != 0)
+    {
+        p_last_node = p_last_node->p_next;
+    }
+
+    // 이 시점에서 마지막 노드는 NULL이 될 수 없음
+    ASSERT(p_last_node != NULL, "p_last_node == NULL");
+    p_last_node->p_element = p_key_value;
+
+    list_delete_node(&p_list->p_head, &p_list->p_tail, p_node);
+    chunked_memory_pool_dealloc(&p_map->key_pool, p_key_value->p_key);
+    chunked_memory_pool_dealloc(&p_map->value_pool, p_key_value->p_value);
+    chunked_memory_pool_dealloc(&p_map->node_pool, p_node);
+
+    --p_map->num_elements;
+
+    return true;
+}
+
+bool map_remove_by_hash(map_t* p_map, const uint64_t hash, const void* p_key, const size_t key_size)
+{
+    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_key != NULL, "p_key == NULL");
+
+    if (p_map->key_size != key_size)
+    {
+        ASSERT(false, "mismatch key size");
+        return false;
+    }
+
     const size_t index = hash % p_map->bucket_size;
 
     list_t* p_list = p_map->pa_bucket + index;
@@ -286,12 +405,54 @@ key_value_t* map_find_or_null(map_t* p_map, const void* p_key, const size_t key_
     return (key_value_t*)p_node->p_element;
 }
 
+key_value_t* map_find_by_hash_or_null(map_t* p_map, const uint64_t hash, const void* p_key, const size_t key_size)
+{
+    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_key != NULL, "p_key == NULL");
+
+    if (p_map->key_size != key_size)
+    {
+        ASSERT(false, "mismatch key size");
+        return NULL;
+    }
+
+    const size_t index = hash % p_map->bucket_size;
+
+    list_t* p_list = p_map->pa_bucket + index;
+    list_node_t* p_node = p_list->p_head;
+    while (p_node != NULL && memcmp(((key_value_t*)p_node->p_element)->p_key, p_key, key_size) != 0)
+    {
+        p_node = p_node->p_next;
+    }
+
+    if (p_node == NULL)
+    {
+        return NULL;
+    }
+
+    return (key_value_t*)p_node->p_element;
+}
+
 void* map_get_value_or_null(map_t* p_map, const void* p_key, const size_t key_size)
 {
     ASSERT(p_map != NULL, "p_map == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
 
     key_value_t* p_key_value = map_find_or_null(p_map, p_key, key_size);
+    if (p_key_value == NULL)
+    {
+        return NULL;
+    }
+
+    return p_key_value->p_value;
+}
+
+void* map_get_value_by_hash_or_null(map_t* p_map, const uint64_t hash, const void* p_key, const size_t key_size)
+{
+    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_key != NULL, "p_key == NULL");
+
+    key_value_t* p_key_value = map_find_by_hash_or_null(p_map, hash, p_key, key_size);
     if (p_key_value == NULL)
     {
         return NULL;
