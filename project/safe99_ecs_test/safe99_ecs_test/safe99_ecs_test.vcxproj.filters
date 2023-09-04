@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="safe99_common">
+      <UniqueIdentifier>{ccba69c0-4175-4f5a-aa22-5915b4453dc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="public">
+      <UniqueIdentifier>{f54993c9-359a-4c85-a77f-2600d5e61e38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private">
+      <UniqueIdentifier>{32dcd880-0113-4922-93f2-95a1b5b9b880}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="public\component">
+      <UniqueIdentifier>{b121b546-8226-419c-b274-4c30581e9ecf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="public\system">
+      <UniqueIdentifier>{ad25b305-f4ac-41fa-8d13-48dafe0be574}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\safe99_common\assert.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_common\defines.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_ecs_test\public\component\position.h">
+      <Filter>public\component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_ecs_test\public\component\velocity.h">
+      <Filter>public\component</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\safe99_ecs_test\private\benchmark1.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_ecs_test\private\sample1.c">
+      <Filter>private</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

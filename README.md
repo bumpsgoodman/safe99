@@ -84,12 +84,12 @@ int main(void)
 
 실행 결과
 
-<img src="sample/sample1.jpg"  width="20%"/>
+<img src="sample/ecs/sample1.jpg"  width="20%"/>
 
 ### 성능 측정
 1,000,000개의 entity를 생성하고 2개의 copmponent 추가 시 걸리는 시간 측정
 
-<img src="sample/benchmark1.jpg"  width="40%"/>
+<img src="sample/ecs/benchmark1.jpg"  width="40%"/>
 
 ## TODO
  1. D3D 11 지원

@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="public">
+      <UniqueIdentifier>{a6c5f7c1-f919-4272-b8c1-13fd163c20de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private">
+      <UniqueIdentifier>{60bc080c-e42b-4cb0-b7b1-734bec05b2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="public\generic">
+      <UniqueIdentifier>{0c7a187c-701b-44fc-982b-797fd0163de2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="public\util">
+      <UniqueIdentifier>{a5b68df5-874c-453e-92f8-14d2010db3c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private\util">
+      <UniqueIdentifier>{3595ea0d-deab-4e0d-a0cf-2bbd6ddf8ea4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private\generic">
+      <UniqueIdentifier>{ae3258a8-01e9-4128-bddb-bb1fcc981e83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_common">
+      <UniqueIdentifier>{30b5bc8f-b8fe-4e93-b1ef-bdd180bef0a6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\safe99_core\public\generic\chunked_memory_pool.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_core\public\generic\dynamic_vector.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_core\public\generic\fixed_vector.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_core\public\generic\list.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_core\public\generic\map.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_core\public\generic\static_memory_pool.h">
+      <Filter>public\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_core\public\util\hash_function.h">
+      <Filter>public\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_core\public\util\timer.h">
+      <Filter>public\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_core\private\precompiled.h">
+      <Filter>private</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_common\assert.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_common\defines.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\safe99_core\private\util\hash_function.c">
+      <Filter>private\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\util\timer.c">
+      <Filter>private\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\generic\chunked_memory_pool.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\generic\dynamic_vector.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\generic\fixed_vector.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\generic\list.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\generic\map.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\generic\static_memory_pool.c">
+      <Filter>private\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\dll_main.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\precompiled.c">
+      <Filter>private</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
