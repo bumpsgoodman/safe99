@@ -4,9 +4,6 @@
     <Filter Include="safe99_common">
       <UniqueIdentifier>{008da5a0-93ed-4b23-9710-2c9ec6ed8288}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public">
-      <UniqueIdentifier>{08a4743f-698b-4a94-8c01-7960dd4e7c0c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="private">
       <UniqueIdentifier>{0fbd9f4b-1e2d-4435-b576-bfb6ff7333c7}</UniqueIdentifier>
     </Filter>
@@ -21,12 +18,10 @@
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h">
       <Filter>safe99_common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_ecs\public\ecs.h">
-      <Filter>public</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\safe99_ecs\private\precompiled.h">
       <Filter>private</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_ecs\ecs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_ecs\private\dll_main.c">

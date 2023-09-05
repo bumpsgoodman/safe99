@@ -6,9 +6,9 @@
 #include <stdint.h>
 
 #include "safe99_common/defines.h"
-#include "generic/chunked_memory_pool.h"
-#include "generic/dynamic_vector.h"
-#include "generic/map.h"
+#include "safe99_core/generic/chunked_memory_pool.h"
+#include "safe99_core/generic/dynamic_vector.h"
+#include "safe99_core/generic/map.h"
 
 // id 구성, 총 64비트
 // -----------------------------------------------------------------

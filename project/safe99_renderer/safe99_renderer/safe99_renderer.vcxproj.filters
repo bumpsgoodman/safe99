@@ -4,9 +4,6 @@
     <Filter Include="safe99_common">
       <UniqueIdentifier>{854697fd-80fe-4a2b-b37d-cd65a6338ef6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public">
-      <UniqueIdentifier>{2c213de7-bce3-4d88-a632-dd20b984b799}</UniqueIdentifier>
-    </Filter>
     <Filter Include="private">
       <UniqueIdentifier>{79fc8c70-a4f4-4f95-8b38-fc7f5a8c1603}</UniqueIdentifier>
     </Filter>
@@ -21,9 +18,7 @@
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h">
       <Filter>safe99_common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_renderer_ddraw\public\renderer_ddraw.h">
-      <Filter>public</Filter>
-    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_renderer_ddraw\renderer_ddraw.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_renderer_ddraw\private\dll_main.c">

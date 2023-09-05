@@ -95,7 +95,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_core\public;..\..\..\source\safe99_core\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_core\;..\..\..\source\safe99_core\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -114,7 +114,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_core\public;..\..\..\source\safe99_core\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_core\;..\..\..\source\safe99_core\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -133,7 +133,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_core\public;..\..\..\source\safe99_core\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_core\;..\..\..\source\safe99_core\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -152,7 +152,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_core\public;..\..\..\source\safe99_core\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_core\;..\..\..\source\safe99_core\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -169,15 +169,15 @@
     <ClInclude Include="..\..\..\source\safe99_common\assert.h" />
     <ClInclude Include="..\..\..\source\safe99_common\defines.h" />
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h" />
+    <ClInclude Include="..\..\..\source\safe99_core\generic\chunked_memory_pool.h" />
+    <ClInclude Include="..\..\..\source\safe99_core\generic\dynamic_vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_core\generic\fixed_vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_core\generic\list.h" />
+    <ClInclude Include="..\..\..\source\safe99_core\generic\map.h" />
+    <ClInclude Include="..\..\..\source\safe99_core\generic\static_memory_pool.h" />
     <ClInclude Include="..\..\..\source\safe99_core\private\precompiled.h" />
-    <ClInclude Include="..\..\..\source\safe99_core\public\generic\chunked_memory_pool.h" />
-    <ClInclude Include="..\..\..\source\safe99_core\public\generic\dynamic_vector.h" />
-    <ClInclude Include="..\..\..\source\safe99_core\public\generic\fixed_vector.h" />
-    <ClInclude Include="..\..\..\source\safe99_core\public\generic\list.h" />
-    <ClInclude Include="..\..\..\source\safe99_core\public\generic\map.h" />
-    <ClInclude Include="..\..\..\source\safe99_core\public\generic\static_memory_pool.h" />
-    <ClInclude Include="..\..\..\source\safe99_core\public\util\hash_function.h" />
-    <ClInclude Include="..\..\..\source\safe99_core\public\util\timer.h" />
+    <ClInclude Include="..\..\..\source\safe99_core\util\hash_function.h" />
+    <ClInclude Include="..\..\..\source\safe99_core\util\timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_core\private\dll_main.c" />

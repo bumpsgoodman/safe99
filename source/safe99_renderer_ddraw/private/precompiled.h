@@ -11,7 +11,7 @@
 #include "safe99_common/defines.h"
 #include "safe99_common/safe_delete.h"
 
-#include "math_util.h"
+#include "safe99_math/math_util.h"
 
 #include "renderer_ddraw.h"
 

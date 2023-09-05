@@ -1,7 +1,7 @@
 #include "renderer_ddraw.h"
-#include "math_util.h"
 #include "safe99_common/assert.h"
 #include "safe99_common/safe_delete.h"
+#include "safe99_math/math_util.h"
 
 static bool create_back_buffer(renderer_ddraw_t* p_ddraw, const size_t width, const size_t height);
 

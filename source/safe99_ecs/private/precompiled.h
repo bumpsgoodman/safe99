@@ -15,14 +15,13 @@
 #include "safe99_common/defines.h"
 #include "safe99_common/safe_delete.h"
 
-#include "generic/chunked_memory_pool.h"
-#include "generic/dynamic_vector.h"
-#include "generic/list.h"
-#include "generic/map.h"
+#include "safe99_core/generic/chunked_memory_pool.h"
+#include "safe99_core/generic/dynamic_vector.h"
+#include "safe99_core/generic/list.h"
+#include "safe99_core/generic/map.h"
+#include "safe99_core/util/hash_function.h"
 
-#include "util/hash_function.h"
-
-#include "math_util.h"
+#include "safe99_math/math_util.h"
 
 #include "ecs.h"
 

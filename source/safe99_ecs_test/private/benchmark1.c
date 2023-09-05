@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <Windows.h>
 
-#include "ecs.h"
 #include "safe99_common/assert.h"
+#include "safe99_ecs/ecs.h"
 
 typedef struct
 {
@@ -52,8 +52,8 @@ int main(void)
     {
         ecs_id_t e0 = ecs_create_entity(&world);
         ecs_add_component(&world, e0, 2, g_pos, g_vel);
-        //ecs_set_component(&world, e0, g_pos, &(position_t){ 1.0f, 1.0f });
-        //ecs_set_component(&world, e0, g_vel, &(velocity_t){ 2.0f, 2.0f });
+        ecs_set_component(&world, e0, g_pos, &(position_t){ 1.0f, 1.0f });
+        ecs_set_component(&world, e0, g_vel, &(velocity_t){ 2.0f, 2.0f });
     }
     QueryPerformanceCounter(&cur_counter);
     d_elapsed_tick = ((double)cur_counter.QuadPart - (double)prev_counter.QuadPart) / (double)frequency.QuadPart * 1000.0;
@@ -97,9 +97,6 @@ void update_pos(const ecs_view_t* p_view)
         {
             p_pos[j].x += p_vel[j].x;
             p_pos[j].y += p_vel[j].y;
-
-            //printf("pos: [%.3f, %.3f]\n", p_pos[j].x, p_pos[j].y);
-            //printf("vel: [%.3f, %.3f]\n\n", p_vel[j].x, p_vel[j].y);
         }
     }
 }

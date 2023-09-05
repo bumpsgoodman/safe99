@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "list.h"
 #include "chunked_memory_pool.h"
+#include "list.h"
 #include "safe99_common/defines.h"
 
 typedef struct map_key_value

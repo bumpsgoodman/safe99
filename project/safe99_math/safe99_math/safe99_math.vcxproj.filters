@@ -4,9 +4,6 @@
     <Filter Include="safe99_common">
       <UniqueIdentifier>{bcf332b9-9092-4518-be18-252da654c762}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public">
-      <UniqueIdentifier>{c0c6922f-f295-41b4-9ae8-3f37ee00617a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="private">
       <UniqueIdentifier>{6b2553a6-02fc-4874-a7d0-bc23fb7bac4a}</UniqueIdentifier>
     </Filter>
@@ -21,12 +18,10 @@
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h">
       <Filter>safe99_common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_math\public\math_util.h">
-      <Filter>public</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\safe99_math\private\precompiled.h">
       <Filter>private</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_math\math_util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_math\private\dll_main.c">

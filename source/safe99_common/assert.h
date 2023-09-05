@@ -1,13 +1,13 @@
 ﻿#ifndef ASSERT_H
 #define ASSERT_H
 
-#include <assert.h>
-
 #if defined(NDEBUG)
     #define ASSERT(cond, msg) ((void)0)
 #else
-    #include <intrin.h>
-    #define ASSERT(cond, msg) { if (!(cond)) { __debugbreak(); } }
+    #ifdef _MSC_VER
+        #include <intrin.h>
+        #define ASSERT(cond, msg) { if (!(cond)) { __debugbreak(); } }
+    #endif // _MSC_VER
 #endif // NDBUG
 
 #endif // ASSERT_H

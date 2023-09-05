@@ -22,7 +22,7 @@
     <ClInclude Include="..\..\..\source\safe99_common\assert.h" />
     <ClInclude Include="..\..\..\source\safe99_common\defines.h" />
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h" />
-    <ClInclude Include="..\..\..\source\safe99_renderer_ddraw\public\renderer_ddraw.h" />
+    <ClInclude Include="..\..\..\source\safe99_renderer_ddraw\renderer_ddraw.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_renderer_ddraw\private\dll_main.c" />
@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw\public;..\..\..\source\safe99_renderer_ddraw\private;..\..\..\source\safe99_math\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw;..\..\..\source\safe99_renderer_ddraw\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -125,7 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw\public;..\..\..\source\safe99_renderer_ddraw\private;..\..\..\source\safe99_math\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw;..\..\..\source\safe99_renderer_ddraw\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -145,7 +145,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw\public;..\..\..\source\safe99_renderer_ddraw\private;..\..\..\source\safe99_math\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw;..\..\..\source\safe99_renderer_ddraw\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -165,7 +165,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw\public;..\..\..\source\safe99_renderer_ddraw\private;..\..\..\source\safe99_math\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw;..\..\..\source\safe99_renderer_ddraw\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>

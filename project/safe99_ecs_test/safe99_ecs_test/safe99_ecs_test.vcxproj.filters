@@ -4,17 +4,14 @@
     <Filter Include="safe99_common">
       <UniqueIdentifier>{ccba69c0-4175-4f5a-aa22-5915b4453dc4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public">
-      <UniqueIdentifier>{f54993c9-359a-4c85-a77f-2600d5e61e38}</UniqueIdentifier>
-    </Filter>
     <Filter Include="private">
       <UniqueIdentifier>{32dcd880-0113-4922-93f2-95a1b5b9b880}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public\component">
-      <UniqueIdentifier>{b121b546-8226-419c-b274-4c30581e9ecf}</UniqueIdentifier>
+    <Filter Include="component">
+      <UniqueIdentifier>{8cc12693-a978-451a-8605-05102bf4a404}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public\system">
-      <UniqueIdentifier>{ad25b305-f4ac-41fa-8d13-48dafe0be574}</UniqueIdentifier>
+    <Filter Include="system">
+      <UniqueIdentifier>{33a9ce81-5225-4cfe-804c-2b8f873ae6fc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,11 +24,11 @@
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h">
       <Filter>safe99_common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_ecs_test\public\component\position.h">
-      <Filter>public\component</Filter>
+    <ClInclude Include="..\..\..\source\safe99_ecs_test\component\position.h">
+      <Filter>component</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_ecs_test\public\component\velocity.h">
-      <Filter>public\component</Filter>
+    <ClInclude Include="..\..\..\source\safe99_ecs_test\component\velocity.h">
+      <Filter>component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
