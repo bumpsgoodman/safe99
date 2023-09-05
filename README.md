@@ -20,9 +20,9 @@ ECS를 구현함에 있어서 보통 SparseSet 방식과 Archetype 방식을 사
 
 1. Entity, Component, System 각각 최대 16,777,216개의 id를 가질 수 있습니다.
 
-2. Entity는 최대 65,536 세대를 가질 수 있습니다.
+1. Entity는 최대 65,536 세대를 가질 수 있습니다.
 
-3. view를 이용하여 쉽고 간편한 iteration이 가능합니다.
+1. view를 이용하여 쉽고 간편한 iteration이 가능합니다.
 
 ### ECS 예제 코드
 ``` c
@@ -94,7 +94,7 @@ int main(void)
 ## TODO
  1. D3D 11 지원
 
- 2. ECS에서 각 System에 타이머 설정 기능
+ 1. ECS에서 각 System에 타이머 설정 기능
 
 ## 요구사항
 최소 프로세서: x86/x64 SSE3 지원 프로세서 (현시점 SSE3 지원하지 않는 프로세서도 가능)
@@ -103,13 +103,20 @@ int main(void)
 
 미지원 OS: Unix/Linux 계열
 
-IDE: Visual Studio 2019 커뮤니티, Visual Studio 2022 커뮤니티
+IDE: Visual Studio 2019 커뮤니티 이상
 
-## 빌드 순서
-1. runtime 폴더에 있는 프로젝트를 가장 먼저 빌드
+## 빌드 방법
+1. build_dll.bat 실행
 
-    1.1. core 빌드
+    - output/dll 폴더에 각 dll 프로젝트의 .dll 생성됨
 
-    1.2. 나머지 빌드
+    - output/lib 폴더에 각 dll 프로젝트의 .lib 생성됨
 
-2. 나머지 폴더에 있는 프로젝트 필드
+    - ouput/pdb 폴더에 각 dll 프로젝트의 .pdb 생성됨
+
+* 실행이 되지 않는다면 build_dll.bat 메모장으로 열어서 MSBuild 경로 수정
+
+## 내 프로젝트에서 사용하는 방법
+1. output/dll, output/lib에 있는 .dll, .lib 내 프로젝트에 추가
+
+1. 프로젝트에 .dll, .lib 연결 후 사용
