@@ -43,7 +43,9 @@ SAFE99_API void renderer_ddraw_on_draw(renderer_ddraw_t* p_ddraw);
 SAFE99_API void renderer_ddraw_clear(renderer_ddraw_t* p_ddraw, const uint32_t argb);
 SAFE99_API void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const uint32_t argb);
 SAFE99_API void renderer_ddraw_draw_rectangle(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const size_t width, const size_t height, const uint32_t argb);
-SAFE99_API void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const char* p_bitmap, const int32_t dx, const int32_t dy, const size_t width, const size_t height);
+SAFE99_API void renderer_ddraw_draw_horizontal_line(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t length, const uint32_t argb);
+SAFE99_API void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t length, const uint32_t argb);
+SAFE99_API void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t sx, const int32_t sy, const size_t width, const size_t height, const char* p_bitmap);
 
 END_EXTERN_C
 

@@ -225,7 +225,71 @@ void renderer_ddraw_draw_rectangle(renderer_ddraw_t* p_ddraw, const int32_t dx, 
     }
 }
 
-void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const char* p_bitmap, const int32_t dx, const int32_t dy, const size_t width, const size_t height)
+void renderer_ddraw_draw_horizontal_line(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t length, const uint32_t argb)
+{
+    ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
+    ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
+
+    size_t start_x;
+    size_t end_x;
+
+    if (length > 0)
+    {
+        start_x = MAX(dx, 0);
+        end_x = MIN(dx + length, p_ddraw->window_width);
+    }
+    else
+    {
+        start_x = MIN(dx + length, p_ddraw->window_width);
+        end_x = MAX(dx, 0);
+    }
+    
+
+    char* dst = p_ddraw->p_locked_back_buffer + dy * p_ddraw->locked_back_buffer_pitch + start_x * 4;
+    for (size_t x = start_x; x < end_x; ++x)
+    {
+        *(uint32_t*)dst = argb;
+        dst += 4;
+    }
+}
+
+void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t length, const uint32_t argb)
+{
+    ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
+    ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
+
+    size_t start_y;
+    size_t end_y;
+
+    if (length > 0)
+    {
+        start_y = MAX(dy, 0);
+        end_y = MIN(dy + length, p_ddraw->window_height);
+    } else
+    {
+        start_y = MIN(dy + length, p_ddraw->window_height);
+        end_y = MAX(dy, 0);
+    }
+
+    char* dst = p_ddraw->p_locked_back_buffer + start_y * p_ddraw->locked_back_buffer_pitch + dx * 4;
+    for (size_t y = start_y; y < end_y; ++y)
+    {
+        *(uint32_t*)dst = argb;
+        dst += p_ddraw->locked_back_buffer_pitch;
+    }
+}
+
+void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t sx, const int32_t sy, const size_t width, const size_t height, const char* p_bitmap)
 {
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
     ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
@@ -236,12 +300,10 @@ void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const char* p_bitmap,
     const size_t end_x = MIN(dx + width, p_ddraw->window_width);
     const size_t end_y = MIN(dy + height, p_ddraw->window_height);
 
-    const size_t src_x = (dx >= 0) ? 0 : width - dx;
-    const size_t src_y = (dy >= 0) ? 0 : height - dy;
     const size_t dst_width = end_x - start_x;
     const size_t dst_height = end_y - start_y;
 
-    const char* src = p_bitmap + src_y * width + src_x * 4;
+    const char* src = p_bitmap + sy * width + sx * 4;
     char* dst = p_ddraw->p_locked_back_buffer + start_y * p_ddraw->locked_back_buffer_pitch + start_x * 4;
     for (size_t y = 0; y < dst_height; ++y)
     {
