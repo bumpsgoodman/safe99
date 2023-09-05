@@ -40,7 +40,9 @@ SAFE99_API bool renderer_ddraw_begin_draw(renderer_ddraw_t* p_ddraw);
 SAFE99_API void renderer_ddraw_end_draw(renderer_ddraw_t* p_ddraw);
 SAFE99_API void renderer_ddraw_on_draw(renderer_ddraw_t* p_ddraw);
 
-SAFE99_API void renderer_ddraw_clear(renderer_ddraw_t* p_ddraw, const uint32_t color);
+SAFE99_API void renderer_ddraw_clear(renderer_ddraw_t* p_ddraw, const uint32_t argb);
+SAFE99_API void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const uint32_t argb);
+SAFE99_API void renderer_ddraw_draw_rectangle(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const size_t width, const size_t height, const uint32_t argb);
 SAFE99_API void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const char* p_bitmap, const int32_t dx, const int32_t dy, const size_t width, const size_t height);
 
 END_EXTERN_C

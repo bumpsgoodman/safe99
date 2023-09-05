@@ -32,7 +32,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{07ffda2c-3e0d-46df-a02e-3eb91a708893}</ProjectGuid>
-    <RootNamespace>safe99renderer</RootNamespace>
+    <RootNamespace>safe99rendererddraw</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

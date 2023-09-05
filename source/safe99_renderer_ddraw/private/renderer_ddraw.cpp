@@ -3,6 +3,8 @@
 #include "safe99_common/safe_delete.h"
 #include "safe99_math/math_util.h"
 
+#define GET_ALPHA(argb) ((argb) & 0xff000000)
+
 static bool create_back_buffer(renderer_ddraw_t* p_ddraw, const size_t width, const size_t height);
 
 bool renderer_ddraw_init(renderer_ddraw_t* p_ddraw, HWND hwnd)
@@ -150,10 +152,15 @@ void renderer_ddraw_on_draw(renderer_ddraw_t* p_ddraw)
     p_ddraw->p_primary->Blt(&p_ddraw->window_rect, p_ddraw->p_back, NULL, DDBLT_WAIT, NULL);
 }
 
-void renderer_ddraw_clear(renderer_ddraw_t* p_ddraw, const uint32_t color)
+void renderer_ddraw_clear(renderer_ddraw_t* p_ddraw, const uint32_t argb)
 {
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
     ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
 
     char* dst = p_ddraw->p_locked_back_buffer;
     for (size_t y = 0; y < p_ddraw->window_height; ++y)
@@ -161,11 +168,61 @@ void renderer_ddraw_clear(renderer_ddraw_t* p_ddraw, const uint32_t color)
         for (size_t x = 0; x < p_ddraw->window_width; ++x)
         {
             uint32_t* dest = (uint32_t*)(dst + y * p_ddraw->locked_back_buffer_pitch + x * 4);
-            *dest = color;
+            *dest = argb;
         }
     }
+}
 
-    //memset(dst, color, p_ddraw->window_height * p_ddraw->locked_back_buffer_pitch);
+void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const uint32_t argb)
+{
+    ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
+    ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    if (dx < 0 || dx >= p_ddraw->window_width
+        || dy < 0 || dy >= p_ddraw->window_height)
+    {
+        return;
+    }
+
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
+
+    char* dst = p_ddraw->p_locked_back_buffer + dy * p_ddraw->locked_back_buffer_pitch + dx * 4;
+    *(uint32_t*)dst = argb;
+}
+
+void renderer_ddraw_draw_rectangle(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const size_t width, const size_t height, const uint32_t argb)
+{
+    ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
+    ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
+
+    const size_t start_x = MAX(dx, 0);
+    const size_t start_y = MAX(dy, 0);
+    const size_t end_x = MIN(dx + width, p_ddraw->window_width);
+    const size_t end_y = MIN(dy + height, p_ddraw->window_height);
+
+    const size_t dst_width = end_x - start_x;
+    const size_t dst_height = end_y - start_y;
+
+    char* dst = p_ddraw->p_locked_back_buffer + start_y * p_ddraw->locked_back_buffer_pitch + start_x * 4;
+    for (size_t y = start_y; y < end_y; ++y)
+    {
+        for (size_t x = start_x; x < end_x; ++x)
+        {
+            *(uint32_t*)dst = argb;
+            dst += 4;
+        }
+
+        dst -= dst_width * 4;
+        dst += p_ddraw->locked_back_buffer_pitch;
+    }
 }
 
 void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const char* p_bitmap, const int32_t dx, const int32_t dy, const size_t width, const size_t height)
@@ -182,18 +239,21 @@ void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const char* p_bitmap,
     const size_t src_x = (dx >= 0) ? 0 : width - dx;
     const size_t src_y = (dy >= 0) ? 0 : height - dy;
     const size_t dst_width = end_x - start_x;
+    const size_t dst_height = end_y - start_y;
 
     const char* src = p_bitmap + src_y * width + src_x * 4;
     char* dst = p_ddraw->p_locked_back_buffer + start_y * p_ddraw->locked_back_buffer_pitch + start_x * 4;
-    for (size_t y = start_y; y < end_y; ++y)
+    for (size_t y = 0; y < dst_height; ++y)
     {
-        for (size_t x = start_x; x < end_x; ++x)
+        for (size_t x = 0; x < dst_width; ++x)
         {
-            //memcpy(dst + 1, src, 3);
-            *(uint32_t*)dst = *(uint32_t*)src;
+            if (GET_ALPHA(*(uint32_t*)src) != 0)
+            {
+                *(uint32_t*)dst = *(uint32_t*)src;
+            }
 
-            dst += 4;
             src += 4;
+            dst += 4;
         }
 
         src -= dst_width * 4;
