@@ -178,8 +178,8 @@ void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int32_t dx, cons
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
     ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
 
-    if (dx < 0 || dx >= p_ddraw->window_width
-        || dy < 0 || dy >= p_ddraw->window_height)
+    if (dx < 0 || (size_t)dx >= p_ddraw->window_width
+        || dy < 0 || (size_t)dy >= p_ddraw->window_height)
     {
         return;
     }
@@ -241,11 +241,11 @@ void renderer_ddraw_draw_horizontal_line(renderer_ddraw_t* p_ddraw, const int32_
     if (length > 0)
     {
         start_x = MAX(dx, 0);
-        end_x = MIN(dx + length, p_ddraw->window_width);
+        end_x = MIN((size_t)(dx + length), p_ddraw->window_width);
     }
     else
     {
-        start_x = MIN(dx + length, p_ddraw->window_width);
+        start_x = MIN((size_t)(dx + length), p_ddraw->window_width);
         end_x = MAX(dx, 0);
     }
     
@@ -274,10 +274,10 @@ void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, const int32_t 
     if (length > 0)
     {
         start_y = MAX(dy, 0);
-        end_y = MIN(dy + length, p_ddraw->window_height);
+        end_y = MIN((size_t)(dy + length), p_ddraw->window_height);
     } else
     {
-        start_y = MIN(dy + length, p_ddraw->window_height);
+        start_y = MIN((size_t)(dy + length), p_ddraw->window_height);
         end_y = MAX(dy, 0);
     }
 
