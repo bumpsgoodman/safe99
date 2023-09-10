@@ -24,7 +24,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     renderer_ddraw_init(gp_ddraw, g_hwnd);
 
     image_t image;
-    load_a8r8g8b8_dds("32x32_creatures.dds", &image);
+    load_a8r8g8b8_dds("E:\\safe99\\project\\safe99_renderer_ddraw_test\\safe99_renderer_ddraw_test\\32x32_creatures.dds", &image);
 
     // Main message loop
     MSG msg = { 0 };

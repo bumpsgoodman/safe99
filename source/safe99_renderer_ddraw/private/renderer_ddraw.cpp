@@ -89,6 +89,18 @@ void renderer_ddraw_release(renderer_ddraw_t* p_ddraw)
     SAFE_RELEASE(p_ddraw->p_ddraw1);
 }
 
+SAFE99_API size_t renderer_ddraw_get_width(renderer_ddraw_t* p_ddraw)
+{
+    ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
+    return p_ddraw->window_width;
+}
+
+SAFE99_API size_t renderer_ddraw_get_height(renderer_ddraw_t* p_ddraw)
+{
+    ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
+    return p_ddraw->window_height;
+}
+
 void renderer_ddraw_update_window_pos(renderer_ddraw_t* p_ddraw)
 {
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
@@ -289,7 +301,7 @@ void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, const int32_t 
     }
 }
 
-void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t sx, const int32_t sy, const size_t width, const size_t height, const char* p_bitmap)
+void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t sx, const int32_t sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)
 {
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
     ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
@@ -297,13 +309,13 @@ void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, con
 
     const size_t start_x = MAX(dx, 0);
     const size_t start_y = MAX(dy, 0);
-    const size_t end_x = MIN(dx + width, p_ddraw->window_width);
-    const size_t end_y = MIN(dy + height, p_ddraw->window_height);
+    const size_t end_x = MIN(dx + sw, p_ddraw->window_width);
+    const size_t end_y = MIN(dy + sh, p_ddraw->window_height);
 
     const size_t dst_width = end_x - start_x;
     const size_t dst_height = end_y - start_y;
 
-    const char* src = p_bitmap + sy * width + sx * 4;
+    const char* src = p_bitmap + (sy * width + sx) * 4;
     char* dst = p_ddraw->p_locked_back_buffer + start_y * p_ddraw->locked_back_buffer_pitch + start_x * 4;
     for (size_t y = 0; y < dst_height; ++y)
     {
