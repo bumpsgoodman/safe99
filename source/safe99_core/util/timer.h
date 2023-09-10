@@ -1,7 +1,10 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include <stdbool.h>
 #include <Windows.h>
+
+#include "safe99_common/defines.h"
 
 typedef struct timer
 {
@@ -14,13 +17,13 @@ typedef struct timer
 
 START_EXTERN_C
 
-SAFE99_API bool init_timer(timer_t* p_timer, const float interval);
+SAFE99_API bool timer_init(timer_t* p_timer, const float interval);
 
-SAFE99_API void update_timer(timer_t* p_timer);
+SAFE99_API void timer_update(timer_t* p_timer);
 
-SAFE99_API void reset_timer(timer_t* p_timer);
+SAFE99_API void timer_reset(timer_t* p_timer);
 
-SAFE99_API bool is_on_tick_timer(const timer_t* p_timer);
+SAFE99_API bool timer_is_on_tick(const timer_t* p_timer);
 
 END_EXTERN_C
 
