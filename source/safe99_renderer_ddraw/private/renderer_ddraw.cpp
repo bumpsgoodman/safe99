@@ -115,8 +115,16 @@ void renderer_ddraw_update_window_size(renderer_ddraw_t* p_ddraw)
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
 
     renderer_ddraw_update_window_pos(p_ddraw);
-    p_ddraw->window_width = (size_t)(p_ddraw->window_rect.right - p_ddraw->window_rect.left);
-    p_ddraw->window_height = (size_t)(p_ddraw->window_rect.bottom - p_ddraw->window_rect.top);
+
+    const size_t window_width = (size_t)(p_ddraw->window_rect.right - p_ddraw->window_rect.left);
+    const size_t window_height = (size_t)(p_ddraw->window_rect.bottom - p_ddraw->window_rect.top);
+    if (window_width == 0 || window_height == 0)
+    {
+        return;
+    }
+
+    p_ddraw->window_width = window_width;
+    p_ddraw->window_height = window_height;
 
     create_back_buffer(p_ddraw, p_ddraw->window_width, p_ddraw->window_height);
 }
