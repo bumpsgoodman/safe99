@@ -1,4 +1,4 @@
-#include "precompiled.h"
+#include <Windows.h>
 
 BOOL APIENTRY DllMain
 (

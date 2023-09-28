@@ -96,7 +96,7 @@ bool fixed_vector_remove(fixed_vector_t* p_vector, const size_t index)
     return true;
 }
 
-void* fixed_vector_get_element_or_null(fixed_vector_t* p_vector, const size_t index)
+void* fixed_vector_get_element_or_null(const fixed_vector_t* p_vector, const size_t index)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
 

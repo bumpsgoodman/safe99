@@ -1,7 +1,7 @@
 #include "renderer_ddraw.h"
 #include "safe99_common/assert.h"
 #include "safe99_common/safe_delete.h"
-#include "safe99_math/math_util.h"
+#include "safe99_math/math.h"
 
 #define GET_ALPHA(argb) ((argb) & 0xff000000)
 
@@ -12,7 +12,7 @@ bool renderer_ddraw_init(renderer_ddraw_t* p_ddraw, HWND hwnd)
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
 
     p_ddraw->hwnd = hwnd;
-    
+
     HRESULT hr;
     DDSURFACEDESC2 ddsd = { 0, };
 
@@ -268,7 +268,7 @@ void renderer_ddraw_draw_horizontal_line(renderer_ddraw_t* p_ddraw, const int32_
         start_x = MIN((size_t)(dx + length), p_ddraw->window_width);
         end_x = MAX(dx, 0);
     }
-    
+
 
     char* dst = p_ddraw->p_locked_back_buffer + dy * p_ddraw->locked_back_buffer_pitch + start_x * 4;
     for (size_t x = start_x; x < end_x; ++x)
@@ -295,7 +295,8 @@ void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, const int32_t 
     {
         start_y = MAX(dy, 0);
         end_y = MIN((size_t)(dy + length), p_ddraw->window_height);
-    } else
+    }
+    else
     {
         start_y = MIN((size_t)(dy + length), p_ddraw->window_height);
         end_y = MAX(dy, 0);
@@ -307,6 +308,81 @@ void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, const int32_t 
         *(uint32_t*)dst = argb;
         dst += p_ddraw->locked_back_buffer_pitch;
     }
+}
+
+void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int32_t x0, const int32_t y0, const int32_t x1, const int32_t y1, const uint32_t argb)
+{
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
+
+    int32_t start_x = MAX(x0, 0);
+    int32_t start_y = MAX(y0, 0);
+    int32_t end_x = MIN(x1, (int32_t)p_ddraw->window_width);
+    int32_t end_y = MIN(y1, (int32_t)p_ddraw->window_height);
+
+    start_x = MIN(x0, (int32_t)p_ddraw->window_width);
+    start_y = MIN(y0, (int32_t)p_ddraw->window_height);
+    end_x = MAX(x1, 0);
+    end_y = MAX(y1, 0);
+
+    int32_t width = x1 - x0;
+    int32_t height = y1 - y0;
+    bool b_gradual_slope = (ABS(width) >= ABS(height)) ? true : false;
+
+    int32_t dx = (width >= 0) ? 1 : -1;
+    int32_t dy = (height >= 0) ? 1 : -1;
+    int32_t w = dx * width;
+    int32_t h = dy * height;
+
+    int32_t p = (b_gradual_slope) ? 2 * h - w : 2 * w - h;
+    int32_t p1 = (b_gradual_slope) ? 2 * h : 2 * w;
+    int32_t p2 = (b_gradual_slope) ? 2 * h - 2 * w : 2 * w - 2 * h;
+
+    int32_t x = start_x;
+    int32_t y = start_y;
+
+    if (b_gradual_slope)
+    {
+        while (x != end_x)
+        {
+            renderer_ddraw_draw_pixel(p_ddraw, x, y, argb);
+
+            if (p < 0)
+            {
+                p += p1;
+            }
+            else
+            {
+                y += dy;
+                p += p2;
+            }
+
+            x += dx;
+        }
+    }
+    else
+    {
+        while (y != end_y)
+        {
+            renderer_ddraw_draw_pixel(p_ddraw, x, y, argb);
+
+            if (p < 0)
+            {
+                p += p1;
+            }
+            else
+            {
+                x += dx;
+                p += p2;
+            }
+
+            y += dy;
+        }
+    }
+
+    renderer_ddraw_draw_pixel(p_ddraw, x, y, argb);
 }
 
 void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t sx, const int32_t sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)

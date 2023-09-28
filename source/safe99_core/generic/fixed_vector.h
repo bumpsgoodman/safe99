@@ -1,3 +1,15 @@
+//***************************************************************************
+// 
+// 파일: fixed_vector.h
+// 
+// 설명: 고정 길이 벡터
+// 
+// 작성자: bumpsgoodman
+// 
+// 작성일: 2023/08/09
+// 
+//***************************************************************************
+
 #ifndef FIXED_VECTOR_H
 #define FIXED_VECTOR_H
 
@@ -24,7 +36,7 @@ SAFE99_API bool fixed_vector_init(fixed_vector_t* p_vector, const size_t element
 SAFE99_API void fixed_vector_release(fixed_vector_t* p_vector);
 SAFE99_API void fixed_vector_clear(fixed_vector_t* p_vector);
 
-SAFE99_API FORCEINLINE size_t fixed_vector_get_num_elements(fixed_vector_t* p_vector)
+SAFE99_API FORCEINLINE size_t fixed_vector_get_num_elements(const fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->num_elements;
@@ -74,7 +86,7 @@ SAFE99_API FORCEINLINE bool fixed_vector_pop_back(fixed_vector_t* p_vector)
 SAFE99_API bool fixed_vector_insert(fixed_vector_t* p_vector, const void* p_element, const size_t element_size, const size_t index);
 SAFE99_API bool fixed_vector_remove(fixed_vector_t* p_vector, const size_t index);
 
-SAFE99_API FORCEINLINE void* fixed_vector_back_or_null(fixed_vector_t* p_vector)
+SAFE99_API FORCEINLINE void* fixed_vector_back_or_null(const fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
 
@@ -87,11 +99,11 @@ SAFE99_API FORCEINLINE void* fixed_vector_back_or_null(fixed_vector_t* p_vector)
     return p_vector->p_last_element;
 }
 
-SAFE99_API void* fixed_vector_get_element_or_null(fixed_vector_t* p_vector, const size_t index);
+SAFE99_API void* fixed_vector_get_element_or_null(const fixed_vector_t* p_vector, const size_t index);
 
 
 
-SAFE99_API FORCEINLINE char* fixed_vector_get_elements_ptr_or_null(fixed_vector_t* p_vector)
+SAFE99_API FORCEINLINE char* fixed_vector_get_elements_ptr_or_null(const fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->pa_elements;

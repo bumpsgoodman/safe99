@@ -21,16 +21,23 @@
     <ClInclude Include="..\..\..\source\safe99_math\private\precompiled.h">
       <Filter>private</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_math\math_util.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\matrix.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\math.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\math_misc.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\math_defines.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_math\private\dll_main.c">
       <Filter>private</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\safe99_math\private\math_util.c">
+    <ClCompile Include="..\..\..\source\safe99_math\private\precompiled.c">
       <Filter>private</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\safe99_math\private\precompiled.c">
+    <ClCompile Include="..\..\..\source\safe99_math\private\math.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_math\private\math_misc.c">
       <Filter>private</Filter>
     </ClCompile>
   </ItemGroup>

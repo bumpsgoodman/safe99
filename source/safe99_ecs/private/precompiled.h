@@ -21,7 +21,7 @@
 #include "safe99_core/generic/map.h"
 #include "safe99_core/util/hash_function.h"
 
-#include "safe99_math/math_util.h"
+#include "safe99_math/math.h"
 
 #include "ecs.h"
 

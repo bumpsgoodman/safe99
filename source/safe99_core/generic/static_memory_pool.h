@@ -1,4 +1,16 @@
-﻿#ifndef STATIC_MEMORY_POOL_H
+﻿//***************************************************************************
+// 
+// 파일: static_memory_pool.h
+// 
+// 설명: 고정 길이 메모리 풀
+// 
+// 작성자: bumpsgoodman
+// 
+// 작성일: 2023/07/02
+// 
+//***************************************************************************
+
+#ifndef STATIC_MEMORY_POOL_H
 #define STATIC_MEMORY_POOL_H
 
 #include <stdbool.h>

@@ -129,7 +129,7 @@ bool dynamic_vector_remove(dynamic_vector_t* p_vector, const size_t index)
     return true;
 }
 
-void* dynamic_vector_get_element_or_null(dynamic_vector_t* p_vector, const size_t index)
+void* dynamic_vector_get_element_or_null(const dynamic_vector_t* p_vector, const size_t index)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
 

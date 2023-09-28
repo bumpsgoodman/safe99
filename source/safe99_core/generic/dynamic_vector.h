@@ -1,3 +1,15 @@
+//***************************************************************************
+// 
+// 파일: dynamic_vector.h
+// 
+// 설명: 가변 길이 벡터
+// 
+// 작성자: bumpsgoodman
+// 
+// 작성일: 2023/08/10
+// 
+//***************************************************************************
+
 #ifndef DYNAMIC_VECTOR_H
 #define DYNAMIC_VECTOR_H
 
@@ -26,25 +38,25 @@ SAFE99_API void dynamic_vector_clear(dynamic_vector_t* p_vector);
 
 SAFE99_API bool dynamic_vector_expand(dynamic_vector_t* p_vector);
 
-SAFE99_API FORCEINLINE size_t dynamic_vector_get_num_elements(dynamic_vector_t* p_vector)
+FORCEINLINE size_t dynamic_vector_get_num_elements(const dynamic_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->num_elements;
 }
 
-SAFE99_API FORCEINLINE size_t dynamic_vector_get_num_max_elements(dynamic_vector_t* p_vector)
+FORCEINLINE size_t dynamic_vector_get_num_max_elements(const dynamic_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->num_max_elements;
 }
 
-SAFE99_API FORCEINLINE size_t dynamic_vector_get_element_size(dynamic_vector_t* p_vector)
+FORCEINLINE size_t dynamic_vector_get_element_size(const dynamic_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->element_size;
 }
 
-SAFE99_API FORCEINLINE bool dynamic_vector_push_back(dynamic_vector_t* p_vector, const void* p_element, const size_t element_size)
+FORCEINLINE bool dynamic_vector_push_back(dynamic_vector_t* p_vector, const void* p_element, const size_t element_size)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(p_element != NULL, "p_element == NULL");
@@ -68,7 +80,7 @@ SAFE99_API FORCEINLINE bool dynamic_vector_push_back(dynamic_vector_t* p_vector,
     return true;
 }
 
-SAFE99_API FORCEINLINE bool dynamic_vector_push_back_empty(dynamic_vector_t* p_vector)
+FORCEINLINE bool dynamic_vector_push_back_empty(dynamic_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
 
@@ -83,7 +95,7 @@ SAFE99_API FORCEINLINE bool dynamic_vector_push_back_empty(dynamic_vector_t* p_v
     return true;
 }
 
-SAFE99_API FORCEINLINE bool dynamic_vector_pop_back(dynamic_vector_t* p_vector)
+FORCEINLINE bool dynamic_vector_pop_back(dynamic_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
 
@@ -103,7 +115,7 @@ SAFE99_API bool dynamic_vector_insert(dynamic_vector_t* p_vector, const void* p_
 SAFE99_API bool dynamic_vector_insert_empty(dynamic_vector_t* p_vector, const size_t index);
 SAFE99_API bool dynamic_vector_remove(dynamic_vector_t* p_vector, const size_t index);
 
-SAFE99_API FORCEINLINE void* dynamic_vector_back_or_null(dynamic_vector_t* p_vector)
+FORCEINLINE void* dynamic_vector_back_or_null(const dynamic_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
 
@@ -116,9 +128,9 @@ SAFE99_API FORCEINLINE void* dynamic_vector_back_or_null(dynamic_vector_t* p_vec
     return p_vector->p_last_element - p_vector->element_size;
 }
 
-SAFE99_API void* dynamic_vector_get_element_or_null(dynamic_vector_t* p_vector, const size_t index);
+SAFE99_API void* dynamic_vector_get_element_or_null(const dynamic_vector_t* p_vector, const size_t index);
 
-SAFE99_API FORCEINLINE char* dynamic_vector_get_elements_ptr_or_null(dynamic_vector_t* p_vector)
+FORCEINLINE char* dynamic_vector_get_elements_ptr_or_null(const dynamic_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->pa_elements;
