@@ -63,6 +63,8 @@ SAFE99_API void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, con
 SAFE99_API void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int32_t sx, const int32_t sy, const int32_t dx, const int32_t dy, const uint32_t argb);
 SAFE99_API void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t sx, const int32_t sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap);
 
+SAFE99_API bool renderer_ddraw_clip_line(int32_t* p_out_sx, int32_t* p_out_sy, int32_t* p_out_dx, int32_t* p_out_dy, const int32_t left_top_x, const int32_t left_top_y, const int32_t right_bottom_x, const int32_t right_bottom_y);
+
 END_EXTERN_C
 
 #endif // RENDERER_DDRAW_H

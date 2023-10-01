@@ -19,6 +19,9 @@
       <Filter>safe99_common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\safe99_renderer_ddraw\renderer_ddraw.h" />
+    <ClInclude Include="..\..\..\source\safe99_common\types.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_renderer_ddraw\private\dll_main.c">

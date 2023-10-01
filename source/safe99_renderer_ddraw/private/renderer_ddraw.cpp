@@ -5,7 +5,17 @@
 
 #define GET_ALPHA(argb) ((argb) & 0xff000000)
 
+enum
+{
+    REGION_LEFT = 0x0001,
+    REGION_RIGHT = 0x0010,
+    REGION_TOP = 0x1000,
+    REGION_BOTTOM = 0x0100
+};
+
 static bool create_back_buffer(renderer_ddraw_t* p_ddraw, const size_t width, const size_t height);
+
+static int32_t get_region(const int32_t sx, const int32_t sy, const int32_t left_top_x, const int32_t left_top_y, const int32_t right_bottom_x, const int32_t right_bottom_y);
 
 bool renderer_ddraw_init(renderer_ddraw_t* p_ddraw, HWND hwnd)
 {
@@ -310,75 +320,84 @@ void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, const int32_t 
     }
 }
 
-void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int32_t x0, const int32_t y0, const int32_t x1, const int32_t y1, const uint32_t argb)
+void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int32_t sx, const int32_t sy, const int32_t dx, const int32_t dy, const uint32_t argb)
 {
     if (GET_ALPHA(argb) == 0)
     {
         return;
     }
 
-    int32_t start_x = MAX(x0, 0);
-    int32_t start_y = MAX(y0, 0);
-    int32_t end_x = MIN(x1, (int32_t)p_ddraw->window_width);
-    int32_t end_y = MIN(y1, (int32_t)p_ddraw->window_height);
+    const int32_t width = dx - sx;
+    const int32_t height = dy - sy;
 
-    start_x = MIN(x0, (int32_t)p_ddraw->window_width);
-    start_y = MIN(y0, (int32_t)p_ddraw->window_height);
-    end_x = MAX(x1, 0);
-    end_y = MAX(y1, 0);
+    const int32_t increament_x = (width >= 0) ? 1 : -1;
+    const int32_t increament_y = (height > 0) ? 1 : -1;
 
-    int32_t width = x1 - x0;
-    int32_t height = y1 - y0;
-    bool b_gradual_slope = (ABS(width) >= ABS(height)) ? true : false;
+    const int32_t w = increament_x * width;
+    const int32_t h = increament_y * height;
 
-    int32_t dx = (width >= 0) ? 1 : -1;
-    int32_t dy = (height >= 0) ? 1 : -1;
-    int32_t w = dx * width;
-    int32_t h = dy * height;
+    // 완만한지 검사
+    const bool b_gradual = (ABS(width) >= ABS(height)) ? true : false;
 
-    int32_t p = (b_gradual_slope) ? 2 * h - w : 2 * w - h;
-    int32_t p1 = (b_gradual_slope) ? 2 * h : 2 * w;
-    int32_t p2 = (b_gradual_slope) ? 2 * h - 2 * w : 2 * w - 2 * h;
+    int32_t start_x = sx;
+    int32_t start_y = sy;
+
+    int32_t end_x = dx;
+    int32_t end_y = dy;
+    if (!renderer_ddraw_clip_line(&start_x, &start_y, &end_x, &end_y, 0, 0, (int32_t)renderer_ddraw_get_width(p_ddraw) - 1, (int32_t)renderer_ddraw_get_height(p_ddraw) - 1))
+    {
+        return;
+    }
 
     int32_t x = start_x;
     int32_t y = start_y;
 
-    if (b_gradual_slope)
+    if (b_gradual)
     {
+        int32_t f = 2 * h - w;
+
+        const int32_t df1 = 2 * h;
+        const int32_t df2 = 2 * (h - w);
+
         while (x != end_x)
         {
             renderer_ddraw_draw_pixel(p_ddraw, x, y, argb);
 
-            if (p < 0)
+            if (f < 0)
             {
-                p += p1;
+                f += df1;
             }
             else
             {
-                y += dy;
-                p += p2;
+                f += df2;
+                y += increament_y;
             }
 
-            x += dx;
+            x += increament_x;
         }
     }
     else
     {
+        int32_t f = 2 * w - h;
+
+        const int32_t df1 = 2 * w;
+        const int32_t df2 = 2 * (w - h);
+
         while (y != end_y)
         {
             renderer_ddraw_draw_pixel(p_ddraw, x, y, argb);
 
-            if (p < 0)
+            if (f < 0)
             {
-                p += p1;
+                f += df1;
             }
             else
             {
-                x += dx;
-                p += p2;
+                f += df2;
+                x += increament_x;
             }
 
-            y += dy;
+            y += increament_y;
         }
     }
 
@@ -421,6 +440,78 @@ void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, con
     }
 }
 
+bool renderer_ddraw_clip_line(int32_t* p_out_sx, int32_t* p_out_sy, int32_t* p_out_dx, int32_t* p_out_dy, const int32_t left_top_x, const int32_t left_top_y, const int32_t right_bottom_x, const int32_t right_bottom_y)
+{
+    ASSERT(p_out_sx != NULL, "p_out_sx == NULL");
+    ASSERT(p_out_sy != NULL, "p_out_sy == NULL");
+    ASSERT(p_out_dx != NULL, "p_out_dx == NULL");
+    ASSERT(p_out_dy != NULL, "p_out_dy == NULL");
+
+    while (true)
+    {
+        const int32_t start_region = get_region(*p_out_sx, *p_out_sy, left_top_x, left_top_y, right_bottom_x, right_bottom_y);
+        const int32_t end_region = get_region(*p_out_dx, *p_out_dy, left_top_x, left_top_y, right_bottom_x, right_bottom_y);
+
+        // 두 영역 모두 0이면 두 영역은 모두 영역 내에 있음
+        if ((start_region | end_region) == 0)
+        {
+            return true;
+        }
+
+        // 0보다 크면 두 영역은 모두 영역 밖에 있음
+        if ((start_region & end_region) > 0)
+        {
+            return false;
+        }
+
+        // 클리핑
+        const int32_t width = *p_out_dx - *p_out_sx;
+        const int32_t height = *p_out_dy - *p_out_sy;
+
+        const float slope = (width == 0) ? (float)height : (float)height / width;
+
+        float x;
+        float y;
+
+        const int32_t clipped_region = (start_region != 0) ? start_region : end_region;
+        if (clipped_region & REGION_LEFT)
+        {
+            // 좌측 영역인 경우 수직 경계선과 교점 계산
+            x = (float)left_top_x;
+            y = *p_out_sy + slope * (x - *p_out_sx);
+        }
+        else if (clipped_region & REGION_RIGHT)
+        {
+            // 우측 영역인 경우 수직 경계선과 교점 계산
+            x = (float)right_bottom_x;
+            y = *p_out_sy + slope * (x - *p_out_sx);
+        }
+        else if (clipped_region & REGION_TOP)
+        {
+            // 위 영역인 경우 평 경계선과 교점 계산
+            y = (float)left_top_y;
+            x = *p_out_sx + (y - *p_out_sy) / slope;
+        }
+        else
+        {
+            // 아래 영역인 경우 평 경계선과 교점 계산
+            y = (float)right_bottom_y;
+            x = *p_out_sx + (y - *p_out_sy) / slope;
+        }
+
+        if (clipped_region == start_region)
+        {
+            *p_out_sx = ROUND(x);
+            *p_out_sy = ROUND(y);
+        }
+        else
+        {
+            *p_out_dx = ROUND(x);
+            *p_out_dy = ROUND(y);
+        }
+    }
+}
+
 static bool create_back_buffer(renderer_ddraw_t* p_ddraw, const size_t width, const size_t height)
 {
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
@@ -445,4 +536,28 @@ static bool create_back_buffer(renderer_ddraw_t* p_ddraw, const size_t width, co
     p_ddraw->window_height = height;
 
     return true;
+}
+
+static int32_t get_region(const int32_t sx, const int32_t sy, const int32_t left_top_x, const int32_t left_top_y, const int32_t right_bottom_x, const int32_t right_bottom_y)
+{
+    int32_t result = 0;
+    if (sx < left_top_x)
+    {
+        result |= REGION_LEFT; // 0b0001
+    }
+    else if (sx > right_bottom_x)
+    {
+        result |= REGION_RIGHT; // 0b0010
+    }
+
+    if (sy < left_top_y)
+    {
+        result |= REGION_TOP; // 0b1000
+    }
+    else if (sy > right_bottom_y)
+    {
+        result |= REGION_BOTTOM; // 0b0100
+    }
+
+    return result;
 }
