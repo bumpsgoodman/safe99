@@ -31,7 +31,7 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define ABS(a) (((a) > 0) ? (a) : -(a))
-#define ROUND_INT(a) ((int)((a) + 0.5f))
+#define ROUND(x) ((x) >= 0.0f ? (int)((x) + 0.5f) : (int)((x) - 0.5f))
 
 // -----------------------------------------------------------------
 
