@@ -106,7 +106,7 @@ int main(void)
 IDE: Visual Studio 2019 커뮤니티 이상
 
 ## 빌드 방법
-1. build_dll.bat 실행
+1. build_script/build_dll.bat 실행
 
     - output/dll 폴더에 각 dll 프로젝트의 .dll 생성됨
 
@@ -114,7 +114,7 @@ IDE: Visual Studio 2019 커뮤니티 이상
 
     - ouput/pdb 폴더에 각 dll 프로젝트의 .pdb 생성됨
 
-* 실행이 되지 않는다면 build_dll.bat 메모장으로 열어서 MSBuild 경로 수정
+* 실행이 되지 않는다면 각 프로젝트 배치 파일을 메모장으로 열어서 MSBuild 경로 수정
 
 ## 내 프로젝트에서 사용하는 방법
 1. output/dll, output/lib에 있는 .dll, .lib 내 프로젝트에 추가
