@@ -2,7 +2,7 @@
 // 
 // 파일: renderer_ddraw.h
 // 
-// 설명: safe99 전용 DirectDraw7 렌더러
+// 설명: DirectDraw7 렌더러
 // 
 // 작성자: bumpsgoodman
 // 
@@ -14,11 +14,9 @@
 #define RENDERER_DDRAW_H
 
 #include <ddraw.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 
 #include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 
 #pragma comment(lib, "ddraw.lib")
 #pragma comment(lib, "dxguid.lib")
@@ -56,14 +54,12 @@ SAFE99_API void renderer_ddraw_end_draw(renderer_ddraw_t* p_ddraw);
 SAFE99_API void renderer_ddraw_on_draw(renderer_ddraw_t* p_ddraw);
 
 SAFE99_API void renderer_ddraw_clear(renderer_ddraw_t* p_ddraw, const uint32_t argb);
-SAFE99_API void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const uint32_t argb);
-SAFE99_API void renderer_ddraw_draw_rectangle(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const size_t width, const size_t height, const uint32_t argb);
-SAFE99_API void renderer_ddraw_draw_horizontal_line(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t length, const uint32_t argb);
-SAFE99_API void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t length, const uint32_t argb);
-SAFE99_API void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int32_t sx, const int32_t sy, const int32_t dx, const int32_t dy, const uint32_t argb);
-SAFE99_API void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t sx, const int32_t sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap);
+SAFE99_API void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int dx, const int dy, const uint32_t argb);
+SAFE99_API void renderer_ddraw_draw_rectangle(renderer_ddraw_t* p_ddraw, const int dx, const int dy, const size_t width, const size_t height, const uint32_t argb);
+SAFE99_API void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int sx, const int sy, const int dx, const int dy, const uint32_t argb);
+SAFE99_API void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int dx, const int dy, const int sx, const int sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap);
 
-SAFE99_API bool renderer_ddraw_clip_line(int32_t* p_out_sx, int32_t* p_out_sy, int32_t* p_out_dx, int32_t* p_out_dy, const int32_t left_top_x, const int32_t left_top_y, const int32_t right_bottom_x, const int32_t right_bottom_y);
+SAFE99_API bool renderer_ddraw_clip_line(int* p_out_sx, int* p_out_sy, int* p_out_dx, int* p_out_dy, const int left_top_x, const int left_top_y, const int right_bottom_x, const int right_bottom_y);
 
 END_EXTERN_C
 

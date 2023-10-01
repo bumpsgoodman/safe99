@@ -57,6 +57,12 @@
     <ClInclude Include="..\..\..\source\safe99_core\util\timer.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_core\util\stop_watch.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_common\types.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_core\private\util\hash_function.c">
@@ -88,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_core\private\precompiled.c">
       <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_core\private\util\stop_watch.c">
+      <Filter>private\util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

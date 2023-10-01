@@ -2,7 +2,7 @@
 // 
 // 파일: defines.h
 // 
-// 설명: safe99 전용 매크로 정의
+// 설명: 매크로 정의
 // 
 // 작성자: bumpsgoodman
 // 
@@ -42,11 +42,9 @@
 #define FORCEINLINE __forceinline
 
 // alignment
-#ifdef _MSC_VER
 #define ALIGN8 _declspec(align(8))
 #define ALIGN16 _declspec(align(16))
 #define ALIGN32 _declspec(align(32))
-#endif // _MSC_VER
 
 // dll exports
 #ifdef SAFE99_DLL_EXPORTS

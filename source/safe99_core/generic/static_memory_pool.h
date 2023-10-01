@@ -2,7 +2,7 @@
 // 
 // 파일: static_memory_pool.h
 // 
-// 설명: 고정 길이 메모리 풀
+// 설명: 고정 사이즈 메모리 풀
 // 
 // 작성자: bumpsgoodman
 // 

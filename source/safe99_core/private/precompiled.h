@@ -1,3 +1,15 @@
+//***************************************************************************
+// 
+// 파일: precompiled.h
+// 
+// 설명: precompiled 헤더
+// 
+// 작성자: bumpsgoodman
+// 
+// 작성일: 2023/09/04
+// 
+//***************************************************************************
+
 #ifndef PRECOMPILED_H
 #define PRECOMPILED_H
 
@@ -6,18 +18,17 @@
 #endif  // WIN32_LEAN_AND_MEAN
 
 #include <memory.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <Windows.h>
 
 #include "safe99_common/assert.h"
 #include "safe99_common/safe_delete.h"
 #include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 
 #include "util/hash_function.h"
 #include "util/timer.h"
+#include "util/stop_watch.h"
 
 #include "generic/chunked_memory_pool.h"
 #include "generic/dynamic_vector.h"

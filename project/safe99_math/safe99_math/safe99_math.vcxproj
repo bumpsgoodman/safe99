@@ -173,6 +173,7 @@
     <ClInclude Include="..\..\..\source\safe99_common\assert.h" />
     <ClInclude Include="..\..\..\source\safe99_common\defines.h" />
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h" />
+    <ClInclude Include="..\..\..\source\safe99_common\types.h" />
     <ClInclude Include="..\..\..\source\safe99_math\math.h" />
     <ClInclude Include="..\..\..\source\safe99_math\math_defines.h" />
     <ClInclude Include="..\..\..\source\safe99_math\math_misc.h" />

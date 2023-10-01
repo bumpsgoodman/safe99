@@ -13,10 +13,10 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include <stdbool.h>
 #include <Windows.h>
 
 #include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 
 typedef struct timer
 {

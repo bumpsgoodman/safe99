@@ -1,3 +1,15 @@
+//***************************************************************************
+// 
+// 파일: fixed_vector.c
+// 
+// 설명: 고정 사이즈 벡터
+// 
+// 작성자: bumpsgoodman
+// 
+// 작성일: 2023/08/10
+// 
+//***************************************************************************
+
 #include "precompiled.h"
 
 bool fixed_vector_init(fixed_vector_t* p_vector, const size_t element_size, const size_t num_max_elements)

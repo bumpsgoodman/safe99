@@ -2,7 +2,7 @@
 // 
 // 파일: dynamic_vector.h
 // 
-// 설명: 가변 길이 벡터
+// 설명: 가변 사이즈 벡터
 // 
 // 작성자: bumpsgoodman
 // 

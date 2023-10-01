@@ -2,7 +2,7 @@
 // 
 // 파일: ecs.h
 // 
-// 설명: safe99 전용 ecs 헤더 파일
+// 설명: safe99 ecs
 // 
 // 작성자: bumpsgoodman
 // 
@@ -13,11 +13,8 @@
 #ifndef ECS_H
 #define ECS_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
 #include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 #include "safe99_core/generic/chunked_memory_pool.h"
 #include "safe99_core/generic/dynamic_vector.h"
 #include "safe99_core/generic/map.h"

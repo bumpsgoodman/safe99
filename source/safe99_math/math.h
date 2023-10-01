@@ -2,7 +2,7 @@
 // 
 // 파일: math.h
 // 
-// 설명: safe99 전용 수학 헤더 파일
+// 설명: 수학 헤더 파일
 // 
 // 작성자: bumpsgoodman
 // 
@@ -14,12 +14,10 @@
 #define SAFE99_MATH_H
 
 #include <intrin.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 
 #include "safe99_common/assert.h"
 #include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 
 #include "math_defines.h"
 #include "math_misc.h"

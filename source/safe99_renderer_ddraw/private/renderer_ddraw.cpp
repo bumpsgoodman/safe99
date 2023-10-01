@@ -1,3 +1,15 @@
+//***************************************************************************
+// 
+// 파일: renderer_ddraw.cpp
+// 
+// 설명: DirectDraw7 렌더러
+// 
+// 작성자: bumpsgoodman
+// 
+// 작성일: 2023/08/31
+// 
+//***************************************************************************
+
 #include "renderer_ddraw.h"
 #include "safe99_common/assert.h"
 #include "safe99_common/safe_delete.h"
@@ -15,7 +27,7 @@ enum
 
 static bool create_back_buffer(renderer_ddraw_t* p_ddraw, const size_t width, const size_t height);
 
-static int32_t get_region(const int32_t sx, const int32_t sy, const int32_t left_top_x, const int32_t left_top_y, const int32_t right_bottom_x, const int32_t right_bottom_y);
+static int get_region(const int sx, const int sy, const int left_top_x, const int left_top_y, const int right_bottom_x, const int right_bottom_y);
 
 bool renderer_ddraw_init(renderer_ddraw_t* p_ddraw, HWND hwnd)
 {
@@ -203,7 +215,7 @@ void renderer_ddraw_clear(renderer_ddraw_t* p_ddraw, const uint32_t argb)
     }
 }
 
-void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const uint32_t argb)
+void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int dx, const int dy, const uint32_t argb)
 {
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
     ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
@@ -223,7 +235,7 @@ void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int32_t dx, cons
     *(uint32_t*)dst = argb;
 }
 
-void renderer_ddraw_draw_rectangle(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const size_t width, const size_t height, const uint32_t argb)
+void renderer_ddraw_draw_rectangle(renderer_ddraw_t* p_ddraw, const int dx, const int dy, const size_t width, const size_t height, const uint32_t argb)
 {
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
     ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
@@ -255,109 +267,44 @@ void renderer_ddraw_draw_rectangle(renderer_ddraw_t* p_ddraw, const int32_t dx, 
     }
 }
 
-void renderer_ddraw_draw_horizontal_line(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t length, const uint32_t argb)
-{
-    ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
-    ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
-
-    if (GET_ALPHA(argb) == 0)
-    {
-        return;
-    }
-
-    size_t start_x;
-    size_t end_x;
-
-    if (length > 0)
-    {
-        start_x = MAX(dx, 0);
-        end_x = MIN((size_t)(dx + length), p_ddraw->window_width);
-    }
-    else
-    {
-        start_x = MIN((size_t)(dx + length), p_ddraw->window_width);
-        end_x = MAX(dx, 0);
-    }
-
-
-    char* dst = p_ddraw->p_locked_back_buffer + dy * p_ddraw->locked_back_buffer_pitch + start_x * 4;
-    for (size_t x = start_x; x < end_x; ++x)
-    {
-        *(uint32_t*)dst = argb;
-        dst += 4;
-    }
-}
-
-void renderer_ddraw_draw_vertical_line(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t length, const uint32_t argb)
-{
-    ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
-    ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
-
-    if (GET_ALPHA(argb) == 0)
-    {
-        return;
-    }
-
-    size_t start_y;
-    size_t end_y;
-
-    if (length > 0)
-    {
-        start_y = MAX(dy, 0);
-        end_y = MIN((size_t)(dy + length), p_ddraw->window_height);
-    }
-    else
-    {
-        start_y = MIN((size_t)(dy + length), p_ddraw->window_height);
-        end_y = MAX(dy, 0);
-    }
-
-    char* dst = p_ddraw->p_locked_back_buffer + start_y * p_ddraw->locked_back_buffer_pitch + dx * 4;
-    for (size_t y = start_y; y < end_y; ++y)
-    {
-        *(uint32_t*)dst = argb;
-        dst += p_ddraw->locked_back_buffer_pitch;
-    }
-}
-
-void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int32_t sx, const int32_t sy, const int32_t dx, const int32_t dy, const uint32_t argb)
+void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int sx, const int sy, const int dx, const int dy, const uint32_t argb)
 {
     if (GET_ALPHA(argb) == 0)
     {
         return;
     }
 
-    const int32_t width = dx - sx;
-    const int32_t height = dy - sy;
+    const int width = dx - sx;
+    const int height = dy - sy;
 
-    const int32_t increament_x = (width >= 0) ? 1 : -1;
-    const int32_t increament_y = (height > 0) ? 1 : -1;
+    const int increament_x = (width >= 0) ? 1 : -1;
+    const int increament_y = (height > 0) ? 1 : -1;
 
-    const int32_t w = increament_x * width;
-    const int32_t h = increament_y * height;
+    const int w = increament_x * width;
+    const int h = increament_y * height;
 
     // 완만한지 검사
     const bool b_gradual = (ABS(width) >= ABS(height)) ? true : false;
 
-    int32_t start_x = sx;
-    int32_t start_y = sy;
+    int start_x = sx;
+    int start_y = sy;
 
-    int32_t end_x = dx;
-    int32_t end_y = dy;
-    if (!renderer_ddraw_clip_line(&start_x, &start_y, &end_x, &end_y, 0, 0, (int32_t)renderer_ddraw_get_width(p_ddraw) - 1, (int32_t)renderer_ddraw_get_height(p_ddraw) - 1))
+    int end_x = dx;
+    int end_y = dy;
+    if (!renderer_ddraw_clip_line(&start_x, &start_y, &end_x, &end_y, 0, 0, (int)renderer_ddraw_get_width(p_ddraw) - 1, (int)renderer_ddraw_get_height(p_ddraw) - 1))
     {
         return;
     }
 
-    int32_t x = start_x;
-    int32_t y = start_y;
+    int x = start_x;
+    int y = start_y;
 
     if (b_gradual)
     {
-        int32_t f = 2 * h - w;
+        int f = 2 * h - w;
 
-        const int32_t df1 = 2 * h;
-        const int32_t df2 = 2 * (h - w);
+        const int df1 = 2 * h;
+        const int df2 = 2 * (h - w);
 
         while (x != end_x)
         {
@@ -378,10 +325,10 @@ void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int32_t sx, const
     }
     else
     {
-        int32_t f = 2 * w - h;
+        int f = 2 * w - h;
 
-        const int32_t df1 = 2 * w;
-        const int32_t df2 = 2 * (w - h);
+        const int df1 = 2 * w;
+        const int df2 = 2 * (w - h);
 
         while (y != end_y)
         {
@@ -404,7 +351,7 @@ void renderer_ddraw_draw_line(renderer_ddraw_t* p_ddraw, const int32_t sx, const
     renderer_ddraw_draw_pixel(p_ddraw, x, y, argb);
 }
 
-void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, const int32_t dy, const int32_t sx, const int32_t sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)
+void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int dx, const int dy, const int sx, const int sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)
 {
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
     ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
@@ -440,7 +387,7 @@ void renderer_ddraw_draw_bitmap(renderer_ddraw_t* p_ddraw, const int32_t dx, con
     }
 }
 
-bool renderer_ddraw_clip_line(int32_t* p_out_sx, int32_t* p_out_sy, int32_t* p_out_dx, int32_t* p_out_dy, const int32_t left_top_x, const int32_t left_top_y, const int32_t right_bottom_x, const int32_t right_bottom_y)
+bool renderer_ddraw_clip_line(int* p_out_sx, int* p_out_sy, int* p_out_dx, int* p_out_dy, const int left_top_x, const int left_top_y, const int right_bottom_x, const int right_bottom_y)
 {
     ASSERT(p_out_sx != NULL, "p_out_sx == NULL");
     ASSERT(p_out_sy != NULL, "p_out_sy == NULL");
@@ -449,8 +396,8 @@ bool renderer_ddraw_clip_line(int32_t* p_out_sx, int32_t* p_out_sy, int32_t* p_o
 
     while (true)
     {
-        const int32_t start_region = get_region(*p_out_sx, *p_out_sy, left_top_x, left_top_y, right_bottom_x, right_bottom_y);
-        const int32_t end_region = get_region(*p_out_dx, *p_out_dy, left_top_x, left_top_y, right_bottom_x, right_bottom_y);
+        const int start_region = get_region(*p_out_sx, *p_out_sy, left_top_x, left_top_y, right_bottom_x, right_bottom_y);
+        const int end_region = get_region(*p_out_dx, *p_out_dy, left_top_x, left_top_y, right_bottom_x, right_bottom_y);
 
         // 두 영역 모두 0이면 두 영역은 모두 영역 내에 있음
         if ((start_region | end_region) == 0)
@@ -465,15 +412,15 @@ bool renderer_ddraw_clip_line(int32_t* p_out_sx, int32_t* p_out_sy, int32_t* p_o
         }
 
         // 클리핑
-        const int32_t width = *p_out_dx - *p_out_sx;
-        const int32_t height = *p_out_dy - *p_out_sy;
+        const int width = *p_out_dx - *p_out_sx;
+        const int height = *p_out_dy - *p_out_sy;
 
         const float slope = (width == 0) ? (float)height : (float)height / width;
 
         float x;
         float y;
 
-        const int32_t clipped_region = (start_region != 0) ? start_region : end_region;
+        const int clipped_region = (start_region != 0) ? start_region : end_region;
         if (clipped_region & REGION_LEFT)
         {
             // 좌측 영역인 경우 수직 경계선과 교점 계산
@@ -538,9 +485,9 @@ static bool create_back_buffer(renderer_ddraw_t* p_ddraw, const size_t width, co
     return true;
 }
 
-static int32_t get_region(const int32_t sx, const int32_t sy, const int32_t left_top_x, const int32_t left_top_y, const int32_t right_bottom_x, const int32_t right_bottom_y)
+static int get_region(const int sx, const int sy, const int left_top_x, const int left_top_y, const int right_bottom_x, const int right_bottom_y)
 {
-    int32_t result = 0;
+    int result = 0;
     if (sx < left_top_x)
     {
         result |= REGION_LEFT; // 0b0001

@@ -2,7 +2,7 @@
 // 
 // 파일: chunked_memory_pool.h
 // 
-// 설명: 가변 길이 메모리 풀
+// 설명: 가변 사이즈 메모리 풀
 // 
 // 작성자: bumpsgoodman
 // 

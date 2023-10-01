@@ -1,27 +1,23 @@
 //***************************************************************************
 // 
-// 파일: precompiled.h
+// 파일: types.h
 // 
-// 설명: precompiled 헤더
+// 설명: 타입 정의
 // 
 // 작성자: bumpsgoodman
 // 
-// 작성일: 2023/09/04
+// 작성일: 2023/10/01
 // 
 //***************************************************************************
 
-#ifndef PRECOMPILED_H
-#define PRECOMPILED_H
+#ifndef TYPES_H
+#define TYPES_H
 
-#include <intrin.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <Windows.h>
 
-#include "safe99_common/assert.h"
-#include "safe99_common/defines.h"
+typedef unsigned int uint_t;
 
-
-
-#endif // PRECOMPILED_H
+#endif // TYPES_H

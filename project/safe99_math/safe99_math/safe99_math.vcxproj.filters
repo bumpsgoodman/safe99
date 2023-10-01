@@ -26,6 +26,9 @@
     <ClInclude Include="..\..\..\source\safe99_math\vector.h" />
     <ClInclude Include="..\..\..\source\safe99_math\math_misc.h" />
     <ClInclude Include="..\..\..\source\safe99_math\math_defines.h" />
+    <ClInclude Include="..\..\..\source\safe99_common\types.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_math\private\dll_main.c">
