@@ -13,12 +13,10 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include <stdbool.h>
-#include <stddef.h>
-
+#include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 #include "chunked_memory_pool.h"
 #include "list.h"
-#include "safe99_common/defines.h"
 
 typedef struct map_key_value
 {
@@ -53,9 +51,6 @@ START_EXTERN_C
 // key_size는 0보다 커야 함
 // value_size는 0보다 커야 함
 // num_max_elements의 크기는 [0 > num_max_elements <= 26,339,984]
-// 
-// 이미 초기화 된 map을 다시 초기화하지 말 것
-// 해야 한다면 map_release() 호출 이후에 초기화 진행
 SAFE99_API bool map_init(map_t* p_map, const size_t key_size, const size_t value_size, const size_t num_max_elements);
 SAFE99_API void map_release(map_t* p_map);
 SAFE99_API void map_clear(map_t* p_map);

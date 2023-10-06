@@ -13,12 +13,11 @@
 #ifndef FIXED_VECTOR_H
 #define FIXED_VECTOR_H
 
-#include <stdbool.h>
-#include <stddef.h>
 #include <memory.h>
 
 #include "safe99_common/assert.h"
 #include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 
 typedef struct fixed_vector
 {
@@ -100,8 +99,6 @@ SAFE99_API FORCEINLINE void* fixed_vector_back_or_null(const fixed_vector_t* p_v
 }
 
 SAFE99_API void* fixed_vector_get_element_or_null(const fixed_vector_t* p_vector, const size_t index);
-
-
 
 SAFE99_API FORCEINLINE char* fixed_vector_get_elements_ptr_or_null(const fixed_vector_t* p_vector)
 {

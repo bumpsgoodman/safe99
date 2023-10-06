@@ -13,10 +13,8 @@
 #ifndef STATIC_MEMORY_POOL_H
 #define STATIC_MEMORY_POOL_H
 
-#include <stdbool.h>
-#include <stddef.h>
-
 #include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 
 typedef struct static_memory_pool
 {
@@ -36,9 +34,6 @@ START_EXTERN_C
 // element_size는 0보다 커야 함
 // num_elements_per_block은 0보다 커야 함
 // num_blocks는 0보다 커야 함
-// 
-// 이미 초기화한 메모리 풀을 다시 초기화하지 말 것
-// 해야 한다면 static_memory_pool_release() 함수 호출 이후 재호출
 SAFE99_API bool static_memory_pool_init(static_memory_pool_t* p_pool, const size_t element_size, const size_t num_elements_per_block, const size_t num_max_blocks);
 
 SAFE99_API void static_memory_pool_release(static_memory_pool_t* p_pool);

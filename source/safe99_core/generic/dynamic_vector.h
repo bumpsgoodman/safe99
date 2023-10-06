@@ -13,12 +13,11 @@
 #ifndef DYNAMIC_VECTOR_H
 #define DYNAMIC_VECTOR_H
 
-#include <stdbool.h>
-#include <stddef.h>
 #include <memory.h>
 
 #include "safe99_common/assert.h"
 #include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 
 typedef struct dynamic_vector
 {

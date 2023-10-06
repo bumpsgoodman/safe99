@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\..\source\safe99_common\types.h">
       <Filter>safe99_common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_math\color.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_math\private\dll_main.c">

@@ -220,8 +220,8 @@ void renderer_ddraw_draw_pixel(renderer_ddraw_t* p_ddraw, const int dx, const in
     ASSERT(p_ddraw != NULL, "p_ddraw == NULL");
     ASSERT(p_ddraw->p_locked_back_buffer != NULL, "locked back buffer == NULL");
 
-    if (dx < 0 || (size_t)dx >= p_ddraw->window_width
-        || dy < 0 || (size_t)dy >= p_ddraw->window_height)
+    if ((size_t)dx >= p_ddraw->window_width
+        || (size_t)dy >= p_ddraw->window_height)
     {
         return;
     }

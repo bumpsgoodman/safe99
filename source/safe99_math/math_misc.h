@@ -15,6 +15,11 @@
 
 #include "safe99_common/defines.h"
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define ABS(a) (((a) > 0) ? (a) : -(a))
+#define ROUND(x) ((x) >= 0.0f ? (int)((x) + 0.5f) : (int)((x) - 0.5f))
+
 START_EXTERN_C
 
 SAFE99_API void get_sin_cos(const float rad, float* p_out_sin, float* p_out_cos);

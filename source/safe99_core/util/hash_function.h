@@ -13,10 +13,8 @@
 #ifndef HASH_FUNCTION_H
 #define HASH_FUNCTION_H
 
-#include <stddef.h>
-#include <stdint.h>
-
 #include "safe99_common/defines.h"
+#include "safe99_common/types.h"
 
 START_EXTERN_C
 

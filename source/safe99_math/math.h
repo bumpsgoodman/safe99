@@ -19,19 +19,10 @@
 #include "safe99_common/defines.h"
 #include "safe99_common/types.h"
 
+#include "color.h"
 #include "math_defines.h"
 #include "math_misc.h"
 #include "matrix.h"
-
-// 매크로 함수
-// -----------------------------------------------------------------
-
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define ABS(a) (((a) > 0) ? (a) : -(a))
-#define ROUND(x) ((x) >= 0.0f ? (int)((x) + 0.5f) : (int)((x) - 0.5f))
-
-// -----------------------------------------------------------------
 
 START_EXTERN_C
 

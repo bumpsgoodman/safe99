@@ -395,7 +395,8 @@ ecs_id_t ecs_create_entity(ecs_world_t* p_world)
     if (p_queue->front == p_queue->rear)
     {
         entity = p_world->entity_count++ | ECS_FLAG_ENTITY;
-    } else
+    }
+    else
     {
         p_queue->front = (p_queue->front + 1) % (p_world->num_max_entities + 1);
         entity = p_queue->pa_entities[p_queue->front];
@@ -436,7 +437,8 @@ bool ecs_destroy_entity(ecs_world_t* p_world, const ecs_id_t entity)
     if (ENTITY_GEN(entity) >= MAX_ENTITY_GEN_FLAG)
     {
         next_entity = PURE_ECS_ID(entity) | ECS_FLAG_ENTITY;
-    } else
+    }
+    else
     {
         next_entity = entity + ENTITY_GEN_FLAG;
     }
@@ -542,7 +544,8 @@ bool ecs_add_component(ecs_world_t* p_world, const ecs_id_t entity, const size_t
     if (p_archetype == NULL)
     {
         memset(next_mask.p_masks, 0, 8 * NUM_MASKS(p_world->num_max_components));
-    } else
+    }
+    else
     {
         const ecs_mask_t* p_mask = &p_archetype->mask;
         memcpy(next_mask.p_masks, p_mask->p_masks, 8 * NUM_MASKS(p_world->num_max_components));
@@ -723,7 +726,8 @@ bool ecs_remove_component(ecs_world_t* p_world, const ecs_id_t entity, const siz
             ASSERT(false, "Failed to create next archetype");
             goto failed_to_create_archetype;
         }
-    } else
+    }
+    else
     {
         chunked_memory_pool_dealloc(&p_world->mask_pool, next_mask.p_masks);
     }
