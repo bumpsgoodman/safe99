@@ -21,10 +21,10 @@
     <ClInclude Include="..\..\..\source\safe99_ecs\private\precompiled.h">
       <Filter>private</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_ecs\ecs.h" />
     <ClInclude Include="..\..\..\source\safe99_common\types.h">
       <Filter>safe99_common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_ecs\i_ecs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_ecs\private\dll_main.c">
@@ -36,5 +36,8 @@
     <ClCompile Include="..\..\..\source\safe99_ecs\private\precompiled.c">
       <Filter>private</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ecs.def" />
   </ItemGroup>
 </Project>

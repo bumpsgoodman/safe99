@@ -23,7 +23,7 @@
     <ClInclude Include="..\..\..\source\safe99_common\defines.h" />
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h" />
     <ClInclude Include="..\..\..\source\safe99_common\types.h" />
-    <ClInclude Include="..\..\..\source\safe99_ecs\ecs.h" />
+    <ClInclude Include="..\..\..\source\safe99_ecs\i_ecs.h" />
     <ClInclude Include="..\..\..\source\safe99_ecs\private\precompiled.h" />
   </ItemGroup>
   <ItemGroup>
@@ -35,6 +35,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ecs.def" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -123,6 +126,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_core_x86d.lib;..\..\..\output\lib\safe99_math_x86d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>ecs.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -145,6 +149,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_core_x86.lib;..\..\..\output\lib\safe99_math_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>ecs.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -163,6 +168,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_core_x64d.lib;..\..\..\output\lib\safe99_math_x64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>ecs.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -185,6 +191,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_core_x64.lib;..\..\..\output\lib\safe99_math_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>ecs.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

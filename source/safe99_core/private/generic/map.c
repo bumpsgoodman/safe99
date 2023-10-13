@@ -12,6 +12,26 @@
 
 #include "precompiled.h"
 
+typedef struct map
+{
+    i_map_t base;
+
+    size_t key_size;
+    size_t value_size;
+    size_t num_max_elements;
+    float factor;
+
+    key_value_t* pa_key_values;
+    size_t num_elements;
+
+    list_t* pa_bucket; // <key_value_t*>
+    size_t bucket_size;
+
+    i_chunked_memory_pool_t* p_key_pool;
+    i_chunked_memory_pool_t* p_value_pool;
+    i_chunked_memory_pool_t* p_node_pool;
+} map_t;
+
 static const size_t S_BUCKET_SIZE_LIST[] =
 {
     7u, 23u, 97u, 397u, 1597u, 6421u, 25717u, 102877u,
@@ -21,12 +41,14 @@ static const size_t S_NUM_BUCKET_SIZE_LIST = sizeof(S_BUCKET_SIZE_LIST) / sizeof
 
 static bool expand(map_t* p_map);
 
-bool map_init(map_t* p_map, const size_t key_size, const size_t value_size, const size_t num_max_elements)
+static bool __stdcall initialize(i_map_t* p_this, const size_t key_size, const size_t value_size, const size_t num_max_elements)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(key_size > 0, "key_size == 0");
     ASSERT(value_size > 0, "value_size == 0");
     ASSERT(num_max_elements <= S_BUCKET_SIZE_LIST[S_NUM_BUCKET_SIZE_LIST - 1] / 2, "overflow");
+
+    map_t* p_map = (map_t*)p_this;
 
     p_map->key_size = key_size;
     p_map->value_size = value_size;
@@ -62,22 +84,27 @@ bool map_init(map_t* p_map, const size_t key_size, const size_t value_size, cons
         goto failed_malloc_key_values;
     }
 
+    // 메모리 풀 할당
+    create_chunked_memory_pool(&p_map->p_node_pool);
+    create_chunked_memory_pool(&p_map->p_key_pool);
+    create_chunked_memory_pool(&p_map->p_value_pool);
+
     // 메모리 풀 초기화 (노드)
-    if (!chunked_memory_pool_init(&p_map->node_pool, sizeof(list_node_t), num_max_elements))
+    if (!p_map->p_node_pool->vtbl->initialize(p_map->p_node_pool, sizeof(list_node_t), num_max_elements))
     {
         ASSERT(false, "Failed to init node pool");
         goto failed_init_node_pool;
     }
 
     // 메모리 풀 초기화 (키)
-    if (!chunked_memory_pool_init(&p_map->key_pool, key_size, num_max_elements))
+    if (!p_map->p_key_pool->vtbl->initialize(p_map->p_key_pool, key_size, num_max_elements))
     {
         ASSERT(false, "Failed to init key pool");
         goto failed_init_key_pool;
     }
 
     // 메모리 풀 초기화 (값)
-    if (!chunked_memory_pool_init(&p_map->value_pool, value_size, num_max_elements))
+    if (!p_map->p_value_pool->vtbl->initialize(p_map->p_value_pool, value_size, num_max_elements))
     {
         ASSERT(false, "Failed to init value pool");
         goto failed_init_value_pool;
@@ -86,10 +113,10 @@ bool map_init(map_t* p_map, const size_t key_size, const size_t value_size, cons
     return true;
 
 failed_init_value_pool:
-    chunked_memory_pool_release(&p_map->key_pool);
+    p_map->p_key_pool->vtbl->release(p_map->p_key_pool);
 
 failed_init_key_pool:
-    chunked_memory_pool_release(&p_map->value_pool);
+    p_map->p_value_pool->vtbl->release(p_map->p_value_pool);
 
 failed_init_node_pool:
     SAFE_FREE(p_map->pa_key_values);
@@ -102,38 +129,44 @@ failed_malloc_bucket:
     return false;
 }
 
-void map_release(map_t* p_map)
+static void __stdcall release(i_map_t* p_this)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    map_t* p_map = (map_t*)p_this;
 
     SAFE_FREE(p_map->pa_bucket);
     SAFE_FREE(p_map->pa_key_values);
 
-    chunked_memory_pool_release(&p_map->node_pool);
-    chunked_memory_pool_release(&p_map->key_pool);
-    chunked_memory_pool_release(&p_map->value_pool);
+    destroy_chunked_memory_pool(p_map->p_node_pool);
+    destroy_chunked_memory_pool(p_map->p_key_pool);
+    destroy_chunked_memory_pool(p_map->p_value_pool);
 
     memset(p_map, 0, sizeof(map_t));
 }
 
-void map_clear(map_t* p_map)
+static void __stdcall clear(i_map_t* p_this)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    map_t* p_map = (map_t*)p_this;
 
     p_map->num_elements = 0;
 
     memset(p_map->pa_bucket, 0, sizeof(list_t) * p_map->bucket_size);
 
-    chunked_memory_pool_reset(&p_map->node_pool);
-    chunked_memory_pool_reset(&p_map->key_pool);
-    chunked_memory_pool_reset(&p_map->value_pool);
+    p_map->p_node_pool->vtbl->reset(p_map->p_node_pool);
+    p_map->p_key_pool->vtbl->reset(p_map->p_key_pool);
+    p_map->p_value_pool->vtbl->reset(p_map->p_value_pool);
 }
 
-bool map_insert(map_t* p_map, const void* p_key, const size_t key_size, const void* p_value, const size_t value_size)
+static bool __stdcall insert(i_map_t* p_this, const void* p_key, const size_t key_size, const void* p_value, const size_t value_size)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
     ASSERT(p_value != NULL, "p_value == NULL");
+
+    map_t* p_map = (map_t*)p_this;
 
     if (p_map->key_size != key_size)
     {
@@ -175,12 +208,12 @@ bool map_insert(map_t* p_map, const void* p_key, const size_t key_size, const vo
         }
     }
 
-    list_node_t* p_node = (list_node_t*)chunked_memory_pool_alloc_or_null(&p_map->node_pool);
+    list_node_t* p_node = (list_node_t*)p_map->p_node_pool->vtbl->alloc_or_null(p_map->p_node_pool);
     key_value_t* key_value = p_map->pa_key_values + p_map->num_elements;
 
     // 키-값 복사
-    key_value->p_key = chunked_memory_pool_alloc_or_null(&p_map->key_pool);
-    key_value->p_value = chunked_memory_pool_alloc_or_null(&p_map->value_pool);
+    key_value->p_key = p_map->p_key_pool->vtbl->alloc_or_null(p_map->p_key_pool);
+    key_value->p_value = p_map->p_value_pool->vtbl->alloc_or_null(p_map->p_value_pool);
     memcpy(key_value->p_key, p_key, key_size);
     memcpy(key_value->p_value, p_value, value_size);
 
@@ -194,11 +227,13 @@ bool map_insert(map_t* p_map, const void* p_key, const size_t key_size, const vo
     return true;
 }
 
-bool map_insert_by_hash(map_t* p_map, const uint64_t hash, const void* p_key, const size_t key_size, const void* p_value, const size_t value_size)
+static bool __stdcall insert_by_hash(i_map_t* p_this, const uint64_t hash, const void* p_key, const size_t key_size, const void* p_value, const size_t value_size)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
     ASSERT(p_value != NULL, "p_value == NULL");
+
+    map_t* p_map = (map_t*)p_this;
 
     if (p_map->key_size != key_size)
     {
@@ -239,12 +274,12 @@ bool map_insert_by_hash(map_t* p_map, const uint64_t hash, const void* p_key, co
         }
     }
 
-    list_node_t* p_node = (list_node_t*)chunked_memory_pool_alloc_or_null(&p_map->node_pool);
+    list_node_t* p_node = (list_node_t*)p_map->p_node_pool->vtbl->alloc_or_null(p_map->p_node_pool);
     key_value_t* key_value = p_map->pa_key_values + p_map->num_elements;
 
     // 키-값 복사
-    key_value->p_key = chunked_memory_pool_alloc_or_null(&p_map->key_pool);
-    key_value->p_value = chunked_memory_pool_alloc_or_null(&p_map->value_pool);
+    key_value->p_key = p_map->p_key_pool->vtbl->alloc_or_null(p_map->p_key_pool);
+    key_value->p_value = p_map->p_value_pool->vtbl->alloc_or_null(p_map->p_value_pool);
     memcpy(key_value->p_key, p_key, key_size);
     memcpy(key_value->p_value, p_value, value_size);
 
@@ -258,10 +293,12 @@ bool map_insert_by_hash(map_t* p_map, const uint64_t hash, const void* p_key, co
     return true;
 }
 
-bool map_remove(map_t* p_map, const void* p_key, const size_t key_size)
+static bool __stdcall remove(i_map_t* p_this, const void* p_key, const size_t key_size)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
+
+    map_t* p_map = (map_t*)p_this;
 
     if (p_map->key_size != key_size)
     {
@@ -305,19 +342,21 @@ bool map_remove(map_t* p_map, const void* p_key, const size_t key_size)
     p_last_node->p_element = p_key_value;
 
     list_delete_node(&p_list->p_head, &p_list->p_tail, p_node);
-    chunked_memory_pool_dealloc(&p_map->key_pool, p_key_value->p_key);
-    chunked_memory_pool_dealloc(&p_map->value_pool, p_key_value->p_value);
-    chunked_memory_pool_dealloc(&p_map->node_pool, p_node);
+    p_map->p_key_pool->vtbl->dealloc(p_map->p_key_pool, p_key_value->p_key);
+    p_map->p_value_pool->vtbl->dealloc(p_map->p_value_pool, p_key_value->p_value);
+    p_map->p_node_pool->vtbl->dealloc(p_map->p_node_pool, p_node);
 
     --p_map->num_elements;
 
     return true;
 }
 
-bool map_remove_by_hash(map_t* p_map, const uint64_t hash, const void* p_key, const size_t key_size)
+static bool __stdcall remove_by_hash(i_map_t* p_this, const uint64_t hash, const void* p_key, const size_t key_size)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
+
+    map_t* p_map = (map_t*)p_this;
 
     if (p_map->key_size != key_size)
     {
@@ -360,31 +399,37 @@ bool map_remove_by_hash(map_t* p_map, const uint64_t hash, const void* p_key, co
     p_last_node->p_element = p_key_value;
 
     list_delete_node(&p_list->p_head, &p_list->p_tail, p_node);
-    chunked_memory_pool_dealloc(&p_map->key_pool, p_key_value->p_key);
-    chunked_memory_pool_dealloc(&p_map->value_pool, p_key_value->p_value);
-    chunked_memory_pool_dealloc(&p_map->node_pool, p_node);
+    p_map->p_key_pool->vtbl->dealloc(p_map->p_key_pool, p_key_value->p_key);
+    p_map->p_value_pool->vtbl->dealloc(p_map->p_value_pool, p_key_value->p_value);
+    p_map->p_node_pool->vtbl->dealloc(p_map->p_node_pool, p_node);
 
     --p_map->num_elements;
 
     return true;
 }
 
-size_t map_get_num_elements(map_t* p_map)
+static size_t __stdcall get_num_elements(const i_map_t* p_this)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    map_t* p_map = (map_t*)p_this;
     return p_map->num_elements;
 }
 
-size_t map_get_num_max_elements(map_t* p_map)
+static size_t __stdcall get_num_max_elements(const i_map_t* p_this)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    map_t* p_map = (map_t*)p_this;
     return p_map->num_max_elements;
 }
 
-key_value_t* map_find_or_null(map_t* p_map, const void* p_key, const size_t key_size)
+static key_value_t* __stdcall find_or_null(const i_map_t* p_this, const void* p_key, const size_t key_size)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
+
+    map_t* p_map = (map_t*)p_this;
 
     if (p_map->key_size != key_size)
     {
@@ -410,10 +455,12 @@ key_value_t* map_find_or_null(map_t* p_map, const void* p_key, const size_t key_
     return (key_value_t*)p_node->p_element;
 }
 
-key_value_t* map_find_by_hash_or_null(map_t* p_map, const uint64_t hash, const void* p_key, const size_t key_size)
+static key_value_t* __stdcall find_by_hash_or_null(const i_map_t* p_this, const uint64_t hash, const void* p_key, const size_t key_size)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
+
+    map_t* p_map = (map_t*)p_this;
 
     if (p_map->key_size != key_size)
     {
@@ -438,12 +485,14 @@ key_value_t* map_find_by_hash_or_null(map_t* p_map, const uint64_t hash, const v
     return (key_value_t*)p_node->p_element;
 }
 
-void* map_get_value_or_null(map_t* p_map, const void* p_key, const size_t key_size)
+static void* __stdcall get_value_or_null(const i_map_t* p_this, const void* p_key, const size_t key_size)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
 
-    key_value_t* p_key_value = map_find_or_null(p_map, p_key, key_size);
+    map_t* p_map = (map_t*)p_this;
+
+    key_value_t* p_key_value = find_or_null(p_this, p_key, key_size);
     if (p_key_value == NULL)
     {
         return NULL;
@@ -452,12 +501,14 @@ void* map_get_value_or_null(map_t* p_map, const void* p_key, const size_t key_si
     return p_key_value->p_value;
 }
 
-void* map_get_value_by_hash_or_null(map_t* p_map, const uint64_t hash, const void* p_key, const size_t key_size)
+static void* __stdcall get_value_by_hash_or_null(const i_map_t* p_this, const uint64_t hash, const void* p_key, const size_t key_size)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
 
-    key_value_t* p_key_value = map_find_by_hash_or_null(p_map, hash, p_key, key_size);
+    map_t* p_map = (map_t*)p_this;
+
+    key_value_t* p_key_value = find_by_hash_or_null(p_this, hash, p_key, key_size);
     if (p_key_value == NULL)
     {
         return NULL;
@@ -466,10 +517,12 @@ void* map_get_value_by_hash_or_null(map_t* p_map, const uint64_t hash, const voi
     return p_key_value->p_value;
 }
 
-size_t map_get_count(map_t* p_map, const void* p_key, const size_t key_size)
+static size_t __stdcall get_count(const i_map_t* p_this, const void* p_key, const size_t key_size)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_key != NULL, "p_key == NULL");
+
+    map_t* p_map = (map_t*)p_this;
     ASSERT(p_map->key_size == key_size, "mismatch key size");
 
     const uint64_t hash = hash64_fnv1a((const char*)p_key, key_size);
@@ -491,9 +544,11 @@ size_t map_get_count(map_t* p_map, const void* p_key, const size_t key_size)
     return count;
 }
 
-key_value_t* map_get_key_values_ptr(map_t* p_map)
+static key_value_t* __stdcall get_key_values_ptr(const i_map_t* p_this)
 {
-    ASSERT(p_map != NULL, "p_map == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    map_t* p_map = (map_t*)p_this;
     ASSERT(p_map->pa_key_values != NULL, "pa_key_values == NULL");
 
     return p_map->pa_key_values;
@@ -507,7 +562,8 @@ static bool expand(map_t* p_map)
     list_t* pa_new_bucket = NULL;
     key_value_t* pa_new_key_values = NULL;
 
-    const size_t new_num_max_elements = p_map->num_max_elements + p_map->node_pool.num_elements_per_chunk;
+    const size_t num_elements_per_chunk = p_map->p_node_pool->vtbl->get_num_elements_per_chunk(p_map->p_node_pool);
+    const size_t new_num_max_elements = p_map->num_max_elements + num_elements_per_chunk;
 
     pa_new_key_values = (key_value_t*)malloc(sizeof(key_value_t) * new_num_max_elements);
     if (pa_new_key_values == NULL)
@@ -568,4 +624,53 @@ failed_malloc_new_bucket:
 
 failed_malloc_new_key_values:
     return false;
+}
+
+static void __stdcall create_map(i_map_t** pp_out_map)
+{
+    ASSERT(pp_out_map != NULL, "pp_out_map == NULL");
+
+    static i_map_vtbl_t vtbl =
+    {
+        initialize,
+        release,
+        clear,
+
+        insert,
+        insert_by_hash,
+
+        remove,
+        remove_by_hash,
+
+        find_or_null,
+        find_by_hash_or_null,
+
+        get_count,
+
+        get_num_elements,
+        get_num_max_elements,
+
+        get_value_or_null,
+        get_value_by_hash_or_null,
+        get_key_values_ptr
+    };
+
+    map_t* pa_map = (map_t*)malloc(sizeof(map_t));
+    if (pa_map == NULL)
+    {
+        ASSERT(false, "Failed to malloc map");
+        *pp_out_map = NULL;
+    }
+
+    pa_map->base.vtbl = &vtbl;
+
+    *pp_out_map = (i_map_t*)pa_map;
+}
+
+static void __stdcall destroy_map(i_map_t* p_map)
+{
+    ASSERT(p_map != NULL, "p_map == NULL");
+
+    release(p_map);
+    SAFE_FREE(p_map);
 }

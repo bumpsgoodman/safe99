@@ -1,3 +1,15 @@
+//***************************************************************************
+// 
+// 파일: color.h
+// 
+// 설명: float4 색상
+// 
+// 작성자: bumpsgoodman
+// 
+// 작성일: 2023/10/06
+// 
+//***************************************************************************
+
 #ifndef COLOR_H
 #define COLOR_H
 
@@ -23,7 +35,7 @@ typedef struct color
 
 START_EXTERN_C
 
-FORCEINLINE color_t color_set(const float r, const float g, const float b, const float a)
+FORCEINLINE color_t __stdcall color_set(const float r, const float g, const float b, const float a)
 {
     /*
     const color_t color =
@@ -42,7 +54,7 @@ FORCEINLINE color_t color_set(const float r, const float g, const float b, const
     return color;
 }
 
-FORCEINLINE uint32_t color_to_argb_hex(const color_t color)
+FORCEINLINE uint32_t __stdcall color_to_argb(const color_t color)
 {
     const uint32_t argb = ((uint32_t)(color.a * 255.0f) << 24)
         | (uint32_t)(color.r * 255.0f) << 16

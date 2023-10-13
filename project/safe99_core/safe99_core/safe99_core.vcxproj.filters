@@ -33,22 +33,22 @@
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h">
       <Filter>safe99_common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_core\generic\chunked_memory_pool.h">
+    <ClInclude Include="..\..\..\source\safe99_core\generic\i_chunked_memory_pool.h">
       <Filter>generic</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_core\generic\dynamic_vector.h">
+    <ClInclude Include="..\..\..\source\safe99_core\generic\i_dynamic_vector.h">
       <Filter>generic</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_core\generic\fixed_vector.h">
+    <ClInclude Include="..\..\..\source\safe99_core\generic\i_fixed_vector.h">
       <Filter>generic</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\safe99_core\generic\list.h">
       <Filter>generic</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_core\generic\map.h">
+    <ClInclude Include="..\..\..\source\safe99_core\generic\i_map.h">
       <Filter>generic</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_core\generic\static_memory_pool.h">
+    <ClInclude Include="..\..\..\source\safe99_core\generic\i_static_memory_pool.h">
       <Filter>generic</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\safe99_core\util\hash_function.h">

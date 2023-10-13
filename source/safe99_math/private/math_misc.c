@@ -15,7 +15,7 @@
 #include "math_defines.h"
 #include "math_misc.h"
 
-void get_sin_cos(const float rad, float* p_out_sin, float* p_out_cos)
+void __stdcall get_sin_cos(const float rad, float* p_out_sin, float* p_out_cos)
 {
     ASSERT(p_out_sin != NULL, "p_out_sin == NULL");
     ASSERT(p_out_cos != NULL, "p_out_cos == NULL");
@@ -49,12 +49,12 @@ void get_sin_cos(const float rad, float* p_out_sin, float* p_out_cos)
         sign = +1.0f;
     }
 
-    float y2 = y * y;
+    const float y2 = y * y;
 
     // 11-degree minimax approximation
     *p_out_sin = (((((-2.3889859e-08f * y2 + 2.7525562e-06f) * y2 - 0.00019840874f) * y2 + 0.0083333310f) * y2 - 0.16666667f) * y2 + 1.0f) * y;
 
     // 10-degree minimax approximation
-    float p = ((((-2.6051615e-07f * y2 + 2.4760495e-05f) * y2 - 0.0013888378f) * y2 + 0.041666638f) * y2 - 0.5f) * y2 + 1.0f;
+    const float p = ((((-2.6051615e-07f * y2 + 2.4760495e-05f) * y2 - 0.0013888378f) * y2 + 0.041666638f) * y2 - 0.5f) * y2 + 1.0f;
     *p_out_cos = sign * p;
 }

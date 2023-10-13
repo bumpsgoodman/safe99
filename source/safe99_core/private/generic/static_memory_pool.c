@@ -12,6 +12,22 @@
 
 #include "precompiled.h"
 
+typedef struct static_memory_pool
+{
+    i_static_memory_pool_t base;
+
+    size_t element_size;
+    size_t num_elements_per_block;
+    size_t num_max_blocks;
+    size_t num_cur_blocks;
+    size_t element_size_with_header;
+    size_t num_alloc_elements;
+
+    char** ppa_blocks;
+    char*** pppa_index_tables;
+    char*** pppa_index_table_ptrs;
+} static_memory_pool_t;
+
 typedef enum state
 {
     STATE_ALLOC = 95,
@@ -26,18 +42,21 @@ typedef struct header
 
 static bool create_new_block(static_memory_pool_t* p_pool);
 
-bool static_memory_pool_init(static_memory_pool_t* p_pool, const size_t element_size, const size_t num_elements_per_block, const size_t num_max_blocks)
+static bool __stdcall initialize(i_static_memory_pool_t* p_this, const size_t element_size, const size_t num_elements_per_block, const size_t num_max_blocks)
 {
-    ASSERT(p_pool != NULL, "p_pool == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(element_size > 0, "key_size == 0");
     ASSERT(num_elements_per_block > 0, "num_elements_per_block == 0");
     ASSERT(num_max_blocks > 0, "num_blocks == 0");
+
+    static_memory_pool_t* p_pool = (static_memory_pool_t*)p_this;
 
     p_pool->element_size = element_size;
     p_pool->num_elements_per_block = num_elements_per_block;
     p_pool->num_max_blocks = num_max_blocks;
     p_pool->num_cur_blocks = 0;
     p_pool->element_size_with_header = sizeof(header_t) + element_size;
+    p_pool->num_alloc_elements = 0;
 
     char** pa_blocks = NULL;
     char*** pa_index_tables = NULL;
@@ -89,9 +108,11 @@ failed_to_malloc_blocks:
     return false;
 }
 
-void static_memory_pool_release(static_memory_pool_t* p_pool)
+static void __stdcall release(i_static_memory_pool_t* p_this)
 {
-    ASSERT(p_pool != NULL, "p_pool == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    static_memory_pool_t* p_pool = (static_memory_pool_t*)p_this;
 
     for (size_t i = 0; i < p_pool->num_cur_blocks; ++i)
     {
@@ -106,9 +127,35 @@ void static_memory_pool_release(static_memory_pool_t* p_pool)
     memset(p_pool, 0, sizeof(static_memory_pool_t));
 }
 
-void* static_memory_pool_alloc_or_null(static_memory_pool_t* p_pool)
+static void __stdcall reset(i_static_memory_pool_t* p_this)
 {
-    ASSERT(p_pool != NULL, "p_pool == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    static_memory_pool_t* p_pool = (static_memory_pool_t*)p_this;
+
+    // 헤더, 인덱스 테이블 및 인덱스 테이블 포인터 리셋
+    for (size_t i = 0; i < p_pool->num_cur_blocks; ++i)
+    {
+        for (size_t j = 0; j < p_pool->num_elements_per_block; ++j)
+        {
+            header_t* header = (header_t*)(p_pool->ppa_blocks[i] + j * p_pool->element_size_with_header);
+            header->state = STATE_DEALLOC;
+            header->block_index = i;
+            p_pool->pppa_index_tables[i][j] = (char*)header;
+        }
+
+        p_pool->pppa_index_table_ptrs[i] = p_pool->pppa_index_tables[i];
+    }
+
+    p_pool->num_cur_blocks = 0;
+    p_pool->num_alloc_elements = 0;
+}
+
+static void* __stdcall alloc_or_null(i_static_memory_pool_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    static_memory_pool_t* p_pool = (static_memory_pool_t*)p_this;
 
     size_t blockIndex = SIZE_MAX;
 
@@ -140,12 +187,16 @@ void* static_memory_pool_alloc_or_null(static_memory_pool_t* p_pool)
 
     ++p_pool->pppa_index_table_ptrs[blockIndex];
 
+    ++p_pool->num_alloc_elements;
+
     return (void*)(header + 1);
 }
 
-void static_memory_pool_dealloc(static_memory_pool_t* p_pool, void* p_element_or_null)
+static void __stdcall dealloc(i_static_memory_pool_t* p_this, void* p_element_or_null)
 {
-    ASSERT(p_pool != NULL, "p_pool == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    static_memory_pool_t* p_pool = (static_memory_pool_t*)p_this;
 
     if (p_element_or_null == NULL)
     {
@@ -165,27 +216,32 @@ void static_memory_pool_dealloc(static_memory_pool_t* p_pool, void* p_element_or
     // 인덱스 테이블 수정
     --p_pool->pppa_index_table_ptrs[header->block_index];
     *p_pool->pppa_index_table_ptrs[header->block_index] = (char*)header;
+
+    --p_pool->num_alloc_elements;
 }
 
-void static_memory_pool_reset(static_memory_pool_t* p_pool)
+static size_t __stdcall get_element_size(const i_static_memory_pool_t* p_this)
 {
-    ASSERT(p_pool != NULL, "p_pool == NULL");
+    ASSERT(p_this != NULL, "p_this == NULL");
 
-    // 헤더, 인덱스 테이블 및 인덱스 테이블 포인터 리셋
-    for (size_t i = 0; i < p_pool->num_cur_blocks; ++i)
-    {
-        for (size_t j = 0; j < p_pool->num_elements_per_block; ++j)
-        {
-            header_t* header = (header_t*)(p_pool->ppa_blocks[i] + j * p_pool->element_size_with_header);
-            header->state = STATE_DEALLOC;
-            header->block_index = i;
-            p_pool->pppa_index_tables[i][j] = (char*)header;
-        }
+    const static_memory_pool_t* p_pool = (static_memory_pool_t*)p_this;
+    return p_pool->element_size;
+}
 
-        p_pool->pppa_index_table_ptrs[i] = p_pool->pppa_index_tables[i];
-    }
+static size_t __stdcall get_num_elements_per_block(const i_static_memory_pool_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
 
-    p_pool->num_cur_blocks = 0;
+    const static_memory_pool_t* p_pool = (static_memory_pool_t*)p_this;
+    return p_pool->num_elements_per_block;
+}
+
+static size_t __stdcall get_num_alloc_elements(const i_static_memory_pool_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    const static_memory_pool_t* p_pool = (static_memory_pool_t*)p_this;
+    return p_pool->num_alloc_elements;
 }
 
 static bool create_new_block(static_memory_pool_t* p_pool)
@@ -240,4 +296,43 @@ failed_malloc_new_index_table:
 
 failed_malloc_new_block:
     return false;
+}
+
+static void __stdcall create_static_memory_pool(i_static_memory_pool_t** pp_out_static_memory_pool)
+{
+    ASSERT(pp_out_static_memory_pool != NULL, "pp_out_static_memory_pool == NULL");
+
+    static i_static_memory_pool_vtbl_t vtbl =
+    {
+        initialize,
+        release,
+        reset,
+
+        alloc_or_null,
+        dealloc,
+
+        get_element_size,
+        get_num_elements_per_block,
+        get_num_alloc_elements
+    };
+
+    static_memory_pool_t* pa_pool = (static_memory_pool_t*)malloc(sizeof(static_memory_pool_t));
+    if (pa_pool == NULL)
+    {
+        ASSERT(false, "Failed to malloc pool");
+        *pp_out_static_memory_pool = NULL;
+    }
+    memset(pa_pool, 0, sizeof(static_memory_pool_t));
+
+    pa_pool->base.vtbl = &vtbl;
+
+    *pp_out_static_memory_pool = (i_static_memory_pool_t*)pa_pool;
+}
+
+static void __stdcall destroy_static_memory_pool(i_static_memory_pool_t* p_static_memory_pool)
+{
+    ASSERT(p_static_memory_pool != NULL, "p_static_memory_pool == NULL");
+    
+    release(p_static_memory_pool);
+    SAFE_FREE(p_static_memory_pool);
 }

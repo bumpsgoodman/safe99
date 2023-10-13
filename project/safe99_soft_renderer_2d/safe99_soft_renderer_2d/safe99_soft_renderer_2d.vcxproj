@@ -23,11 +23,14 @@
     <ClInclude Include="..\..\..\source\safe99_common\defines.h" />
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h" />
     <ClInclude Include="..\..\..\source\safe99_common\types.h" />
-    <ClInclude Include="..\..\..\source\safe99_renderer_ddraw\renderer_ddraw.h" />
+    <ClInclude Include="..\..\..\source\safe99_soft_renderer_2d\i_soft_renderer_2d.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\source\safe99_renderer_ddraw\private\dll_main.c" />
-    <ClCompile Include="..\..\..\source\safe99_renderer_ddraw\private\renderer_ddraw.cpp" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\dll_main.c" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\soft_renderer_2d.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="soft_renderer.def" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -35,6 +38,7 @@
     <ProjectGuid>{07ffda2c-3e0d-46df-a02e-3eb91a708893}</ProjectGuid>
     <RootNamespace>safe99rendererddraw</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>safe99_soft_renderer_2d</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -106,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw;..\..\..\source\safe99_renderer_ddraw\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer_2d;..\..\..\source\safe99_soft_renderer_2d\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -116,6 +120,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_math_x86d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -126,7 +131,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw;..\..\..\source\safe99_renderer_ddraw\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer_2d;..\..\..\source\safe99_soft_renderer_2d\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -138,6 +143,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_math_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -146,7 +152,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw;..\..\..\source\safe99_renderer_ddraw\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer_2d;..\..\..\source\safe99_soft_renderer_2d\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -156,6 +162,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_math_x64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -166,7 +173,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_renderer_ddraw;..\..\..\source\safe99_renderer_ddraw\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer_2d;..\..\..\source\safe99_soft_renderer_2d\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -178,6 +185,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_math_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

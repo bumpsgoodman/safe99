@@ -1,0 +1,919 @@
+//***************************************************************************
+// 
+// 파일: soft_renderer_2d.cpp
+// 
+// 설명: DirectDraw7을 활용한 2D 소프트웨어 렌더러
+// 
+// 작성자: bumpsgoodman
+// 
+// 작성일: 2023/08/31
+// 
+//***************************************************************************
+
+#include "i_soft_renderer_2d.h"
+#include "safe99_common/assert.h"
+#include "safe99_common/safe_delete.h"
+#include "safe99_math/math.h"
+
+#define GET_ALPHA(argb) ((argb) & 0xff000000)
+#define GET_SEMANTIC(semantic) ((semantic) & UINT_MAX)
+
+typedef struct soft_renderer_2d
+{
+    i_soft_renderer_2d base;
+    size_t ref_count;
+
+    HWND hwnd;
+    RECT window_rect;
+    size_t window_width;
+    size_t window_height;
+
+    IDirectDraw* p_ddraw;
+    IDirectDraw7* p_ddraw7;
+    IDirectDrawSurface7* p_primary;
+    IDirectDrawSurface7* p_back;
+    IDirectDrawClipper* p_clipper;
+
+    char* p_locked_back_buffer;
+    size_t locked_back_buffer_pitch;
+
+    const vertex_buffer_t* p_vertex_buffer;
+    const index_buffer_t* p_index_buffer;
+    const vertex_shader_t* p_vertex_shader;
+} soft_renderer_2d_t;
+
+enum
+{
+    REGION_LEFT = 0x0001,
+    REGION_RIGHT = 0x0010,
+    REGION_TOP = 0x1000,
+    REGION_BOTTOM = 0x0100
+};
+
+static bool __stdcall create_back_buffer(soft_renderer_2d_t* p_renderer, const size_t width, const size_t height);
+
+static vector2_t __stdcall to_screen_coord(const vector2_t cartesian_coord, const size_t screen_width, const size_t screen_height);
+static vector2_t __stdcall to_cartesian_coord(const vector2_t screen_coord, const size_t screen_width, const size_t screen_height);
+static int __stdcall get_region(const int sx, const int sy, const int left_top_x, const int left_top_y, const int right_bottom_x, const int right_bottom_y);
+
+static void __stdcall execute_vertex_shader(const soft_renderer_2d_t* p_this, const size_t index, vector2_t* p_out_positions);
+
+void __stdcall create_instance(void** pp_out_instance);
+
+size_t __stdcall add_ref(i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    return ++p_renderer->ref_count;
+}
+
+size_t __stdcall release(i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    if (--p_renderer->ref_count == 0)
+    {
+        SAFE_RELEASE_MS(p_renderer->p_clipper);
+        SAFE_RELEASE_MS(p_renderer->p_back);
+        SAFE_RELEASE_MS(p_renderer->p_primary);
+        SAFE_RELEASE_MS(p_renderer->p_ddraw7);
+        SAFE_RELEASE_MS(p_renderer->p_ddraw);
+
+        SAFE_FREE(p_renderer);
+        return 0;
+    }
+
+    return p_renderer->ref_count;
+}
+
+size_t __stdcall get_ref_count(const i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    return p_renderer->ref_count;
+}
+
+void __stdcall update_window_pos(i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+
+    GetClientRect(p_renderer->hwnd, &p_renderer->window_rect);
+    ClientToScreen(p_renderer->hwnd, (POINT*)&p_renderer->window_rect.left);
+    ClientToScreen(p_renderer->hwnd, (POINT*)&p_renderer->window_rect.right);
+}
+
+void __stdcall update_window_size(i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+
+    update_window_pos(p_this);
+
+    const size_t window_width = (size_t)p_renderer->window_rect.right - p_renderer->window_rect.left;
+    const size_t window_height = (size_t)p_renderer->window_rect.bottom - p_renderer->window_rect.top;
+    if (window_width == 0 || window_height == 0)
+    {
+        return;
+    }
+
+    p_renderer->window_width = window_width;
+    p_renderer->window_height = window_height;
+
+    create_back_buffer(p_renderer, p_renderer->window_width, p_renderer->window_height);
+}
+
+bool __stdcall init(i_soft_renderer_2d_t* p_this, HWND hwnd, const size_t num_max_objects)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+
+    p_renderer->hwnd = hwnd;
+
+    HRESULT hr;
+    DDSURFACEDESC2 ddsd = { 0, };
+
+    update_window_pos(p_this);
+
+    const size_t WINDOW_WIDTH = (size_t)p_renderer->window_rect.right - p_renderer->window_rect.left;
+    const size_t WINDOW_HEIGHT = (size_t)p_renderer->window_rect.bottom - p_renderer->window_rect.top;
+
+    p_renderer->window_width = WINDOW_WIDTH;
+    p_renderer->window_height = WINDOW_HEIGHT;
+
+    hr = DirectDrawCreate(NULL, &p_renderer->p_ddraw, NULL);
+    if (FAILED(hr))
+    {
+        ASSERT(false, "Failed to Create DDrawObject");
+        goto failed_init;
+    }
+
+    hr = p_renderer->p_ddraw->QueryInterface(IID_IDirectDraw7, (LPVOID*)&p_renderer->p_ddraw7);
+    if (FAILED(hr))
+    {
+        ASSERT(false, "Failed to Create DDraw7 Object");
+        goto failed_init;
+    }
+
+    hr = p_renderer->p_ddraw7->SetCooperativeLevel(hwnd, DDSCL_NORMAL);
+    if (FAILED(hr))
+    {
+        ASSERT(false, "Failed to SetCooperativeLeve");
+        goto failed_init;
+    }
+
+    ddsd.dwSize = sizeof(DDSURFACEDESC2);
+    ddsd.dwFlags = DDSD_CAPS;
+    ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+
+    hr = p_renderer->p_ddraw7->CreateSurface(&ddsd, &p_renderer->p_primary, NULL);
+    if (FAILED(hr))
+    {
+        ASSERT(false, "Failed to CreateSurface");
+        goto failed_init;
+    }
+
+    if (!create_back_buffer(p_renderer, WINDOW_WIDTH, WINDOW_HEIGHT))
+    {
+        ASSERT(false, "Failed to CreateBackBuffer");
+        goto failed_init;
+    }
+
+    hr = p_renderer->p_ddraw7->CreateClipper(0, &p_renderer->p_clipper, NULL);
+    if (FAILED(hr))
+    {
+        ASSERT(false, "Failed to CreateClipper");
+        goto failed_init;
+    }
+    p_renderer->p_clipper->SetHWnd(0, hwnd);
+    p_renderer->p_primary->SetClipper(p_renderer->p_clipper);
+
+    return true;
+
+failed_init:
+    release(p_this);
+    memset(p_renderer, 0, sizeof(soft_renderer_2d_t));
+    return false;
+}
+
+size_t __stdcall get_width(const i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    return p_renderer->window_width;
+}
+
+size_t __stdcall get_height(const i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    return p_renderer->window_height;
+}
+
+bool __stdcall begin_draw(i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    ASSERT(p_renderer->p_back != NULL, "back buffer == NULL");
+
+    HRESULT hr = 0;
+    DDSURFACEDESC2 ddsd = { 0, };
+
+    ddsd.dwSize = sizeof(DDSURFACEDESC2);
+
+    hr = p_renderer->p_back->Lock(NULL, &ddsd, DDLOCK_WAIT | DDLOCK_WRITEONLY, NULL);
+    if (FAILED(hr))
+    {
+        return false;
+    }
+
+    ASSERT(ddsd.dwWidth == p_renderer->window_width, "Mismatch width");
+    ASSERT(ddsd.dwHeight == p_renderer->window_height, "Mismatch height");
+
+    p_renderer->p_locked_back_buffer = (char*)ddsd.lpSurface;
+    p_renderer->locked_back_buffer_pitch = ddsd.lPitch;
+
+    return true;
+}
+
+void __stdcall end_draw(i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    ASSERT(p_renderer->p_back != NULL, "back buffer == NULL");
+    ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    p_renderer->p_back->Unlock(NULL);
+
+    p_renderer->p_locked_back_buffer = NULL;
+    p_renderer->locked_back_buffer_pitch = 0;
+}
+
+void __stdcall on_draw(i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    p_renderer->p_primary->Blt(&p_renderer->window_rect, p_renderer->p_back, NULL, DDBLT_WAIT, NULL);
+}
+
+void __stdcall clear(i_soft_renderer_2d_t* p_this, const uint32_t argb)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
+
+    char* dst = p_renderer->p_locked_back_buffer;
+    for (size_t y = 0; y < p_renderer->window_height; ++y)
+    {
+        for (size_t x = 0; x < p_renderer->window_width; ++x)
+        {
+            uint32_t* dest = (uint32_t*)(dst + y * p_renderer->locked_back_buffer_pitch + x * 4);
+            *dest = argb;
+        }
+    }
+}
+
+void __stdcall draw_pixel(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const uint32_t argb)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    if ((size_t)dx >= p_renderer->window_width
+        || (size_t)dy >= p_renderer->window_height)
+    {
+        return;
+    }
+
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
+
+    char* dst = p_renderer->p_locked_back_buffer + dy * p_renderer->locked_back_buffer_pitch + (size_t)dx * 4;
+    *(uint32_t*)dst = argb;
+}
+
+void __stdcall draw_rectangle(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const size_t width, const size_t height, const uint32_t argb)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
+
+    const size_t start_x = MAX(dx, 0);
+    const size_t start_y = MAX(dy, 0);
+    const size_t end_x = MIN(dx + width, p_renderer->window_width);
+    const size_t end_y = MIN(dy + height, p_renderer->window_height);
+
+    const size_t dst_width = end_x - start_x;
+    const size_t dst_height = end_y - start_y;
+
+    char* dst = p_renderer->p_locked_back_buffer + start_y * p_renderer->locked_back_buffer_pitch + start_x * 4;
+    for (size_t y = start_y; y < end_y; ++y)
+    {
+        for (size_t x = start_x; x < end_x; ++x)
+        {
+            *(uint32_t*)dst = argb;
+            dst += 4;
+        }
+
+        dst -= dst_width * 4;
+        dst += p_renderer->locked_back_buffer_pitch;
+    }
+}
+
+bool __stdcall clip_line(int* p_out_sx, int* p_out_sy, int* p_out_dx, int* p_out_dy, const int left_top_x, const int left_top_y, const int right_bottom_x, const int right_bottom_y)
+{
+    ASSERT(p_out_sx != NULL, "p_out_sx == NULL");
+    ASSERT(p_out_sy != NULL, "p_out_sy == NULL");
+    ASSERT(p_out_dx != NULL, "p_out_dx == NULL");
+    ASSERT(p_out_dy != NULL, "p_out_dy == NULL");
+
+    while (true)
+    {
+        const int start_region = get_region(*p_out_sx, *p_out_sy, left_top_x, left_top_y, right_bottom_x, right_bottom_y);
+        const int end_region = get_region(*p_out_dx, *p_out_dy, left_top_x, left_top_y, right_bottom_x, right_bottom_y);
+
+        // 두 영역 모두 0이면 두 영역은 모두 영역 내에 있음
+        if ((start_region | end_region) == 0)
+        {
+            return true;
+        }
+
+        // 0보다 크면 두 영역은 모두 영역 밖에 있음
+        if ((start_region & end_region) > 0)
+        {
+            return false;
+        }
+
+        // 클리핑
+        const int width = *p_out_dx - *p_out_sx;
+        const int height = *p_out_dy - *p_out_sy;
+
+        const float slope = (width == 0) ? (float)height : (float)height / width;
+
+        float x;
+        float y;
+
+        const int clipped_region = (start_region != 0) ? start_region : end_region;
+        if (clipped_region & REGION_LEFT)
+        {
+            // 좌측 영역인 경우 수직 경계선과 교점 계산
+            x = (float)left_top_x;
+            y = *p_out_sy + slope * (x - *p_out_sx);
+        }
+        else if (clipped_region & REGION_RIGHT)
+        {
+            // 우측 영역인 경우 수직 경계선과 교점 계산
+            x = (float)right_bottom_x;
+            y = *p_out_sy + slope * (x - *p_out_sx);
+        }
+        else if (clipped_region & REGION_TOP)
+        {
+            // 위 영역인 경우 평 경계선과 교점 계산
+            y = (float)left_top_y;
+            x = *p_out_sx + (y - *p_out_sy) / slope;
+        }
+        else
+        {
+            // 아래 영역인 경우 평 경계선과 교점 계산
+            y = (float)right_bottom_y;
+            x = *p_out_sx + (y - *p_out_sy) / slope;
+        }
+
+        if (clipped_region == start_region)
+        {
+            *p_out_sx = ROUND(x);
+            *p_out_sy = ROUND(y);
+        }
+        else
+        {
+            *p_out_dx = ROUND(x);
+            *p_out_dy = ROUND(y);
+        }
+    }
+}
+
+void __stdcall draw_line(i_soft_renderer_2d_t* p_this, const int sx, const int sy, const int dx, const int dy, const uint32_t argb)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    if (GET_ALPHA(argb) == 0)
+    {
+        return;
+    }
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+
+    const int width = dx - sx;
+    const int height = dy - sy;
+
+    const int increament_x = (width >= 0) ? 1 : -1;
+    const int increament_y = (height > 0) ? 1 : -1;
+
+    const int w = increament_x * width;
+    const int h = increament_y * height;
+
+    // 완만한지 검사
+    const bool b_gradual = (ABS(width) >= ABS(height)) ? true : false;
+
+    int start_x = sx;
+    int start_y = sy;
+
+    int end_x = dx;
+    int end_y = dy;
+    if (!clip_line(&start_x, &start_y, &end_x, &end_y, 0, 0, (int)get_width(p_this) - 1, (int)get_height(p_this) - 1))
+    {
+        return;
+    }
+
+    int x = start_x;
+    int y = start_y;
+
+    if (b_gradual)
+    {
+        int f = 2 * h - w;
+
+        const int df1 = 2 * h;
+        const int df2 = 2 * (h - w);
+
+        while (x != end_x)
+        {
+            draw_pixel(p_this, x, y, argb);
+
+            if (f < 0)
+            {
+                f += df1;
+            }
+            else
+            {
+                f += df2;
+                y += increament_y;
+            }
+
+            x += increament_x;
+        }
+    }
+    else
+    {
+        int f = 2 * w - h;
+
+        const int df1 = 2 * w;
+        const int df2 = 2 * (w - h);
+
+        while (y != end_y)
+        {
+            draw_pixel(p_this, x, y, argb);
+
+            if (f < 0)
+            {
+                f += df1;
+            }
+            else
+            {
+                f += df2;
+                x += increament_x;
+            }
+
+            y += increament_y;
+        }
+    }
+
+    draw_pixel(p_this, x, y, argb);
+}
+
+void __stdcall draw_bitmap(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const int sx, const int sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+    ASSERT(p_bitmap != NULL, "bitmap == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
+
+    const size_t start_x = MAX(dx, 0);
+    const size_t start_y = MAX(dy, 0);
+    const size_t end_x = MIN(dx + sw, p_renderer->window_width);
+    const size_t end_y = MIN(dy + sh, p_renderer->window_height);
+
+    const size_t dst_width = end_x - start_x;
+    const size_t dst_height = end_y - start_y;
+
+    const char* src = p_bitmap + (sy * width + sx) * 4;
+    char* dst = p_renderer->p_locked_back_buffer + start_y * p_renderer->locked_back_buffer_pitch + start_x * 4;
+    for (size_t y = 0; y < dst_height; ++y)
+    {
+        for (size_t x = 0; x < dst_width; ++x)
+        {
+            if (GET_ALPHA(*(uint32_t*)src) != 0)
+            {
+                *(uint32_t*)dst = *(uint32_t*)src;
+            }
+
+            src += 4;
+            dst += 4;
+        }
+
+        src -= dst_width * 4;
+        src += width * 4;
+        dst -= dst_width * 4;
+        dst += p_renderer->locked_back_buffer_pitch;
+    }
+}
+
+bool __stdcall create_vertex_buffer(const semantic_t* p_semantics, const size_t num_semantics,
+                          const void* p_vertices, const size_t* p_offsets,
+                          const size_t num_vertices, vertex_buffer_t* p_out_vertex_buffer)
+{
+    ASSERT(p_semantics != NULL, "p_semantics == NULL");
+    ASSERT(p_vertices != NULL, "p_vertices == NULL");
+    ASSERT(p_offsets != NULL, "p_offsets == NULL");
+    ASSERT(p_out_vertex_buffer != NULL, "pp_out_vertex_buffer == NULL");
+    ASSERT(num_semantics != 0, "num_semantics == 0");
+    ASSERT(num_vertices != 0, "num_vertices == 0");
+
+    memset(p_out_vertex_buffer, 0, sizeof(vertex_buffer));
+
+    size_t sum_offsets = 0;
+    for (size_t i = 0; i < num_semantics; ++i)
+    {
+        sum_offsets += p_offsets[i];
+    }
+
+    for (size_t i = 0; i < num_vertices; ++i)
+    {
+        for (size_t j = 0; j < num_semantics; ++j)
+        {
+            switch (p_semantics[j])
+            {
+            case SEMANTIC_POSITION:
+            {
+                if (p_out_vertex_buffer->pa_positions == NULL)
+                {
+                    p_out_vertex_buffer->pa_positions = (vector2_t*)malloc(sizeof(vector2_t) * num_vertices);
+                    if (p_out_vertex_buffer->pa_positions == NULL)
+                    {
+                        ASSERT(false, "Failed to malloc positions");
+                        goto failed_malloc_vertices;
+                    }
+                }
+
+                const vector2_t* p_position = (vector2_t*)((char*)p_vertices + p_offsets[j] + i * sum_offsets) + i;
+                p_out_vertex_buffer->pa_positions[i] = *p_position;
+                break;
+            }
+            case SEMANTIC_COLOR:
+            {
+                if (p_out_vertex_buffer->pa_colors == NULL)
+                {
+                    p_out_vertex_buffer->pa_colors = (color_t*)malloc(sizeof(color_t) * num_vertices);
+                    if (p_out_vertex_buffer->pa_colors == NULL)
+                    {
+                        ASSERT(false, "Failed to malloc colors");
+                        goto failed_malloc_vertices;
+                    }
+                }
+
+                const color_t* p_colors = (color_t*)((char*)p_vertices + p_offsets[j] + i * sum_offsets) + i;
+                p_out_vertex_buffer->pa_colors[i] = *p_colors;
+                break;
+            }
+            case SEMANTIC_TEXCOORD:
+            {
+                if (p_out_vertex_buffer->pa_texture_coords == NULL)
+                {
+                    p_out_vertex_buffer->pa_texture_coords = (vector2_t*)malloc(sizeof(vector2_t) * num_vertices);
+                    if (p_out_vertex_buffer->pa_texture_coords == NULL)
+                    {
+                        ASSERT(false, "Failed to malloc texture coord");
+                        goto failed_malloc_vertices;
+                    }
+                }
+
+                const vector2_t* p_texture_coord = (vector2_t*)((char*)p_vertices + p_offsets[j] + i * sum_offsets) + i;
+                p_out_vertex_buffer->pa_texture_coords[i] = *p_texture_coord;
+                break;
+            }
+            default:
+                ASSERT(false, "Invalid semantic");
+                break;
+            }
+        }
+    }
+
+    p_out_vertex_buffer->num_vertices = num_vertices;
+
+    return true;
+
+failed_malloc_vertices:
+    SAFE_FREE(p_out_vertex_buffer->pa_positions);
+    SAFE_FREE(p_out_vertex_buffer->pa_colors);
+    SAFE_FREE(p_out_vertex_buffer->pa_texture_coords);
+    memset(p_out_vertex_buffer, 0, sizeof(vertex_buffer));
+    return false;
+}
+
+bool __stdcall create_index_buffer(const uint_t* p_indices, const size_t num_indices, index_buffer_t* p_out_index_buffer)
+{
+    ASSERT(p_indices != NULL, "p_indices == NULL");
+    ASSERT(p_out_index_buffer != NULL, "p_out_index_buffer == NULL");
+    ASSERT(num_indices != 0, "num_indices == 0");
+
+    p_out_index_buffer->pa_indices = (uint_t*)malloc(sizeof(uint_t) * num_indices);
+    if (p_out_index_buffer->pa_indices == NULL)
+    {
+        ASSERT(false, "Failed to malloc texture coord");
+        return false;
+    }
+    memcpy(p_out_index_buffer->pa_indices, p_indices, sizeof(uint_t) * num_indices);
+
+    p_out_index_buffer->num_indices = num_indices;
+
+    return true;
+}
+
+void __stdcall set_vertex_buffer(i_soft_renderer_2d_t* p_this, const vertex_buffer_t* p_vertex_buffer)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+    ASSERT(p_vertex_buffer != NULL, "p_vertex_buffer == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    p_renderer->p_vertex_buffer = p_vertex_buffer;
+}
+
+void __stdcall set_index_buffer(i_soft_renderer_2d_t* p_this, const index_buffer_t* p_index_buffer)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+    ASSERT(p_index_buffer != NULL, "p_index_buffer == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    p_renderer->p_index_buffer = p_index_buffer;
+}
+
+bool __stdcall create_vertex_shader(const matrix_t* p_transform_matrix, vertex_shader_t* p_out_vertex_shader)
+{
+    ASSERT(p_transform_matrix != NULL, "p_transform_matrix == NULL");
+    ASSERT(p_out_vertex_shader != NULL, "p_out_vertex_shader == NULL");
+
+    p_out_vertex_shader->p_transform_matrix = p_transform_matrix;
+
+    return true;
+}
+
+void __stdcall set_vertex_shader(i_soft_renderer_2d_t* p_this, vertex_shader_t* p_vertex_shader)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+    ASSERT(p_vertex_shader != NULL, "p_vertex_shader == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    p_renderer->p_vertex_shader = p_vertex_shader;
+}
+
+bool __stdcall draw(i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    ASSERT(p_renderer->p_vertex_buffer, "p_renderer->p_vertex_buffer == NULL");
+    ASSERT(p_renderer->p_index_buffer, "p_renderer->p_index_buffer == NULL");
+
+    const size_t window_width = p_renderer->window_width;
+    const size_t window_height = p_renderer->window_height;
+
+    uint_t* p_indices = p_renderer->p_index_buffer->pa_indices;
+    color_t* p_colors = p_renderer->p_vertex_buffer->pa_colors;
+
+    const size_t num_triangles = p_renderer->p_index_buffer->num_indices / 3;
+    for (size_t i = 0; i < num_triangles; ++i)
+    {
+        const size_t buffer_index = i * 3;
+
+        vector2_t v0;
+        vector2_t v1;
+        vector2_t v2;
+
+        execute_vertex_shader(p_renderer, p_indices[buffer_index], &v0);
+        execute_vertex_shader(p_renderer, p_indices[buffer_index + 1], &v1);
+        execute_vertex_shader(p_renderer, p_indices[buffer_index + 2], &v2);
+
+        v0 = to_screen_coord(v0, window_width, window_height);
+        v1 = to_screen_coord(v1, window_width, window_height);
+        v2 = to_screen_coord(v2, window_width, window_height);
+
+        v0.x = floorf(v0.x);
+        v0.y = floorf(v0.y);
+
+        v1.x = floorf(v1.x);
+        v1.y = floorf(v1.y);
+
+        v2.x = floorf(v2.x);
+        v2.y = floorf(v2.y);
+
+        vector2_t min;
+        vector2_t max;
+
+        min.x = MIN(MIN(v0.x, v1.x), v2.x);
+        min.y = MIN(MIN(v0.y, v1.y), v2.y);
+        max.x = MAX(MAX(v0.x, v1.x), v2.x);
+        max.y = MAX(MAX(v0.y, v1.y), v2.y);
+
+        const vector_t tv0 = vector2_to_vector(&v0);
+        const vector_t tv1 = vector2_to_vector(&v1);
+        const vector_t tv2 = vector2_to_vector(&v2);
+
+        const float cross = vector_cross2(vector_sub(tv0, tv1), vector_sub(tv1, tv2));
+
+        for (int y = (int)min.y; y <= (int)max.y; ++y)
+        {
+            for (int x = (int)min.x; x <= (int)max.x; ++x)
+            {
+                const vector2_t p = { (float)x, (float)y };
+                const vector_t tp = vector2_to_vector(&p);
+
+                const float area0 = vector_cross2(vector_sub(tp, tv2), vector_sub(tv1, tv2));
+                const float area1 = vector_cross2(vector_sub(tp, tv0), vector_sub(tv2, tv0));
+                const float area2 = vector_cross2(vector_sub(tv1, tv0), vector_sub(tp, tv0));
+
+                if (area0 < 0.0f || area1 < 0.0f || area2 < 0.0f)
+                {
+                    continue;
+                }
+
+                const float area_sum = area0 + area1 + area2;
+
+                const float w0 = area0 / area_sum;
+                const float w1 = area1 / area_sum;
+                const float w2 = 1 - w0 - w1;
+
+                /*
+                const vector2_t target_uv = { uv0.x * w0 + uv1.x * w1 + uv2.x * w2, uv0.y * w0 + uv1.y * w1 + uv2.y * w2 };
+
+                const int image_x = (int)(floorf(target_uv.x * p_app->image.width)) % p_app->image.width;
+                const int image_y = (int)(floorf(target_uv.y * p_app->image.height)) % p_app->image.height;
+                const int index = p_app->image.width * (p_app->image.height - (1 + image_y)) + image_x;
+                const uint32_t color = *(uint32_t*)(p_app->image.pa_bitmap + index * 4);
+                */
+
+                const float r = w0 * p_colors[buffer_index].r + w1 * p_colors[buffer_index].r + w2 * p_colors[buffer_index].r + 1.0f;
+                const float g = w0 * p_colors[buffer_index + 1].g + w1 * p_colors[buffer_index + 1].g + w2 * p_colors[buffer_index + 1].g + 1.0f;
+                const float b = w0 * p_colors[buffer_index + 2].b + w1 * p_colors[buffer_index + 2].b + w2 * p_colors[buffer_index + 2].b + 1.0f;
+                const color_t color = color_set(p_colors[buffer_index].r, p_colors[buffer_index].g, p_colors[buffer_index].b, 1.0f);
+
+                draw_pixel(p_this, x, y, color_to_argb(color));
+            }
+        }
+    }
+
+    return false;
+}
+
+static bool __stdcall create_back_buffer(soft_renderer_2d_t* p_renderer, const size_t width, const size_t height)
+{
+    ASSERT(p_renderer != NULL, "p_renderer == NULL");
+    ASSERT(p_renderer->p_ddraw7 != NULL, "ddraw7 object == NULL");
+
+    HRESULT hr;
+    DDSURFACEDESC2 ddsd = { 0, };
+
+    ddsd.dwSize = sizeof(DDSURFACEDESC2);
+    ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
+    ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
+    ddsd.dwHeight = (DWORD)height;
+    ddsd.dwWidth = (DWORD)width;
+
+    hr = p_renderer->p_ddraw7->CreateSurface(&ddsd, &p_renderer->p_back, NULL);
+    if (FAILED(hr))
+    {
+        return false;
+    }
+
+    p_renderer->window_width = width;
+    p_renderer->window_height = height;
+
+    return true;
+}
+
+static int __stdcall get_region(const int sx, const int sy, const int left_top_x, const int left_top_y, const int right_bottom_x, const int right_bottom_y)
+{
+    int result = 0;
+    if (sx < left_top_x)
+    {
+        result |= REGION_LEFT; // 0b0001
+    }
+    else if (sx > right_bottom_x)
+    {
+        result |= REGION_RIGHT; // 0b0010
+    }
+
+    if (sy < left_top_y)
+    {
+        result |= REGION_TOP; // 0b1000
+    }
+    else if (sy > right_bottom_y)
+    {
+        result |= REGION_BOTTOM; // 0b0100
+    }
+
+    return result;
+}
+
+static vector2_t __stdcall to_screen_coord(const vector2_t cartesian_coord, const size_t screen_width, const size_t screen_height)
+{
+    vector2_t v = { cartesian_coord.x + (float)screen_width * 0.5f, -cartesian_coord.y + (float)screen_height * 0.5f };
+    return v;
+}
+
+static vector2_t __stdcall to_cartesian_coord(const vector2_t screen_coord, const size_t screen_width, const size_t screen_height)
+{
+    const vector2_t v = { screen_coord.x - (float)screen_width * 0.5f + 0.5f, -(screen_coord.y + 0.5f) + (float)screen_height * 0.5f };
+    return v;
+}
+
+static void __stdcall execute_vertex_shader(const soft_renderer_2d_t* p_renderer, const size_t index, vector2_t* p_out_positions)
+{
+    ASSERT(p_renderer != NULL, "p_renderer == NULL");
+    ASSERT(p_out_positions != NULL, "p_out_positions == NULL");
+    ASSERT(p_renderer->p_vertex_shader != NULL, "p_vertex_shader == NULL");
+
+    const vector_t v = vector2_to_vector(&p_renderer->p_vertex_buffer->pa_positions[index]);
+    const vector_t t = matrix_mul_vector(v, *p_renderer->p_vertex_shader->p_transform_matrix);
+    const vector2_t result = vector_to_vector2(t);
+
+    *p_out_positions = result;
+}
+
+void __stdcall create_instance(void** pp_out_instance)
+{
+    ASSERT(pp_out_instance != NULL, "pp_out_instance == NULL");
+
+    static i_soft_renderer_2d_vtbl_t vtbl =
+    {
+        add_ref,
+        release,
+        get_ref_count,
+
+        init,
+
+        get_width,
+        get_height,
+        update_window_pos,
+        update_window_size,
+
+        begin_draw,
+        end_draw,
+        on_draw,
+
+        clear,
+        draw_pixel,
+        draw_rectangle,
+        draw_line,
+        draw_bitmap,
+
+        clip_line,
+
+        create_vertex_buffer,
+        create_index_buffer,
+        create_vertex_shader,
+
+        set_vertex_buffer,
+        set_index_buffer,
+        set_vertex_shader,
+
+        draw
+    };
+
+    soft_renderer_2d_t* pa_renderer = (soft_renderer_2d_t*)malloc(sizeof(soft_renderer_2d_t));
+    if (pa_renderer == NULL)
+    {
+        ASSERT(false, "Failed to malloc renderer");
+        *pp_out_instance = NULL;
+    }
+    memset(pa_renderer, 0, sizeof(soft_renderer_2d_t));
+
+    pa_renderer->base.vtbl = &vtbl;
+    pa_renderer->ref_count = 1;
+
+    *pp_out_instance = pa_renderer;
+}

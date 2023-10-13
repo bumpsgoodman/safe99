@@ -9,7 +9,7 @@ rem -------------------------
 
 call build_core.bat
 call build_math.bat
-call build_renderer_ddraw.bat
+call build_soft_renderer_2d.bat
 call build_ecs.bat
 
 rem -------------------------

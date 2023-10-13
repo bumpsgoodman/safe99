@@ -13,6 +13,10 @@
 #ifndef PRECOMPILED_H
 #define PRECOMPILED_H
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif // WIN32_LEAN_AND_MEAN
+
 #include <intrin.h>
 #include <math.h>
 #include <stdarg.h>
@@ -25,14 +29,12 @@
 #include "safe99_common/safe_delete.h"
 #include "safe99_common/types.h"
 
-#include "safe99_core/generic/chunked_memory_pool.h"
-#include "safe99_core/generic/dynamic_vector.h"
+#include "safe99_core/generic/i_chunked_memory_pool.h"
+#include "safe99_core/generic/i_dynamic_vector.h"
+#include "safe99_core/generic/i_map.h"
 #include "safe99_core/generic/list.h"
-#include "safe99_core/generic/map.h"
 #include "safe99_core/util/hash_function.h"
 
 #include "safe99_math/math.h"
-
-#include "ecs.h"
 
 #endif // PRECOMPILED_H

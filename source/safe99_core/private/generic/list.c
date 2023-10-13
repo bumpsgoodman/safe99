@@ -12,7 +12,7 @@
 
 #include "precompiled.h"
 
-void list_add_head(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_node)
+void __stdcall list_add_head(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_node)
 {
     ASSERT(pp_head != NULL, "pp_head == NULL");
     ASSERT(pp_tail != NULL, "pp_tail == NULL");
@@ -34,7 +34,7 @@ void list_add_head(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_
     }
 }
 
-void list_add_tail(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_node)
+void __stdcall list_add_tail(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_node)
 {
     ASSERT(pp_head != NULL, "pp_head == NULL");
     ASSERT(pp_tail != NULL, "pp_tail == NULL");
@@ -56,7 +56,7 @@ void list_add_tail(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_
     }
 }
 
-void list_delete_head(list_node_t** pp_head, list_node_t** pp_tail)
+void __stdcall list_delete_head(list_node_t** pp_head, list_node_t** pp_tail)
 {
     ASSERT(pp_head != NULL, "pp_head == NULL");
     ASSERT(pp_tail != NULL, "pp_tail == NULL");
@@ -78,7 +78,7 @@ void list_delete_head(list_node_t** pp_head, list_node_t** pp_tail)
     }
 }
 
-void list_delete_tail(list_node_t** pp_head, list_node_t** pp_tail)
+void __stdcall list_delete_tail(list_node_t** pp_head, list_node_t** pp_tail)
 {
     ASSERT(pp_head != NULL, "pp_head == NULL");
     ASSERT(pp_tail != NULL, "pp_tail == NULL");
@@ -100,8 +100,8 @@ void list_delete_tail(list_node_t** pp_head, list_node_t** pp_tail)
     }
 }
 
-void list_insert_node(list_node_t** pp_head, list_node_t** pp_tail,
-                      list_node_t* p_prev_node, list_node_t* p_node)
+void __stdcall list_insert_node(list_node_t** pp_head, list_node_t** pp_tail,
+                                  list_node_t* p_prev_node, list_node_t* p_node)
 {
     ASSERT(pp_head != NULL, "pp_head == NULL");
     ASSERT(pp_tail != NULL, "pp_tail == NULL");
@@ -125,7 +125,7 @@ void list_insert_node(list_node_t** pp_head, list_node_t** pp_tail,
     }
 }
 
-void list_delete_node(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_del_node)
+void __stdcall list_delete_node(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_del_node)
 {
     ASSERT(pp_head != NULL, "pp_head == NULL");
     ASSERT(pp_tail != NULL, "pp_tail == NULL");

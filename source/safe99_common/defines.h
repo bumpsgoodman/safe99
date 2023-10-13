@@ -22,9 +22,13 @@
 #define END_EXTERN_C
 #endif // __cplusplus
 
-// calling convention
-#define STDCALL __stdcall
-#define VECTORCALL __vectorcall
+// 인터페이스
+#ifndef interface
+#define interface struct
+#endif // interface
+
+// DLL 객체 생성
+typedef void (__stdcall *create_instance_func)(void**);
 
 // SIMD
 #if (defined(__AVX2__))

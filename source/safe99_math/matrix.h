@@ -39,7 +39,7 @@ static const vector_t s_identity_r3 = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 START_EXTERN_C
 
-FORCEINLINE matrix_t VECTORCALL matrix_get_identity(void)
+FORCEINLINE matrix_t __vectorcall matrix_get_identity(void)
 {
     matrix_t result;
     result.r0 = vector_set(1.0f, 0.0f, 0.0f, 0.0f);
@@ -49,13 +49,13 @@ FORCEINLINE matrix_t VECTORCALL matrix_get_identity(void)
     return result;
 }
 
-FORCEINLINE matrix_t VECTORCALL matrix_get_transpose(matrix_t m)
+FORCEINLINE matrix_t __vectorcall matrix_get_transpose(matrix_t m)
 {
     _MM_TRANSPOSE4_PS(m.r0, m.r1, m.r2, m.r3);
     return m;
 }
 
-FORCEINLINE matrix_t VECTORCALL matrix_set(const float m00, const float m01, const float m02, const float m03,
+FORCEINLINE matrix_t __vectorcall matrix_set(const float m00, const float m01, const float m02, const float m03,
                                            const float m10, const float m11, const float m12, const float m13,
                                            const float m20, const float m21, const float m22, const float m23,
                                            const float m30, const float m31, const float m32, const float m33)
@@ -68,7 +68,7 @@ FORCEINLINE matrix_t VECTORCALL matrix_set(const float m00, const float m01, con
     return result;
 }
 
-FORCEINLINE vector_t VECTORCALL matrix_mul_vector(const vector_t v, const matrix_t m_tr)
+FORCEINLINE vector_t __vectorcall matrix_mul_vector(const vector_t v, const matrix_t m_tr)
 {
     const vector_t result = vector_set(_mm_cvtss_f32(_mm_dp_ps(v, m_tr.r0, 0xff)),
                                        _mm_cvtss_f32(_mm_dp_ps(v, m_tr.r1, 0xff)),
@@ -77,7 +77,7 @@ FORCEINLINE vector_t VECTORCALL matrix_mul_vector(const vector_t v, const matrix
     return result;
 }
 
-FORCEINLINE matrix_t VECTORCALL matrix_mul(const matrix_t m0, const matrix_t m1_tr)
+FORCEINLINE matrix_t __vectorcall matrix_mul(const matrix_t m0, const matrix_t m1_tr)
 {
     matrix_t result;
     result.r0 = vector_set(_mm_cvtss_f32(_mm_dp_ps(m0.r0, m1_tr.r0, 0xff)),
@@ -102,7 +102,7 @@ FORCEINLINE matrix_t VECTORCALL matrix_mul(const matrix_t m0, const matrix_t m1_
     return result;
 }
 
-FORCEINLINE matrix_t VECTORCALL matrix_get_scale_2d(const float x, const float y)
+FORCEINLINE matrix_t __vectorcall matrix_get_scale_2d(const float x, const float y)
 {
     matrix_t result;
     result.r0 = vector_set(x, 0.0f, 0.0f, 0.0f);
@@ -112,7 +112,7 @@ FORCEINLINE matrix_t VECTORCALL matrix_get_scale_2d(const float x, const float y
     return result;
 }
 
-FORCEINLINE matrix_t VECTORCALL matrix_get_rotation_2d(const float rad)
+FORCEINLINE matrix_t __vectorcall matrix_get_rotation_2d(const float rad)
 {
     matrix_t result;
     float sin;
@@ -126,7 +126,7 @@ FORCEINLINE matrix_t VECTORCALL matrix_get_rotation_2d(const float rad)
     return result;
 }
 
-FORCEINLINE matrix_t VECTORCALL matrix_get_translation_2d(const float x, const float y)
+FORCEINLINE matrix_t __vectorcall matrix_get_translation_2d(const float x, const float y)
 {
     matrix_t result;
     result.r0 = vector_set(1.0f, 0.0f, x, 0);

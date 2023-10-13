@@ -33,17 +33,14 @@ typedef struct list
 
 START_EXTERN_C
 
-SAFE99_API void list_add_head(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_node);
+SAFE99_API void __stdcall list_add_head(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_node);
+SAFE99_API void __stdcall list_add_tail(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_node);
 
-SAFE99_API void list_add_tail(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_node);
+SAFE99_API void __stdcall list_delete_head(list_node_t** pp_head, list_node_t** pp_tail);
+SAFE99_API void __stdcall list_delete_tail(list_node_t** pp_head, list_node_t** pp_tail);
 
-SAFE99_API void list_delete_head(list_node_t** pp_head, list_node_t** pp_tail);
-
-SAFE99_API void list_delete_tail(list_node_t** pp_head, list_node_t** pp_tail);
-
-SAFE99_API void list_insert_node(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_prev_node, list_node_t* p_node);
-
-SAFE99_API void list_delete_node(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_del_node);
+SAFE99_API void __stdcall list_insert_node(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_prev_node, list_node_t* p_node);
+SAFE99_API void __stdcall list_delete_node(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_del_node);
 
 END_EXTERN_C
 

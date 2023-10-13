@@ -22,7 +22,7 @@
 
 START_EXTERN_C
 
-SAFE99_API void get_sin_cos(const float rad, float* p_out_sin, float* p_out_cos);
+SAFE99_API void __stdcall get_sin_cos(const float rad, float* p_out_sin, float* p_out_cos);
 
 END_EXTERN_C
 

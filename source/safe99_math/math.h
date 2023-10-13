@@ -26,7 +26,7 @@
 
 START_EXTERN_C
 
-SAFE99_API bool log2int64(uint32_t* p_out_index, const uint64_t num);
+SAFE99_API bool __stdcall log2int64(uint32_t* p_out_index, const uint64_t num);
 
 END_EXTERN_C
 

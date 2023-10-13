@@ -14,7 +14,7 @@
 
 #include "math.h"
 
-bool log2int64(uint32_t* p_out_index, const uint64_t num)
+bool __stdcall log2int64(uint32_t* p_out_index, const uint64_t num)
 {
     ASSERT(p_out_index != NULL, "p_out_index == NULL");
 

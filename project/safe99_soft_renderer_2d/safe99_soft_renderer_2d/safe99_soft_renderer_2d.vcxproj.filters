@@ -18,17 +18,20 @@
     <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h">
       <Filter>safe99_common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_renderer_ddraw\renderer_ddraw.h" />
     <ClInclude Include="..\..\..\source\safe99_common\types.h">
       <Filter>safe99_common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_soft_renderer_2d\i_soft_renderer_2d.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\source\safe99_renderer_ddraw\private\dll_main.c">
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\dll_main.c">
       <Filter>private</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\safe99_renderer_ddraw\private\renderer_ddraw.cpp">
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\soft_renderer_2d.cpp">
       <Filter>private</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="soft_renderer.def" />
   </ItemGroup>
 </Project>
