@@ -19,15 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\source\safe99_common\assert.h" />
-    <ClInclude Include="..\..\..\source\safe99_common\defines.h" />
-    <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h" />
-    <ClInclude Include="..\..\..\source\safe99_common\types.h" />
     <ClInclude Include="..\..\..\source\safe99_soft_renderer_2d\i_soft_renderer_2d.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\dll_main.c" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\index_buffer2.c" />
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\soft_renderer_2d.cpp" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\vertex_buffer2.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="soft_renderer.def" />
@@ -119,7 +117,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>..\..\..\output\lib\safe99_math_x86d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\output\lib\safe99_core_x86d.lib;..\..\..\output\lib\safe99_math_x86d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -142,7 +140,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>..\..\..\output\lib\safe99_math_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\output\lib\safe99_core_x86.lib;..\..\..\output\lib\safe99_math_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -161,7 +159,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>..\..\..\output\lib\safe99_math_x64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\output\lib\safe99_core_x64d.lib;..\..\..\output\lib\safe99_math_x64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -184,7 +182,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>..\..\..\output\lib\safe99_math_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\output\lib\safe99_core_x64.lib;..\..\..\output\lib\safe99_math_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>

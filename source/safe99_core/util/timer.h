@@ -16,7 +16,6 @@
 #include <Windows.h>
 
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 
 typedef struct timer
 {

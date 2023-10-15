@@ -1,26 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="safe99_common">
-      <UniqueIdentifier>{854697fd-80fe-4a2b-b37d-cd65a6338ef6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="private">
       <UniqueIdentifier>{79fc8c70-a4f4-4f95-8b38-fc7f5a8c1603}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\source\safe99_common\assert.h">
-      <Filter>safe99_common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_common\defines.h">
-      <Filter>safe99_common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_common\safe_delete.h">
-      <Filter>safe99_common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_common\types.h">
-      <Filter>safe99_common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\safe99_soft_renderer_2d\i_soft_renderer_2d.h" />
   </ItemGroup>
   <ItemGroup>
@@ -28,6 +13,12 @@
       <Filter>private</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\soft_renderer_2d.cpp">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\vertex_buffer2.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\index_buffer2.c">
       <Filter>private</Filter>
     </ClCompile>
   </ItemGroup>

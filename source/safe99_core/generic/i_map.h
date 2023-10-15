@@ -14,7 +14,6 @@
 #define I_MAP_H
 
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 
 typedef struct map_key_value
 {

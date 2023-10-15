@@ -15,9 +15,7 @@
 
 #include <intrin.h>
 
-#include "safe99_common/assert.h"
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 
 #include "color.h"
 #include "math_defines.h"

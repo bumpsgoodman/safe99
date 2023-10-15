@@ -18,7 +18,11 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define ABS(a) (((a) > 0) ? (a) : -(a))
-#define ROUND(x) ((x) >= 0.0f ? (int)((x) + 0.5f) : (int)((x) - 0.5f))
+
+#define ROUND(x) ((x) >= 0.0f ? (float)((int)((x) + 0.5f)) : (float)((int)((x) - 0.5f)))
+#define FLOOR(x) ((x) >= 0.0f ? (float)((int)(x)) : (float)((int)(x)))
+#define ROUND_INT(x) ((x) >= 0.0f ? (int)((x) + 0.5f) : (int)((x) - 0.5f))
+#define FLOOR_INT(x) ((x) >= 0.0f ? (int)(x) : (int)(x))
 
 START_EXTERN_C
 

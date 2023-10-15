@@ -24,7 +24,6 @@
 #define I_ECS_H
 
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 
 #define ECS_FLAG_ENTITY 0x100000000000000ull
 #define ECS_FLAG_COMPONENT 0x200000000000000ull
@@ -45,7 +44,6 @@ typedef void (*ecs_system_func)(const ecs_view_t*);
 
 // -----------------------------------------------------------------
 
-// 인터페이스 전방 선언
 typedef interface i_ecs i_ecs_t;
 
 typedef struct ecs_view

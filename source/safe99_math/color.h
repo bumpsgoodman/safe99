@@ -14,24 +14,7 @@
 #define COLOR_H
 
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 #include "safe99_math/math_misc.h"
-
-typedef struct color
-{
-    union
-    {
-        struct
-        {
-            float r;
-            float g;
-            float b;
-            float a;
-        };
-
-        float rgba[4];
-    };
-} color_t;
 
 START_EXTERN_C
 

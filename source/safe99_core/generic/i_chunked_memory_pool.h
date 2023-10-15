@@ -14,7 +14,6 @@
 #define I_CHUNKED_MEMORY_POOL_H
 
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 
 typedef interface i_chunked_memory_pool i_chunked_memory_pool_t;
 

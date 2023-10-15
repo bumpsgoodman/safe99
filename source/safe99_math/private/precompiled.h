@@ -19,7 +19,6 @@
 #include <stdint.h>
 #include <Windows.h>
 
-#include "safe99_common/assert.h"
 #include "safe99_common/defines.h"
 
 #endif // PRECOMPILED_H

@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="private">
+      <UniqueIdentifier>{c33b8e55-15c6-435c-b38e-18ab9a17e6c2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\safe99_file_system\private\dll_main.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_file_system\private\precompiled.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_file_system\private\file_system.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_file_system\private\texture2.c">
+      <Filter>private</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\safe99_file_system\private\precompiled.h">
+      <Filter>private</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_file_system\i_file_system.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="file_system.def" />
+  </ItemGroup>
+</Project>

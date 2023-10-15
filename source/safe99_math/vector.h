@@ -15,32 +15,13 @@
 #define VECTOR_H
 
 #include <intrin.h>
-#include <math.h>
 
 #include "safe99_common/defines.h"
 
-ALIGN16 typedef struct vector2
-{
-    float x;
-    float y;
-} vector2_t;
-
-ALIGN16 typedef struct vector3
-{
-    float x;
-    float y;
-    float z;
-} vector3_t;
-
-ALIGN16 typedef struct vector4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-} vector4_t;
-
-typedef __m128 vector_t;
+#define TO_VECTOR(v) (*(vector_t*)(&v))
+#define TO_VECTOR2(v) (*(vector2_t*)(&v))
+#define TO_VECTOR3(v) (*(vector3_t*)(&v))
+#define TO_VECTOR4(v) (*(vector4_t*)(&v))
 
 START_EXTERN_C
 

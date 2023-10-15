@@ -14,7 +14,6 @@
 #define I_FIXED_VECTOR_H
 
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 
 typedef interface i_fixed_vector i_fixed_vector_t;
 

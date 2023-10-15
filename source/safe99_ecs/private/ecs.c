@@ -14,7 +14,6 @@
 
 #include "i_ecs.h"
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 #include "safe99_core/generic/i_chunked_memory_pool.h"
 #include "safe99_core/generic/i_dynamic_vector.h"
 #include "safe99_core/generic/i_map.h"
@@ -154,14 +153,15 @@ void __stdcall create_instance(void** pp_out_instance);
 size_t __stdcall add_ref(i_ecs_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
 
+    ecs_world_t* p_world = (ecs_world_t*)p_this;
     return ++p_world->ref_count;
 }
 
 size_t __stdcall release(i_ecs_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
+
     ecs_world_t* p_world = (ecs_world_t*)p_this;
 
     if (--p_world->ref_count == 0)
@@ -230,8 +230,8 @@ size_t __stdcall release(i_ecs_t* p_this)
 size_t __stdcall get_ref_count(const i_ecs_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
 
+    ecs_world_t* p_world = (ecs_world_t*)p_this;
     return p_world->ref_count;
 }
 
@@ -360,7 +360,7 @@ bool __stdcall initialize(i_ecs_t* p_this, const size_t num_max_entities, const 
             if (!p_system->p_archetypes->vtbl->initialize(p_system->p_archetypes, sizeof(archetype_t*), pow2_log2c1))
             {
                 // 실패 전까지 초기화된 p_system 해제
-                for (size_t j = 0; j <= i; ++j)
+                for (size_t j = 0; j < i; ++j)
                 {
                     destroy_dynamic_vector(p_world->pa_systems[j].p_archetypes);
                 }

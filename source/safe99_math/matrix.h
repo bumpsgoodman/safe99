@@ -16,22 +16,6 @@
 #include "math_misc.h"
 #include "vector.h"
 
-ALIGN16 typedef struct matrix
-{
-    union
-    {
-        struct
-        {
-            vector_t r0;
-            vector_t r1;
-            vector_t r2;
-            vector_t r3;
-        };
-
-        vector_t r[4];
-    };
-} matrix_t;
-
 static const vector_t s_identity_r0 = { 1.0f, 0.0f, 0.0f, 0.0f };
 static const vector_t s_identity_r1 = { 0.0f, 1.0f, 0.0f, 0.0f };
 static const vector_t s_identity_r2 = { 0.0f, 0.0f, 1.0f, 0.0f };

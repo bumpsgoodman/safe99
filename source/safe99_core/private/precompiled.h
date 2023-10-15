@@ -21,10 +21,7 @@
 #include <stdlib.h>
 #include <Windows.h>
 
-#include "safe99_common/assert.h"
-#include "safe99_common/safe_delete.h"
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 
 #include "util/hash_function.h"
 #include "util/timer.h"

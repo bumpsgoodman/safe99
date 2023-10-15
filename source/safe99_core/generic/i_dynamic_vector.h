@@ -14,7 +14,6 @@
 #define I_DYNAMIC_VECTOR_H
 
 #include "safe99_common/defines.h"
-#include "safe99_common/types.h"
 
 typedef interface i_dynamic_vector i_dynamic_vector_t;
 
