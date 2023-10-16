@@ -322,7 +322,6 @@ static void __stdcall create_static_memory_pool(i_static_memory_pool_t** pp_out_
         ASSERT(false, "Failed to malloc pool");
         *pp_out_static_memory_pool = NULL;
     }
-    memset(pa_pool, 0, sizeof(static_memory_pool_t));
 
     pa_pool->base.vtbl = &vtbl;
 

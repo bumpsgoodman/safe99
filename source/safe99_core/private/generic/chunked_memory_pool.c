@@ -307,7 +307,6 @@ static void __stdcall create_chunked_memory_pool(i_chunked_memory_pool_t** pp_ou
         ASSERT(false, "Failed to malloc pool");
         *pp_out_chunked_memory_pool = NULL;
     }
-    memset(pa_pool, 0, sizeof(chunked_memory_pool_t));
 
     pa_pool->base.vtbl = &vtbl;
 

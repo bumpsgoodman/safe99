@@ -1435,7 +1435,6 @@ void __stdcall create_instance(void** pp_out_instance)
         ASSERT(false, "Failed to malloc world");
         *pp_out_instance = NULL;
     }
-    memset(pa_world, 0, sizeof(ecs_world_t));
 
     pa_world->base.vtbl = &vtbl;
     pa_world->ref_count = 1;

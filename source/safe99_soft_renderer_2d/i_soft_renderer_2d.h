@@ -79,7 +79,7 @@ typedef interface i_soft_renderer_2d_vtbl
                                                      const uint_t* p_indices, const size_t num_indices,
                                                      i_index_buffer2_t** pp_out_index_buffer);
 
-    void        (__stdcall*     draw_mesh)(i_soft_renderer_2d_t* p_this, const mesh2_t* p_mesh, const matrix_t world);
+    void        (__stdcall*     draw_mesh)(i_soft_renderer_2d_t* p_this, const mesh2_t* p_mesh, const matrix_t* p_world);
 } i_soft_renderer_2d_vtbl_t;
 
 typedef interface i_soft_renderer_2d

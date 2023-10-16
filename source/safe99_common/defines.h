@@ -192,10 +192,8 @@ typedef interface i_index_buffer2
 typedef struct mesh2
 {
     i_vertex_buffer2_t* p_vertex_buffer;
-    i_index_buffer2_t** pp_index_buffers;
-    i_texture2_t** pp_textures;
-
-    size_t num_faces;
+    i_index_buffer2_t* p_index_buffer;
+    i_texture2_t* p_texture;
 } mesh2_t;
 
 #endif // DEFINES_H
