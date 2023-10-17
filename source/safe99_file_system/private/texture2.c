@@ -38,31 +38,31 @@ static size_t __stdcall get_ref_count(const i_texture2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    texture2_t* p_texture = (texture2_t*)p_this;
+    const texture2_t* p_texture = (texture2_t*)p_this;
     return p_texture->ref_count;
 }
 
-static size_t __stdcall get_width(i_texture2_t* p_this)
+static size_t __stdcall get_width(const i_texture2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    texture2_t* p_texture = (texture2_t*)p_this;
+    const texture2_t* p_texture = (texture2_t*)p_this;
     return p_texture->width;
 }
 
-static size_t __stdcall get_height(i_texture2_t* p_this)
+static size_t __stdcall get_height(const i_texture2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    texture2_t* p_texture = (texture2_t*)p_this;
+    const texture2_t* p_texture = (texture2_t*)p_this;
     return p_texture->height;
 }
 
-static const char* __stdcall get_bitmap(i_texture2_t* p_this)
+static const char* __stdcall get_bitmap(const i_texture2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    texture2_t* p_texture = (texture2_t*)p_this;
+    const texture2_t* p_texture = (texture2_t*)p_this;
     return p_texture->pa_bitmap;
 }
 

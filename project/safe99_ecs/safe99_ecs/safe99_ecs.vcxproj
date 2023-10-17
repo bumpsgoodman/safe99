@@ -121,7 +121,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>..\..\..\output\lib\safe99_core_x86d.lib;..\..\..\output\lib\safe99_math_x86d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x86d.lib;..\..\..\output\lib\safe99_math_x86d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>ecs.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -144,7 +144,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>..\..\..\output\lib\safe99_core_x86.lib;..\..\..\output\lib\safe99_math_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x86.lib;..\..\..\output\lib\safe99_math_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>ecs.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -163,7 +163,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>..\..\..\output\lib\safe99_core_x64d.lib;..\..\..\output\lib\safe99_math_x64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x64d.lib;..\..\..\output\lib\safe99_math_x64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>ecs.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -186,7 +186,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>..\..\..\output\lib\safe99_core_x64.lib;..\..\..\output\lib\safe99_math_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x64.lib;..\..\..\output\lib\safe99_math_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>ecs.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>

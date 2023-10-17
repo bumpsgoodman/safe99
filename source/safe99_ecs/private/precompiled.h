@@ -26,11 +26,11 @@
 
 #include "safe99_common/defines.h"
 
-#include "safe99_core/generic/i_chunked_memory_pool.h"
-#include "safe99_core/generic/i_dynamic_vector.h"
-#include "safe99_core/generic/i_map.h"
-#include "safe99_core/generic/list.h"
-#include "safe99_core/util/hash_function.h"
+#include "safe99_generic/i_chunked_memory_pool.h"
+#include "safe99_generic/i_dynamic_vector.h"
+#include "safe99_generic/i_map.h"
+#include "safe99_generic/list.h"
+#include "safe99_generic/util/hash_function.h"
 
 #include "safe99_math/math.h"
 

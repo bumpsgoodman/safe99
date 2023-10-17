@@ -39,7 +39,7 @@ static size_t __stdcall release(i_vertex_buffer2_t* p_this)
     return p_buffer->ref_count;
 }
 
-static size_t __stdcall get_ref_count(i_vertex_buffer2_t* p_this)
+static size_t __stdcall get_ref_count(const i_vertex_buffer2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -47,7 +47,7 @@ static size_t __stdcall get_ref_count(i_vertex_buffer2_t* p_this)
     return p_buffer->ref_count;
 }
 
-static const vector2_t* __stdcall get_positions(i_vertex_buffer2_t* p_this)
+static const vector2_t* __stdcall get_positions(const i_vertex_buffer2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -55,7 +55,7 @@ static const vector2_t* __stdcall get_positions(i_vertex_buffer2_t* p_this)
     return p_buffer->pa_positions;
 }
 
-static const color_t* __stdcall get_colors_or_null(i_vertex_buffer2_t* p_this)
+static const color_t* __stdcall get_colors_or_null(const i_vertex_buffer2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -63,7 +63,7 @@ static const color_t* __stdcall get_colors_or_null(i_vertex_buffer2_t* p_this)
     return p_buffer->pa_colors;
 }
 
-static const vector2_t* __stdcall get_tex_coord_or_null(i_vertex_buffer2_t* p_this)
+static const vector2_t* __stdcall get_tex_coord_or_null(const i_vertex_buffer2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -71,7 +71,7 @@ static const vector2_t* __stdcall get_tex_coord_or_null(i_vertex_buffer2_t* p_th
     return p_buffer->pa_texcoords;
 }
 
-static size_t __stdcall get_num_vertices(i_vertex_buffer2_t* p_this)
+static size_t __stdcall get_num_vertices(const i_vertex_buffer2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -79,10 +79,17 @@ static size_t __stdcall get_num_vertices(i_vertex_buffer2_t* p_this)
     return p_buffer->num_vertices;
 }
 
-void __stdcall initialize_vertex_buffer2_private(vertex_buffer2_t* p_buffer)
+void __stdcall create_vertex_buffer2_private(i_vertex_buffer2_t** pp_out_vertex_buffer)
 {
-    ASSERT(p_buffer != NULL, "p_buffer == NULL");
-    
+    ASSERT(pp_out_vertex_buffer != NULL, "pp_out_vertex_buffer == NULL");
+
+    vertex_buffer2_t* p_vertex_buffer = (vertex_buffer2_t*)malloc(sizeof(vertex_buffer2_t));
+    if (p_vertex_buffer == NULL)
+    {
+        ASSERT(false, "Failed to malloc vertex buffer");
+        *pp_out_vertex_buffer = NULL;
+    }
+
     static i_vertex_buffer2_vtbl_t vtbl =
     {
         add_ref,
@@ -96,8 +103,8 @@ void __stdcall initialize_vertex_buffer2_private(vertex_buffer2_t* p_buffer)
         get_num_vertices
     };
 
-    memset(p_buffer, 0, sizeof(vertex_buffer2_t));
+    p_vertex_buffer->base.vtbl = &vtbl;
+    p_vertex_buffer->ref_count = 1;
 
-    p_buffer->base.vtbl = &vtbl;
-    p_buffer->ref_count = 1;
+    *pp_out_vertex_buffer = (i_vertex_buffer2_t*)p_vertex_buffer;
 }

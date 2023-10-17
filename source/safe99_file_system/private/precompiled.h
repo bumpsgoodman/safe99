@@ -24,7 +24,7 @@
 
 #include "safe99_common/defines.h"
 
-#include "safe99_core/util/hash_function.h"
-#include "safe99_core/generic/i_map.h"
+#include "safe99_generic/i_map.h"
+#include "safe99_generic/util/hash_function.h"
 
 #endif // PRECOMPILED_H

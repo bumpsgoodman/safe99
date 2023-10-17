@@ -34,7 +34,7 @@ static size_t __stdcall release(i_index_buffer2_t* p_this)
     return p_buffer->ref_count;
 }
 
-static size_t __stdcall get_ref_count(i_index_buffer2_t* p_this)
+static size_t __stdcall get_ref_count(const i_index_buffer2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -42,7 +42,7 @@ static size_t __stdcall get_ref_count(i_index_buffer2_t* p_this)
     return p_buffer->ref_count;
 }
 
-static const uint_t* __stdcall get_indices(i_index_buffer2_t* p_this)
+static const uint_t* __stdcall get_indices(const i_index_buffer2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -50,17 +50,24 @@ static const uint_t* __stdcall get_indices(i_index_buffer2_t* p_this)
     return p_buffer->pa_indices;
 }
 
-static size_t __stdcall get_num_indices(i_index_buffer2_t* p_this)
+static size_t __stdcall get_num_indices(const i_index_buffer2_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
-    index_buffer2_t* p_buffer = (index_buffer2_t*)p_this;
 
+    index_buffer2_t* p_buffer = (index_buffer2_t*)p_this;
     return p_buffer->num_indices;
 }
 
-void  __stdcall initialize_index_buffer2_private(index_buffer2_t* p_buffer)
+void __stdcall create_index_buffer2_private(i_index_buffer2_t** pp_out_index_buffer)
 {
-    ASSERT(p_buffer != NULL, "p_buffer == NULL");
+    ASSERT(pp_out_index_buffer != NULL, "pp_out_index_buffer == NULL");
+
+    index_buffer2_t* p_index_buffer = (index_buffer2_t*)malloc(sizeof(index_buffer2_t));
+    if (p_index_buffer == NULL)
+    {
+        ASSERT(false, "Failed to malloc index buffer");
+        *pp_out_index_buffer = NULL;
+    }
 
     static i_index_buffer2_vtbl_t vtbl =
     {
@@ -72,8 +79,8 @@ void  __stdcall initialize_index_buffer2_private(index_buffer2_t* p_buffer)
         get_num_indices
     };
 
-    memset(p_buffer, 0, sizeof(index_buffer2_t));
+    p_index_buffer->base.vtbl = &vtbl;
+    p_index_buffer->ref_count = 1;
 
-    p_buffer->base.vtbl = &vtbl;
-    p_buffer->ref_count = 1;
+    *pp_out_index_buffer = (i_index_buffer2_t*)p_index_buffer;
 }

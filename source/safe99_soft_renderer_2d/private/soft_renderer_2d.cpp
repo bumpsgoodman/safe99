@@ -10,12 +10,14 @@
 // 
 //***************************************************************************
 
-#include <math.h>
+#include <ddraw.h>
 #include <stdlib.h>
 
 #include "i_soft_renderer_2d.h"
-#include "safe99_core/generic/i_static_memory_pool.h"
 #include "safe99_math/math.h"
+
+#pragma comment(lib, "ddraw.lib")
+#pragma comment(lib, "dxguid.lib")
 
 #define GET_ALPHA(argb) ((argb) & 0xff000000)
 #define GET_SEMANTIC(semantic) ((semantic) & UINT_MAX)
@@ -41,6 +43,16 @@ typedef struct index_buffer2
     size_t num_indices;
 } index_buffer2_t;
 
+typedef struct mesh2
+{
+    i_mesh2_t base;
+    size_t ref_count;
+
+    i_vertex_buffer2_t* p_vertex_buffer;
+    i_index_buffer2_t* p_index_buffer;
+    i_texture2_t* p_texture;
+} mesh2_t;
+
 typedef struct soft_renderer_2d
 {
     i_soft_renderer_2d_t base;
@@ -61,9 +73,6 @@ typedef struct soft_renderer_2d
 
     char* p_locked_back_buffer;
     size_t locked_back_buffer_pitch;
-
-    i_static_memory_pool_t* p_vertex_buffer_pool;
-    i_static_memory_pool_t* p_index_buffer_pool;
 } soft_renderer_2d_t;
 
 enum
@@ -74,8 +83,9 @@ enum
     REGION_BOTTOM = 0x0100
 };
 
-extern "C" void  __stdcall initialize_vertex_buffer2_private(vertex_buffer2_t* p_buffer);
-extern "C" void  __stdcall initialize_index_buffer2_private(index_buffer2_t* p_buffer);
+extern "C" void __stdcall create_vertex_buffer2_private(i_vertex_buffer2_t** pp_out_vertex_buffer);
+extern "C" void __stdcall create_index_buffer2_private(i_index_buffer2_t** pp_out_index_buffer);
+extern "C" void __stdcall create_mesh2_private(i_mesh2_t * *pp_out_mesh);
 
 static bool __stdcall create_back_buffer(soft_renderer_2d_t* p_renderer, const size_t width, const size_t height);
 
@@ -99,9 +109,6 @@ static size_t __stdcall release(i_soft_renderer_2d_t* p_this)
     soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     if (--p_renderer->ref_count == 0)
     {
-        destroy_static_memory_pool(p_renderer->p_index_buffer_pool);
-        destroy_static_memory_pool(p_renderer->p_vertex_buffer_pool);
-
         SAFE_RELEASE_MS(p_renderer->p_clipper);
         SAFE_RELEASE_MS(p_renderer->p_back);
         SAFE_RELEASE_MS(p_renderer->p_primary);
@@ -109,6 +116,7 @@ static size_t __stdcall release(i_soft_renderer_2d_t* p_this)
         SAFE_RELEASE_MS(p_renderer->p_ddraw);
 
         SAFE_FREE(p_renderer);
+
         return 0;
     }
 
@@ -119,7 +127,7 @@ static size_t __stdcall get_ref_count(const i_soft_renderer_2d_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     return p_renderer->ref_count;
 }
 
@@ -222,24 +230,6 @@ static bool __stdcall initialize(i_soft_renderer_2d_t* p_this, HWND hwnd, const 
     p_renderer->p_clipper->SetHWnd(0, hwnd);
     p_renderer->p_primary->SetClipper(p_renderer->p_clipper);
 
-    i_static_memory_pool* p_pool;
-
-    create_static_memory_pool(&p_pool);
-    if (!p_pool->vtbl->initialize(p_pool, sizeof(vertex_buffer2_t), num_max_objects, 1))
-    {
-        ASSERT(false, "Failed to init vertex buffer pool");
-        goto failed_init;
-    }
-    p_renderer->p_vertex_buffer_pool = p_pool;
-
-    create_static_memory_pool(&p_pool);
-    if (!p_pool->vtbl->initialize(p_pool, sizeof(index_buffer2_t), num_max_objects, 1))
-    {
-        ASSERT(false, "Failed to init index buffer pool");
-        goto failed_init;
-    }
-    p_renderer->p_index_buffer_pool = p_pool;
-
     return true;
 
 failed_init:
@@ -252,7 +242,7 @@ static size_t __stdcall get_width(const i_soft_renderer_2d_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     return p_renderer->window_width;
 }
 
@@ -260,7 +250,7 @@ static size_t __stdcall get_height(const i_soft_renderer_2d_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     return p_renderer->window_height;
 }
 
@@ -313,14 +303,14 @@ static void __stdcall on_draw(i_soft_renderer_2d_t* p_this)
     p_renderer->p_primary->Blt(&p_renderer->window_rect, p_renderer->p_back, NULL, DDBLT_WAIT, NULL);
 }
 
-static void __stdcall clear(i_soft_renderer_2d_t* p_this, const uint32_t argb)
+static void __stdcall clear(const i_soft_renderer_2d_t* p_this, const uint32_t argb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
 
-    if (GET_ALPHA(argb) == 0)
+    if (GET_ALPHA(argb) == 0xff)
     {
         return;
     }
@@ -336,11 +326,11 @@ static void __stdcall clear(i_soft_renderer_2d_t* p_this, const uint32_t argb)
     }
 }
 
-static void __stdcall draw_pixel(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const uint32_t argb)
+static void __stdcall draw_pixel(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const uint32_t argb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
 
     if ((size_t)dx >= p_renderer->window_width
@@ -349,7 +339,7 @@ static void __stdcall draw_pixel(i_soft_renderer_2d_t* p_this, const int dx, con
         return;
     }
 
-    if (GET_ALPHA(argb) == 0)
+    if (GET_ALPHA(argb) == 0xff)
     {
         return;
     }
@@ -358,14 +348,14 @@ static void __stdcall draw_pixel(i_soft_renderer_2d_t* p_this, const int dx, con
     *(uint32_t*)dst = argb;
 }
 
-static void __stdcall draw_rectangle(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const size_t width, const size_t height, const uint32_t argb)
+static void __stdcall draw_rectangle(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const size_t width, const size_t height, const uint32_t argb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
 
-    if (GET_ALPHA(argb) == 0)
+    if (GET_ALPHA(argb) == 0xff)
     {
         return;
     }
@@ -464,16 +454,16 @@ static bool __stdcall clip_line(int* p_out_sx, int* p_out_sy, int* p_out_dx, int
     }
 }
 
-static void __stdcall draw_line(i_soft_renderer_2d_t* p_this, const int sx, const int sy, const int dx, const int dy, const uint32_t argb)
+static void __stdcall draw_line(const i_soft_renderer_2d_t* p_this, const int sx, const int sy, const int dx, const int dy, const uint32_t argb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    if (GET_ALPHA(argb) == 0)
+    if (GET_ALPHA(argb) == 0xff)
     {
         return;
     }
 
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
 
     const int width = dx - sx;
     const int height = dy - sy;
@@ -552,12 +542,12 @@ static void __stdcall draw_line(i_soft_renderer_2d_t* p_this, const int sx, cons
     draw_pixel(p_this, x, y, argb);
 }
 
-static void __stdcall draw_bitmap(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const int sx, const int sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)
+static void __stdcall draw_bitmap(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const int sx, const int sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_bitmap != NULL, "bitmap == NULL");
 
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
 
     const size_t start_x = MAX(dx, 0);
@@ -574,7 +564,7 @@ static void __stdcall draw_bitmap(i_soft_renderer_2d_t* p_this, const int dx, co
     {
         for (size_t x = 0; x < dst_width; ++x)
         {
-            if (GET_ALPHA(*(uint32_t*)src) != 0)
+            if (GET_ALPHA(*(uint32_t*)src) != 0xff)
             {
                 *(uint32_t*)dst = *(uint32_t*)src;
             }
@@ -604,11 +594,15 @@ static bool __stdcall create_vertex_buffer(const i_soft_renderer_2d_t* p_this,
     ASSERT(pp_out_vertex_buffer != NULL, "pp_out_vertex_buffer == NULL");
 
     const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
-
-    vertex_buffer2_t* p_buffer = (vertex_buffer2_t*)p_renderer->p_vertex_buffer_pool->vtbl->alloc_or_null(p_renderer->p_vertex_buffer_pool);
-    initialize_vertex_buffer2_private(p_buffer);
-
     const char* p_vertex = (char*)p_vertices;
+
+    i_vertex_buffer2_t* p_vertex_buffer;
+    create_vertex_buffer2_private(&p_vertex_buffer);
+
+    vertex_buffer2_t* p_buffer = (vertex_buffer2_t*)p_vertex_buffer;
+    p_buffer->pa_texcoords = NULL;
+    p_buffer->pa_colors = NULL;
+    p_buffer->pa_positions = NULL;
 
     // 버텍스 크기 구하기 및 할당
     size_t vertex_size = 0;
@@ -692,7 +686,7 @@ failed_malloc_colors:
     SAFE_FREE(p_buffer->pa_positions);
 
 failed_malloc_positions:
-    p_renderer->p_vertex_buffer_pool->vtbl->dealloc(p_renderer->p_vertex_buffer_pool, p_buffer);
+    p_vertex_buffer->vtbl->release(p_vertex_buffer);
     *pp_out_vertex_buffer = NULL;
     return false;
 }
@@ -707,8 +701,10 @@ static bool __stdcall create_index_buffer(const i_soft_renderer_2d_t* p_this,
 
     const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
 
-    index_buffer2_t* p_buffer = (index_buffer2_t*)p_renderer->p_index_buffer_pool->vtbl->alloc_or_null(p_renderer->p_index_buffer_pool);
-    initialize_index_buffer2_private(p_buffer);
+    i_index_buffer2_t* p_index_buffer;
+    create_index_buffer2_private(&p_index_buffer);
+
+    index_buffer2_t* p_buffer = (index_buffer2_t*)p_index_buffer;
 
     p_buffer->pa_indices = (uint_t*)malloc(sizeof(uint_t) * num_indices);
     if (p_buffer->pa_indices == NULL)
@@ -724,17 +720,52 @@ static bool __stdcall create_index_buffer(const i_soft_renderer_2d_t* p_this,
     return true;
 }
 
-static void __stdcall draw_mesh(i_soft_renderer_2d_t* p_this, const mesh2_t* p_mesh, const matrix_t* p_world)
+bool __stdcall create_mesh (const i_soft_renderer_2d_t* p_this,
+                            i_vertex_buffer2_t* p_vertex_buffer,
+                            i_index_buffer2_t* p_index_buffer,
+                            i_texture2_t* p_texture,
+                            i_mesh2_t** pp_out_mesh)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+    ASSERT(p_vertex_buffer != NULL, "p_vertex_buffer == NULL");
+    ASSERT(p_index_buffer != NULL, "p_index_buffer == NULL");
+    ASSERT(p_texture != NULL, "p_texture == NULL");
+    ASSERT(pp_out_mesh != NULL, "pp_out_mesh == NULL");
+
+    mesh2_t* p_mesh;
+    create_mesh2_private((i_mesh2_t**)&p_mesh);
+
+    if (p_mesh == NULL)
+    {
+        ASSERT(false, "Failed to create mesh");
+        *pp_out_mesh = NULL;
+        return false;
+    }
+
+    p_mesh->p_vertex_buffer = p_vertex_buffer;
+    p_mesh->p_index_buffer = p_index_buffer;
+    p_mesh->p_texture = p_texture;
+
+    p_vertex_buffer->vtbl->add_ref(p_vertex_buffer);
+    p_index_buffer->vtbl->add_ref(p_index_buffer);
+    p_texture->vtbl->add_ref(p_texture);
+
+    *pp_out_mesh = (i_mesh2_t*)p_mesh;
+
+    return true;
+}
+
+static void __stdcall draw_mesh(const i_soft_renderer_2d_t* p_this, const i_mesh2_t* p_mesh, const matrix_t* p_world, const bool b_wireframe)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_mesh != NULL, "p_mesh == NULL");
 
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
 
     const size_t window_width = p_renderer->window_width;
     const size_t window_height = p_renderer->window_height;
 
-    const vertex_buffer2_t* p_vertex_buffer = (vertex_buffer2_t*)p_mesh->p_vertex_buffer;
+    const vertex_buffer2_t* p_vertex_buffer = (vertex_buffer2_t*)p_mesh->vtbl->get_vertex_buffer(p_mesh);
 
     const vector2_t* p_positions = p_vertex_buffer->pa_positions;
     const color_t* p_colors = p_vertex_buffer->pa_colors;
@@ -750,129 +781,149 @@ static void __stdcall draw_mesh(i_soft_renderer_2d_t* p_this, const mesh2_t* p_m
         return;
     }
 
-    const index_buffer2_t* p_index_buffer = (index_buffer2_t*)p_mesh->p_index_buffer;
+    const index_buffer2_t* p_index_buffer = (index_buffer2_t*)p_mesh->vtbl->get_index_buffer(p_mesh);
 
     const uint_t* p_indices = p_index_buffer->pa_indices;
 
     // texcoords가 들어왔으면 텍스처 불러오기
-    i_texture2_t* p_texture = (b_texcoords) ? p_mesh->p_texture : NULL;
+    i_texture2_t* p_texture = (b_texcoords) ? p_mesh->vtbl->get_texture(p_mesh) : NULL;
 
     const size_t num_triangles = p_index_buffer->num_indices / 3;
     for (size_t j = 0; j < num_triangles; ++j)
     {
         const size_t buffer_index = j * 3;
 
-        vector2_t uv0 = { 0.0f, };
-        vector2_t uv1 = { 0.0f, };
-        vector2_t uv2 = { 0.0f, };
-
-        color_t color0 = { 0.0f, };
-        color_t color1 = { 0.0f, };
-        color_t color2 = { 0.0f, };
-
-        if (b_colors)
-        {
-            memcpy(&color0, &p_colors[p_indices[buffer_index]], sizeof(color_t));
-            memcpy(&color1, &p_colors[p_indices[buffer_index + 1]], sizeof(color_t));
-            memcpy(&color2, &p_colors[p_indices[buffer_index + 2]], sizeof(color_t));
-        }
-            
-        if (b_texcoords)
-        {
-            uv0.x = p_texcoords[p_indices[buffer_index]].x;
-            uv0.y = p_texcoords[p_indices[buffer_index]].y;
-
-            uv1.x = p_texcoords[p_indices[buffer_index + 1]].x;
-            uv1.y = p_texcoords[p_indices[buffer_index + 1]].y;
-
-            uv2.x = p_texcoords[p_indices[buffer_index + 2]].x;
-            uv2.y = p_texcoords[p_indices[buffer_index + 2]].y;
-        }
-
         // 버텍스 셰이더 적용
-        vector_t temp_v0 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index]]), *p_world);
-        vector_t temp_v1 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 1]]), *p_world);
-        vector_t temp_v2 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 2]]), *p_world);
+        const vector_t temp_v0 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index]]), *p_world);
+        const vector_t temp_v1 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 1]]), *p_world);
+        const vector_t temp_v2 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 2]]), *p_world);
 
         vector2_t v0 = to_screen_coord(vector_to_vector2(temp_v0), window_width, window_height);
         vector2_t v1 = to_screen_coord(vector_to_vector2(temp_v1), window_width, window_height);
         vector2_t v2 = to_screen_coord(vector_to_vector2(temp_v2), window_width, window_height);
 
-        v0.x = (float)((int)(v0.x));
-        v0.y = (float)((int)(v0.y));
-
-        v1.x = (float)((int)(v1.x));
-        v1.y = (float)((int)(v1.y));
-
-        v2.x = (float)((int)(v2.x));
-        v2.y = (float)((int)(v2.y));
-
-        vector2_t min;
-        vector2_t max;
-
-        min.x = MIN(MIN(v0.x, v1.x), v2.x);
-        min.y = MIN(MIN(v0.y, v1.y), v2.y);
-        max.x = MAX(MAX(v0.x, v1.x), v2.x);
-        max.y = MAX(MAX(v0.y, v1.y), v2.y);
-
-        const vector_t tv0 = vector2_to_vector(&v0);
-        const vector_t tv1 = vector2_to_vector(&v1);
-        const vector_t tv2 = vector2_to_vector(&v2);
-
-        const float cross = vector_cross2(vector_sub(tv0, tv1), vector_sub(tv1, tv2));
-
-        for (int y = (int)min.y; y <= (int)max.y; ++y)
+        if ((v0.x < 0 || v0.x >= window_width || v0.y < 0 || v0.y >= window_height)
+            && (v1.x < 0 || v1.x >= window_width || v1.y < 0 || v1.y >= window_height)
+            && (v2.x < 0 || v2.x >= window_width || v2.y < 0 || v2.y >= window_height))
         {
-            for (int x = (int)min.x; x <= (int)max.x; ++x)
+            continue;
+        }
+
+        // 와이어프레임 모드
+        if (b_wireframe)
+        {
+            const uint32_t color = 0xff0404f4;
+
+            draw_line(p_this, (int)v0.x, (int)v0.y, (int)v1.x, (int)v1.y, color);
+            draw_line(p_this, (int)v0.x, (int)v0.y, (int)v2.x, (int)v2.y, color);
+            draw_line(p_this, (int)v1.x, (int)v1.y, (int)v2.x, (int)v2.y, color);
+        }
+        else
+        {
+            vector2_t uv0 = { 0.0f, };
+            vector2_t uv1 = { 0.0f, };
+            vector2_t uv2 = { 0.0f, };
+
+            color_t color0 = { 0.0f, };
+            color_t color1 = { 0.0f, };
+            color_t color2 = { 0.0f, };
+
+            if (b_colors)
             {
-                const vector2_t temp_p = { (float)x, (float)y };
-                const vector_t p = vector2_to_vector(&temp_p);
+                memcpy(&color0, &p_colors[p_indices[buffer_index]], sizeof(color_t));
+                memcpy(&color1, &p_colors[p_indices[buffer_index + 1]], sizeof(color_t));
+                memcpy(&color2, &p_colors[p_indices[buffer_index + 2]], sizeof(color_t));
+            }
 
-                const float area0 = vector_cross2(vector_sub(p, tv2), vector_sub(tv1, tv2));
-                const float area1 = vector_cross2(vector_sub(p, tv0), vector_sub(tv2, tv0));
-                const float area2 = vector_cross2(vector_sub(tv1, tv0), vector_sub(p, tv0));
+            if (b_texcoords)
+            {
+                uv0.x = p_texcoords[p_indices[buffer_index]].x;
+                uv0.y = p_texcoords[p_indices[buffer_index]].y;
 
-                if (area0 < 0.0f || area1 < 0.0f || area2 < 0.0f)
+                uv1.x = p_texcoords[p_indices[buffer_index + 1]].x;
+                uv1.y = p_texcoords[p_indices[buffer_index + 1]].y;
+
+                uv2.x = p_texcoords[p_indices[buffer_index + 2]].x;
+                uv2.y = p_texcoords[p_indices[buffer_index + 2]].y;
+            }
+
+            v0.x = (float)((int)(v0.x));
+            v0.y = (float)((int)(v0.y));
+
+            v1.x = (float)((int)(v1.x));
+            v1.y = (float)((int)(v1.y));
+
+            v2.x = (float)((int)(v2.x));
+            v2.y = (float)((int)(v2.y));
+
+            vector2_t min;
+            vector2_t max;
+
+            min.x = MIN(MIN(v0.x, v1.x), v2.x);
+            min.y = MIN(MIN(v0.y, v1.y), v2.y);
+            max.x = MAX(MAX(v0.x, v1.x), v2.x);
+            max.y = MAX(MAX(v0.y, v1.y), v2.y);
+
+            const vector_t tv0 = vector2_to_vector(&v0);
+            const vector_t tv1 = vector2_to_vector(&v1);
+            const vector_t tv2 = vector2_to_vector(&v2);
+
+            const float cross = vector_cross2(vector_sub(tv0, tv1), vector_sub(tv1, tv2));
+
+            for (int y = (int)min.y; y <= (int)max.y; ++y)
+            {
+                for (int x = (int)min.x; x <= (int)max.x; ++x)
                 {
-                    continue;
-                }
+                    const vector2_t temp_p = { (float)x, (float)y };
+                    const vector_t p = vector2_to_vector(&temp_p);
 
-                const float area_sum = area0 + area1 + area2;
+                    const float area0 = vector_cross2(vector_sub(p, tv2), vector_sub(tv1, tv2));
+                    const float area1 = vector_cross2(vector_sub(p, tv0), vector_sub(tv2, tv0));
+                    const float area2 = vector_cross2(vector_sub(tv1, tv0), vector_sub(p, tv0));
 
-                const float w0 = area0 / area_sum;
-                const float w1 = area1 / area_sum;
-                const float w2 = 1 - w0 - w1;
+                    if (area0 < 0.0f || area1 < 0.0f || area2 < 0.0f)
+                    {
+                        continue;
+                    }
 
-                if (b_texcoords)
-                {
-                    const vector2_t target_uv = { uv0.x * w0 + uv1.x * w1 + uv2.x * w2, uv0.y * w0 + uv1.y * w1 + uv2.y * w2 };
+                    const float area_sum = area0 + area1 + area2;
 
-                    const size_t texture_width = p_texture->vtbl->get_width(p_texture);
-                    const size_t texture_height = p_texture->vtbl->get_height(p_texture);
-                    const char* p_bitmap = p_texture->vtbl->get_bitmap(p_texture);
+                    const float w0 = area0 / area_sum;
+                    const float w1 = area1 / area_sum;
+                    const float w2 = 1 - w0 - w1;
 
-                    const size_t image_x = (size_t)(FLOOR(target_uv.x * texture_width)) % texture_width;
-                    const size_t image_y = (size_t)(FLOOR(target_uv.y * texture_height)) % texture_height;
-                    const size_t index = texture_width * (texture_height - (1 + image_y)) + image_x;
+                    if (b_texcoords)
+                    {
+                        const vector2_t target_uv = { uv0.x * w0 + uv1.x * w1 + uv2.x * w2, uv0.y * w0 + uv1.y * w1 + uv2.y * w2 };
 
-                    const uint32_t color = *(uint32_t*)(p_bitmap + index * 4);
-                    draw_pixel(p_this, x, y, color);
-                }
-                else
-                {
-                    vector_t cv0 = vector4_to_vector((vector4_t*)&color0);
-                    vector_t cv1 = vector4_to_vector((vector4_t*)&color1);
-                    vector_t cv2 = vector4_to_vector((vector4_t*)&color2);
+                        const size_t texture_width = p_texture->vtbl->get_width(p_texture);
+                        const size_t texture_height = p_texture->vtbl->get_height(p_texture);
+                        const char* p_bitmap = p_texture->vtbl->get_bitmap(p_texture);
 
-                    cv0 = vector_mul_scalar(cv0, w0);
-                    cv1 = vector_mul_scalar(cv1, w1);
-                    cv2 = vector_mul_scalar(cv2, w2);
+                        const size_t image_x = (size_t)(FLOOR(target_uv.x * texture_width)) % texture_width;
+                        const size_t image_y = (size_t)(FLOOR(target_uv.y * texture_height)) % texture_height;
+                        const size_t index = texture_width * (texture_height - (1 + image_y)) + image_x;
 
-                    const vector_t temp = vector_add(vector_add(cv0, cv1), cv2);
-                    const vector4_t cv = vector_to_vector4(temp);
+                        const uint32_t color = *(uint32_t*)(p_bitmap + index * 4);
+                        draw_pixel(p_this, x, y, color);
+                    }
+                    else
+                    {
+                        vector_t cv0 = vector4_to_vector((vector4_t*)&color0);
+                        vector_t cv1 = vector4_to_vector((vector4_t*)&color1);
+                        vector_t cv2 = vector4_to_vector((vector4_t*)&color2);
 
-                    const color_t color = { cv.x, cv.y, cv.z, 1.0f };
-                    draw_pixel(p_this, x, y, color_to_argb(color));
+                        cv0 = vector_mul_scalar(cv0, w0);
+                        cv1 = vector_mul_scalar(cv1, w1);
+                        cv2 = vector_mul_scalar(cv2, w2);
+
+                        const vector_t temp = vector_add(vector_add(cv0, cv1), cv2);
+                        const vector4_t cv = vector_to_vector4(temp);
+
+                        const color_t color = { cv.x, cv.y, cv.z, 1.0f };
+
+                        draw_pixel(p_this, x, y, color_to_argb(color));
+                    }
                 }
             }
         }
@@ -972,6 +1023,7 @@ void __stdcall create_instance(void** pp_out_instance)
 
         create_vertex_buffer,
         create_index_buffer,
+        create_mesh,
 
         draw_mesh
     };

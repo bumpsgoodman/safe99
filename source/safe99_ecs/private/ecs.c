@@ -14,9 +14,9 @@
 
 #include "i_ecs.h"
 #include "safe99_common/defines.h"
-#include "safe99_core/generic/i_chunked_memory_pool.h"
-#include "safe99_core/generic/i_dynamic_vector.h"
-#include "safe99_core/generic/i_map.h"
+#include "safe99_generic/i_chunked_memory_pool.h"
+#include "safe99_generic/i_dynamic_vector.h"
+#include "safe99_generic/i_map.h"
 
 // 상수 정의
 // -----------------------------------------------------------------
@@ -946,8 +946,8 @@ void* __stdcall get_instances_or_null(const ecs_view_t* p_view, const size_t arc
 
     system_t* p_system = p_world->pa_systems + PURE_ECS_ID(p_view->system);
 
-    archetype_t* p_archetypes = *(archetype_t**)p_system->p_archetypes->vtbl->get_elements_ptr_or_null(p_system->p_archetypes);
-    archetype_t* p_archetype = p_archetypes + archetype_index;
+    archetype_t** pp_archetypes = (archetype_t**)p_system->p_archetypes->vtbl->get_elements_ptr_or_null(p_system->p_archetypes);
+    archetype_t* p_archetype = pp_archetypes[archetype_index];
     const size_t component_index = *(size_t*)p_archetype->p_component_map->vtbl->get_value_or_null(p_archetype->p_component_map, &component, sizeof(ecs_id_t));
 
     i_dynamic_vector_t* p_instances = p_archetype->ppa_instances_array[component_index];
@@ -967,8 +967,8 @@ size_t __stdcall get_num_instances(const ecs_view_t* p_view, const size_t archet
 
     system_t* p_system = p_world->pa_systems + PURE_ECS_ID(p_view->system);
 
-    archetype_t* p_archetypes = *(archetype_t**)p_system->p_archetypes->vtbl->get_elements_ptr_or_null(p_system->p_archetypes);
-    archetype_t* p_archetype = p_archetypes + archetype_index;
+    archetype_t** pp_archetypes = (archetype_t**)p_system->p_archetypes->vtbl->get_elements_ptr_or_null(p_system->p_archetypes);
+    archetype_t* p_archetype = pp_archetypes[archetype_index];
 
     return p_archetype->num_instances;
 }
@@ -986,8 +986,8 @@ void* __stdcall get_entities_or_null(const ecs_view_t* p_view, const size_t arch
 
     system_t* p_system = p_world->pa_systems + PURE_ECS_ID(p_view->system);
 
-    archetype_t* p_archetypes = *(archetype_t**)p_system->p_archetypes->vtbl->get_elements_ptr_or_null(p_system->p_archetypes);
-    archetype_t* p_archetype = p_archetypes + archetype_index;
+    archetype_t** pp_archetypes = (archetype_t**)p_system->p_archetypes->vtbl->get_elements_ptr_or_null(p_system->p_archetypes);
+    archetype_t* p_archetype = pp_archetypes[archetype_index];
 
     return p_archetype->p_entities->vtbl->get_elements_ptr_or_null(p_archetype->p_entities);
 }
@@ -1089,9 +1089,14 @@ static bool create_archetype(ecs_world_t* p_world, const ecs_mask_t* p_mask, arc
     for (size_t i = 0; i < p_world->p_registered_systems->vtbl->get_num_elements(p_world->p_registered_systems); ++i)
     {
         system_t* p_system = p_world->pa_systems + i;
-        if (p_system->mask.hash == p_archetype->mask.hash)
+
+        for (size_t j = 0; j < num_masks; ++j)
         {
-            p_system->p_archetypes->vtbl->push_back(p_system->p_archetypes, &p_archetype, sizeof(archetype_t*));
+            const uint64_t mask = p_system->mask.p_masks[j] & p_archetype->mask.p_masks[j];
+            if (mask > 0 && mask == p_system->mask.p_masks[j])
+            {
+                p_system->p_archetypes->vtbl->push_back(p_system->p_archetypes, &p_archetype, sizeof(archetype_t*));
+            }
         }
     }
 

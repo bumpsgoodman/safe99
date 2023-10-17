@@ -23,15 +23,15 @@
 
 #include "safe99_common/defines.h"
 
+#include "i_chunked_memory_pool.h"
+#include "i_dynamic_vector.h"
+#include "i_fixed_vector.h"
+#include "i_map.h"
+#include "i_static_memory_pool.h"
+#include "list.h"
+
 #include "util/hash_function.h"
 #include "util/timer.h"
 #include "util/stop_watch.h"
-
-#include "generic/i_chunked_memory_pool.h"
-#include "generic/i_dynamic_vector.h"
-#include "generic/i_fixed_vector.h"
-#include "generic/i_map.h"
-#include "generic/i_static_memory_pool.h"
-#include "generic/list.h"
 
 #endif // PRECOMPILED_H

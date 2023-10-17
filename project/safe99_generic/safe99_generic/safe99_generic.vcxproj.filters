@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="private">
+      <UniqueIdentifier>{60bc080c-e42b-4cb0-b7b1-734bec05b2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{3184faa1-e649-4c29-8e26-4357e5cc24e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private\util">
+      <UniqueIdentifier>{d3bdd8ab-4b24-409c-8658-7499303ee83f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\safe99_generic\i_chunked_memory_pool.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\i_dynamic_vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\i_fixed_vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\list.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\i_map.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\i_static_memory_pool.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\private\precompiled.h">
+      <Filter>private</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\util\hash_function.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\util\stop_watch.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\util\timer.h">
+      <Filter>util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\map.c" />
+    <ClCompile Include="..\..\..\source\safe99_generic\private\chunked_memory_pool.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\dll_main.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\dynamic_vector.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\fixed_vector.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\precompiled.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\static_memory_pool.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\list.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\util\hash_function.c">
+      <Filter>private\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\util\stop_watch.c">
+      <Filter>private\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\util\timer.c">
+      <Filter>private\util</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

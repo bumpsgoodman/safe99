@@ -56,7 +56,7 @@ static size_t __stdcall get_ref_count(const i_file_system_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    file_system_t* p_file_system = (file_system_t*)p_this;
+    const file_system_t* p_file_system = (file_system_t*)p_this;
     return p_file_system->ref_count;
 }
 
@@ -79,13 +79,13 @@ failed_init_registered_file:
     return false;
 }
 
-static bool __stdcall load_a8r8g8b8_dds(i_file_system_t* p_this, const char* filename, i_texture2_t** pp_out_texture2)
+static bool __stdcall load_a8r8g8b8_dds(const i_file_system_t* p_this, const char* filename, i_texture2_t** pp_out_texture2)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(filename != NULL, "filename == NULL");
     ASSERT(pp_out_texture2 != NULL, "pp_out_texture2 == NULL");
 
-    file_system_t* p_file_system = (file_system_t*)p_this;
+    const file_system_t* p_file_system = (file_system_t*)p_this;
 
     const uint32_t hash = hash32_fnv1a(filename, strlen(filename));
 

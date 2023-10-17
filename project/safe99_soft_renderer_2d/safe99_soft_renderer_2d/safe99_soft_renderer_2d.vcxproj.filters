@@ -21,6 +21,9 @@
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\index_buffer2.c">
       <Filter>private</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\mesh2.c">
+      <Filter>private</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="soft_renderer.def" />

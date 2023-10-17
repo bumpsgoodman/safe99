@@ -7,7 +7,7 @@ for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
 
 rem -------------------------
 
-call build_core.bat
+call build_generic.bat
 call build_math.bat
 call build_file_system.bat
 call build_soft_renderer_2d.bat

@@ -141,11 +141,11 @@ typedef interface i_texture2_vtbl
 {
     size_t          (__stdcall*     add_ref)(i_texture2_t* p_this);
     size_t          (__stdcall*     release)(i_texture2_t* p_this);
-    size_t          (__stdcall*     get_ref_count)(i_texture2_t* p_this);
+    size_t          (__stdcall*     get_ref_count)(const i_texture2_t* p_this);
 
-    size_t          (__stdcall*     get_width)(i_texture2_t* p_this);
-    size_t          (__stdcall*     get_height)(i_texture2_t* p_this);
-    const char*     (__stdcall*     get_bitmap)(i_texture2_t* p_this);
+    size_t          (__stdcall*     get_width)(const i_texture2_t* p_this);
+    size_t          (__stdcall*     get_height)(const i_texture2_t* p_this);
+    const char*     (__stdcall*     get_bitmap)(const i_texture2_t* p_this);
 } i_texture2_vtbl_t;
 
 typedef interface i_texture2
@@ -158,13 +158,13 @@ typedef interface i_vertex_buffer2_vtbl
 {
     size_t              (__stdcall*     add_ref)(i_vertex_buffer2_t* p_this);
     size_t              (__stdcall*     release)(i_vertex_buffer2_t* p_this);
-    size_t              (__stdcall*     get_ref_count)(i_vertex_buffer2_t* p_this);
+    size_t              (__stdcall*     get_ref_count)(const i_vertex_buffer2_t* p_this);
 
-    const vector2_t*    (__stdcall*     get_positions)(i_vertex_buffer2_t* p_this);
-    const color_t*      (__stdcall*     get_colors_or_null)(i_vertex_buffer2_t* p_this);
-    const vector2_t*    (__stdcall*     get_tex_coord_or_null)(i_vertex_buffer2_t* p_this);
+    const vector2_t*    (__stdcall*     get_positions)(const i_vertex_buffer2_t* p_this);
+    const color_t*      (__stdcall*     get_colors_or_null)(const i_vertex_buffer2_t* p_this);
+    const vector2_t*    (__stdcall*     get_tex_coord_or_null)(const i_vertex_buffer2_t* p_this);
 
-    size_t              (__stdcall*     get_num_vertices)(i_vertex_buffer2_t* p_this);
+    size_t              (__stdcall*     get_num_vertices)(const i_vertex_buffer2_t* p_this);
 } i_vertex_buffer2_vtbl_t;
 
 typedef interface i_vertex_buffer2
@@ -177,11 +177,10 @@ typedef interface i_index_buffer2_vtbl
 {
     size_t          (__stdcall*     add_ref)(i_index_buffer2_t* p_this);
     size_t          (__stdcall*     release)(i_index_buffer2_t* p_this);
-    size_t          (__stdcall*     get_ref_count)(i_index_buffer2_t* p_this);
+    size_t          (__stdcall*     get_ref_count)(const i_index_buffer2_t* p_this);
 
-    const uint_t*   (__stdcall*     get_indices)(i_index_buffer2_t* p_this);
-
-    size_t          (__stdcall*     get_num_indices)(i_index_buffer2_t* p_this);
+    const uint_t*   (__stdcall*     get_indices)(const i_index_buffer2_t* p_this);
+    size_t          (__stdcall*     get_num_indices)(const i_index_buffer2_t* p_this);
 } i_index_buffer2_vtbl_t;
 
 typedef interface i_index_buffer2
@@ -189,11 +188,41 @@ typedef interface i_index_buffer2
     i_index_buffer2_vtbl_t* vtbl;
 } i_index_buffer2_t;
 
-typedef struct mesh2
+typedef interface i_mesh2 i_mesh2_t;
+typedef interface i_mesh2_vtbl
 {
-    i_vertex_buffer2_t* p_vertex_buffer;
-    i_index_buffer2_t* p_index_buffer;
-    i_texture2_t* p_texture;
-} mesh2_t;
+    size_t                  (__stdcall*     add_ref)(i_mesh2_t* p_this);
+    size_t                  (__stdcall*     release)(i_mesh2_t* p_this);
+    size_t                  (__stdcall*     get_ref_count)(const i_mesh2_t* p_this);
+
+    i_vertex_buffer2_t*     (__stdcall*     get_vertex_buffer)(const i_mesh2_t* p_this);
+    i_index_buffer2_t*      (__stdcall*     get_index_buffer)(const i_mesh2_t* p_this);
+    i_texture2_t*           (__stdcall*     get_texture)(const i_mesh2_t* p_this);
+} i_mesh2_vtbl_t;
+
+typedef interface i_mesh2
+{
+    i_mesh2_vtbl_t* vtbl;
+} i_mesh2_t;
+
+// ECS 컴포넌트
+#define ecs_component struct
+
+typedef ecs_component transform2
+{
+    vector2_t position;
+    float rotation;
+    float scale;
+} transform2_t;
+
+typedef struct camera2
+{
+    transform2_t transform;
+
+    vector2_t view_port_left_top;
+    vector2_t view_port_right_bottom;
+
+    matrix_t view_matrix;
+} camera2_t;
 
 #endif // DEFINES_H

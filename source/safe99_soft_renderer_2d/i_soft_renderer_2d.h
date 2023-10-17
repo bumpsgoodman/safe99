@@ -13,13 +13,7 @@
 #ifndef I_SOFT_RENDERER_2D_H
 #define I_SOFT_RENDERER_2D_H
 
-#include <ddraw.h>
-
 #include "safe99_common/defines.h"
-#include "safe99_math/math.h"
-
-#pragma comment(lib, "ddraw.lib")
-#pragma comment(lib, "dxguid.lib")
 
 typedef enum semantic
 {
@@ -53,16 +47,16 @@ typedef interface i_soft_renderer_2d_vtbl
     void        (__stdcall*     end_draw)(i_soft_renderer_2d_t* p_this);
     void        (__stdcall*     on_draw)(i_soft_renderer_2d_t* p_this);
 
-    void        (__stdcall*     clear)(i_soft_renderer_2d_t* p_this, const uint32_t argb);
-    void        (__stdcall*     draw_pixel)(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const uint32_t argb);
-    void        (__stdcall*     draw_rectangle)(i_soft_renderer_2d_t* p_this,
+    void        (__stdcall*     clear)(const i_soft_renderer_2d_t* p_this, const uint32_t argb);
+    void        (__stdcall*     draw_pixel)(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const uint32_t argb);
+    void        (__stdcall*     draw_rectangle)(const i_soft_renderer_2d_t* p_this,
                                                 const int dx, const int dy,
                                                 const size_t width, const size_t height, const uint32_t argb);
-    void        (__stdcall*     draw_line)(i_soft_renderer_2d_t* p_this,
+    void        (__stdcall*     draw_line)(const i_soft_renderer_2d_t* p_this,
                                            const int sx, const int sy,
                                            const int dx, const int dy,
                                            const uint32_t argb);
-    void        (__stdcall*     draw_bitmap)(i_soft_renderer_2d_t* p_this,
+    void        (__stdcall*     draw_bitmap)(const i_soft_renderer_2d_t* p_this,
                                              const int dx, const int dy,
                                              const int sx, const int sy, const size_t sw, const size_t sh,
                                              const size_t width, const size_t height, const char* p_bitmap);
@@ -78,8 +72,13 @@ typedef interface i_soft_renderer_2d_vtbl
     bool        (__stdcall*     create_index_buffer)(const i_soft_renderer_2d_t* p_this,
                                                      const uint_t* p_indices, const size_t num_indices,
                                                      i_index_buffer2_t** pp_out_index_buffer);
+    bool        (__stdcall*     create_mesh)(const i_soft_renderer_2d_t* p_this,
+                                             i_vertex_buffer2_t* p_vertex_buffer,
+                                             i_index_buffer2_t* p_index_buffer,
+                                             i_texture2_t* p_texture,
+                                             i_mesh2_t** pp_out_mesh);
 
-    void        (__stdcall*     draw_mesh)(i_soft_renderer_2d_t* p_this, const mesh2_t* p_mesh, const matrix_t* p_world);
+    void        (__stdcall*     draw_mesh)(const i_soft_renderer_2d_t* p_this, const i_mesh2_t* p_mesh, const matrix_t* p_world, const bool b_wireframe);
 } i_soft_renderer_2d_vtbl_t;
 
 typedef interface i_soft_renderer_2d
