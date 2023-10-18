@@ -29,7 +29,7 @@ static size_t __stdcall release(i_mesh2_t* p_this)
         SAFE_RELEASE(p_mesh->p_index_buffer);
         SAFE_RELEASE(p_mesh->p_vertex_buffer);
 
-        SAFE_FREE(p_mesh);
+        SAFE_FREE(p_this);
 
         return 0;
     }

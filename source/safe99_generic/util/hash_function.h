@@ -17,8 +17,8 @@
 
 START_EXTERN_C
 
-SAFE99_API uint32_t hash32_fnv1a(const char* bytes, const size_t size);
-SAFE99_API uint64_t hash64_fnv1a(const char* bytes, const size_t size);
+SAFE99_API uint32_t __stdcall hash32_fnv1a(const char* bytes, const size_t size);
+SAFE99_API uint64_t __stdcall hash64_fnv1a(const char* bytes, const size_t size);
 
 END_EXTERN_C
 

@@ -32,6 +32,5 @@
 
 #include "util/hash_function.h"
 #include "util/timer.h"
-#include "util/stop_watch.h"
 
 #endif // PRECOMPILED_H

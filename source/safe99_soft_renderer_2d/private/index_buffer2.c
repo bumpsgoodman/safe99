@@ -28,6 +28,8 @@ static size_t __stdcall release(i_index_buffer2_t* p_this)
     {
         SAFE_FREE(p_buffer->pa_indices);
 
+        SAFE_FREE(p_this);
+
         return 0;
     }
 

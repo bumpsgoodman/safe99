@@ -81,6 +81,12 @@ typedef void (__stdcall *create_instance_func)(void**);
 #define ALIGN16 _declspec(align(16))
 #define ALIGN32 _declspec(align(32))
 
+typedef struct timer
+{
+    uint64_t frequency;
+    uint64_t prev_counter;
+} timer_t;
+
 ALIGN16 typedef struct color
 {
     union

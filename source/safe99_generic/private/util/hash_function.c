@@ -12,13 +12,13 @@
 
 #include "precompiled.h"
 
-uint32_t hash32_fnv1a(const char* bytes, const size_t len)
+uint32_t __stdcall hash32_fnv1a(const char* bytes, const size_t length)
 {
     static const uint32_t FNV_PRIME_32 = 16777619U;
     static const uint32_t FNV_OFFSET_32 = 2166136261U;
 
     uint32_t hash = FNV_OFFSET_32;
-    for (uint32_t i = 0; i < len; ++i)
+    for (uint32_t i = 0; i < length; ++i)
     {
         hash = hash * FNV_PRIME_32;
         hash = hash + bytes[i];
@@ -27,7 +27,7 @@ uint32_t hash32_fnv1a(const char* bytes, const size_t len)
     return hash;
 }
 
-uint64_t hash64_fnv1a(const char* bytes, const size_t len)
+uint64_t __stdcall hash64_fnv1a(const char* bytes, const size_t length)
 {
     ASSERT(bytes != NULL, "bytes == NULL");
 
@@ -35,7 +35,7 @@ uint64_t hash64_fnv1a(const char* bytes, const size_t len)
     static const uint64_t FNV_OFFSET_BASIS = 14695981039346656037U;
 
     uint64_t hash = FNV_OFFSET_BASIS;
-    for (size_t i = 0; i < len; ++i)
+    for (size_t i = 0; i < length; ++i)
     {
         hash = hash ^ bytes[i];
         hash = hash * FNV_PRIME;

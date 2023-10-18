@@ -14,12 +14,13 @@
 #include <stdlib.h>
 
 #include "i_soft_renderer_2d.h"
+#include "safe99_generic/util/timer.h"
 #include "safe99_math/math.h"
 
 #pragma comment(lib, "ddraw.lib")
 #pragma comment(lib, "dxguid.lib")
 
-#define GET_ALPHA(argb) ((argb) & 0xff000000)
+#define GET_ALPHA(rgb) ((rgb) & 0xff000000)
 #define GET_SEMANTIC(semantic) ((semantic) & UINT_MAX)
 
 typedef struct vertex_buffer2
@@ -63,8 +64,6 @@ typedef struct soft_renderer_2d
     size_t window_width;
     size_t window_height;
 
-    size_t num_max_objects;
-
     IDirectDraw* p_ddraw;
     IDirectDraw7* p_ddraw7;
     IDirectDrawSurface7* p_primary;
@@ -73,6 +72,11 @@ typedef struct soft_renderer_2d
 
     char* p_locked_back_buffer;
     size_t locked_back_buffer_pitch;
+
+    timer_t fps_timer;
+    size_t frame_count;
+    size_t fps;
+    float delta_time;
 } soft_renderer_2d_t;
 
 enum
@@ -87,7 +91,7 @@ extern "C" void __stdcall create_vertex_buffer2_private(i_vertex_buffer2_t** pp_
 extern "C" void __stdcall create_index_buffer2_private(i_index_buffer2_t** pp_out_index_buffer);
 extern "C" void __stdcall create_mesh2_private(i_mesh2_t * *pp_out_mesh);
 
-static bool __stdcall create_back_buffer(soft_renderer_2d_t* p_renderer, const size_t width, const size_t height);
+static bool __stdcall create_back_buffer_private(soft_renderer_2d_t* p_renderer, const size_t width, const size_t height);
 
 static vector2_t __stdcall to_screen_coord(const vector2_t cartesian_coord, const size_t screen_width, const size_t screen_height);
 static vector2_t __stdcall to_cartesian_coord(const vector2_t screen_coord, const size_t screen_width, const size_t screen_height);
@@ -115,7 +119,7 @@ static size_t __stdcall release(i_soft_renderer_2d_t* p_this)
         SAFE_RELEASE_MS(p_renderer->p_ddraw7);
         SAFE_RELEASE_MS(p_renderer->p_ddraw);
 
-        SAFE_FREE(p_renderer);
+        SAFE_FREE(p_this);
 
         return 0;
     }
@@ -160,17 +164,16 @@ static void __stdcall update_window_size(i_soft_renderer_2d_t* p_this)
     p_renderer->window_width = window_width;
     p_renderer->window_height = window_height;
 
-    create_back_buffer(p_renderer, p_renderer->window_width, p_renderer->window_height);
+    create_back_buffer_private(p_renderer, p_renderer->window_width, p_renderer->window_height);
 }
 
-static bool __stdcall initialize(i_soft_renderer_2d_t* p_this, HWND hwnd, const size_t num_max_objects)
+static bool __stdcall initialize(i_soft_renderer_2d_t* p_this, HWND hwnd)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
     soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
 
     p_renderer->hwnd = hwnd;
-    p_renderer->num_max_objects;
 
     HRESULT hr;
     DDSURFACEDESC2 ddsd = { 0, };
@@ -215,7 +218,7 @@ static bool __stdcall initialize(i_soft_renderer_2d_t* p_this, HWND hwnd, const 
         goto failed_init;
     }
 
-    if (!create_back_buffer(p_renderer, WINDOW_WIDTH, WINDOW_HEIGHT))
+    if (!create_back_buffer_private(p_renderer, WINDOW_WIDTH, WINDOW_HEIGHT))
     {
         ASSERT(false, "Failed to CreateBackBuffer");
         goto failed_init;
@@ -229,6 +232,12 @@ static bool __stdcall initialize(i_soft_renderer_2d_t* p_this, HWND hwnd, const 
     }
     p_renderer->p_clipper->SetHWnd(0, hwnd);
     p_renderer->p_primary->SetClipper(p_renderer->p_clipper);
+
+    p_renderer->fps = 0;
+    p_renderer->delta_time = 0.0f;
+
+    timer_init(&p_renderer->fps_timer);
+    timer_start(&p_renderer->fps_timer);
 
     return true;
 
@@ -301,16 +310,92 @@ static void __stdcall on_draw(i_soft_renderer_2d_t* p_this)
 
     soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     p_renderer->p_primary->Blt(&p_renderer->window_rect, p_renderer->p_back, NULL, DDBLT_WAIT, NULL);
+
+    const float time = timer_get_time(&p_renderer->fps_timer);
+    if (time >= 1000.0f)
+    {
+        p_renderer->delta_time = 1.0f / (float)p_renderer->frame_count;
+        p_renderer->fps = p_renderer->frame_count;
+        p_renderer->frame_count = 0;
+
+        timer_start(&p_renderer->fps_timer);
+    }
+    else
+    {
+        ++p_renderer->frame_count;
+    }
 }
 
-static void __stdcall clear(const i_soft_renderer_2d_t* p_this, const uint32_t argb)
+size_t __stdcall get_fps(const i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    return p_renderer->fps;
+}
+
+float __stdcall get_delta_time(const i_soft_renderer_2d_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    return p_renderer->delta_time;
+}
+
+bool __stdcall begin_gdi(const i_soft_renderer_2d_t* p_this, HDC* p_out_hdc)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+
+    HRESULT hr;
+    HDC hdc;
+
+    hr = p_renderer->p_back->GetDC(&hdc);
+    if (FAILED(hr))
+    {
+        ASSERT(false, "Failed to GetDC");
+        return false;
+    }
+
+    *p_out_hdc = hdc;
+
+    return true;
+}
+
+void __stdcall end_gdi(const i_soft_renderer_2d_t* p_this, const HDC hdc)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+    p_renderer->p_back->ReleaseDC(hdc);
+}
+
+void __stdcall print_text(const i_soft_renderer_2d_t* p_this, const HDC hdc,
+                          const wchar_t* text, const int dx, const int dy, const size_t length, const uint32_t rgb)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
+
+    const uint32_t r = (rgb & 0x00ff0000) >> 16;
+    const uint32_t g = (rgb & 0x0000ff00) >> 8;
+    const uint32_t b = (rgb & 0x000000ff);
+
+    SetTextColor(hdc, RGB(r, g, b));
+    SetBkMode(hdc, TRANSPARENT);
+
+    TextOut(hdc, dx, dy, text, (int)length);
+}
+
+static void __stdcall clear(const i_soft_renderer_2d_t* p_this, const uint32_t rgb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
     const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
 
-    if (GET_ALPHA(argb) == 0xff)
+    if (GET_ALPHA(rgb) == 0x00)
     {
         return;
     }
@@ -321,12 +406,12 @@ static void __stdcall clear(const i_soft_renderer_2d_t* p_this, const uint32_t a
         for (size_t x = 0; x < p_renderer->window_width; ++x)
         {
             uint32_t* dest = (uint32_t*)(dst + y * p_renderer->locked_back_buffer_pitch + x * 4);
-            *dest = argb;
+            *dest = rgb;
         }
     }
 }
 
-static void __stdcall draw_pixel(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const uint32_t argb)
+static void __stdcall draw_pixel(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const uint32_t rgb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -339,23 +424,23 @@ static void __stdcall draw_pixel(const i_soft_renderer_2d_t* p_this, const int d
         return;
     }
 
-    if (GET_ALPHA(argb) == 0xff)
+    if (GET_ALPHA(rgb) == 0x00)
     {
         return;
     }
 
     char* dst = p_renderer->p_locked_back_buffer + dy * p_renderer->locked_back_buffer_pitch + (size_t)dx * 4;
-    *(uint32_t*)dst = argb;
+    *(uint32_t*)dst = rgb;
 }
 
-static void __stdcall draw_rectangle(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const size_t width, const size_t height, const uint32_t argb)
+static void __stdcall draw_rectangle(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const size_t width, const size_t height, const uint32_t rgb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
     const soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     ASSERT(p_renderer->p_locked_back_buffer != NULL, "locked back buffer == NULL");
 
-    if (GET_ALPHA(argb) == 0xff)
+    if (GET_ALPHA(rgb) == 0x00)
     {
         return;
     }
@@ -373,7 +458,7 @@ static void __stdcall draw_rectangle(const i_soft_renderer_2d_t* p_this, const i
     {
         for (size_t x = start_x; x < end_x; ++x)
         {
-            *(uint32_t*)dst = argb;
+            *(uint32_t*)dst = rgb;
             dst += 4;
         }
 
@@ -454,11 +539,11 @@ static bool __stdcall clip_line(int* p_out_sx, int* p_out_sy, int* p_out_dx, int
     }
 }
 
-static void __stdcall draw_line(const i_soft_renderer_2d_t* p_this, const int sx, const int sy, const int dx, const int dy, const uint32_t argb)
+static void __stdcall draw_line(const i_soft_renderer_2d_t* p_this, const int sx, const int sy, const int dx, const int dy, const uint32_t rgb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    if (GET_ALPHA(argb) == 0xff)
+    if (GET_ALPHA(rgb) == 0x00)
     {
         return;
     }
@@ -499,7 +584,7 @@ static void __stdcall draw_line(const i_soft_renderer_2d_t* p_this, const int sx
 
         while (x != end_x)
         {
-            draw_pixel(p_this, x, y, argb);
+            draw_pixel(p_this, x, y, rgb);
 
             if (f < 0)
             {
@@ -523,7 +608,7 @@ static void __stdcall draw_line(const i_soft_renderer_2d_t* p_this, const int sx
 
         while (y != end_y)
         {
-            draw_pixel(p_this, x, y, argb);
+            draw_pixel(p_this, x, y, rgb);
 
             if (f < 0)
             {
@@ -539,7 +624,7 @@ static void __stdcall draw_line(const i_soft_renderer_2d_t* p_this, const int sx
         }
     }
 
-    draw_pixel(p_this, x, y, argb);
+    draw_pixel(p_this, x, y, rgb);
 }
 
 static void __stdcall draw_bitmap(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const int sx, const int sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)
@@ -564,7 +649,7 @@ static void __stdcall draw_bitmap(const i_soft_renderer_2d_t* p_this, const int 
     {
         for (size_t x = 0; x < dst_width; ++x)
         {
-            if (GET_ALPHA(*(uint32_t*)src) != 0xff)
+            if (GET_ALPHA(*(uint32_t*)src) != 0x00)
             {
                 *(uint32_t*)dst = *(uint32_t*)src;
             }
@@ -755,7 +840,7 @@ bool __stdcall create_mesh (const i_soft_renderer_2d_t* p_this,
     return true;
 }
 
-static void __stdcall draw_mesh(const i_soft_renderer_2d_t* p_this, const i_mesh2_t* p_mesh, const matrix_t* p_world, const bool b_wireframe)
+static void __stdcall draw_mesh(const i_soft_renderer_2d_t* p_this, const i_mesh2_t* p_mesh, const matrix_t* p_transform_mat, const bool b_wireframe)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_mesh != NULL, "p_mesh == NULL");
@@ -794,9 +879,9 @@ static void __stdcall draw_mesh(const i_soft_renderer_2d_t* p_this, const i_mesh
         const size_t buffer_index = j * 3;
 
         // 버텍스 셰이더 적용
-        const vector_t temp_v0 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index]]), *p_world);
-        const vector_t temp_v1 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 1]]), *p_world);
-        const vector_t temp_v2 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 2]]), *p_world);
+        const vector_t temp_v0 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index]]), *p_transform_mat);
+        const vector_t temp_v1 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 1]]), *p_transform_mat);
+        const vector_t temp_v2 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 2]]), *p_transform_mat);
 
         vector2_t v0 = to_screen_coord(vector_to_vector2(temp_v0), window_width, window_height);
         vector2_t v1 = to_screen_coord(vector_to_vector2(temp_v1), window_width, window_height);
@@ -902,7 +987,7 @@ static void __stdcall draw_mesh(const i_soft_renderer_2d_t* p_this, const i_mesh
 
                         const size_t image_x = (size_t)(FLOOR(target_uv.x * texture_width)) % texture_width;
                         const size_t image_y = (size_t)(FLOOR(target_uv.y * texture_height)) % texture_height;
-                        const size_t index = texture_width * (texture_height - (1 + image_y)) + image_x;
+                        const size_t index = image_y * texture_width + image_x;
 
                         const uint32_t color = *(uint32_t*)(p_bitmap + index * 4);
                         draw_pixel(p_this, x, y, color);
@@ -930,7 +1015,7 @@ static void __stdcall draw_mesh(const i_soft_renderer_2d_t* p_this, const i_mesh
     }
 }
 
-static bool __stdcall create_back_buffer(soft_renderer_2d_t* p_renderer, const size_t width, const size_t height)
+static bool __stdcall create_back_buffer_private(soft_renderer_2d_t* p_renderer, const size_t width, const size_t height)
 {
     ASSERT(p_renderer != NULL, "p_renderer == NULL");
     ASSERT(p_renderer->p_ddraw7 != NULL, "ddraw7 object == NULL");
@@ -1012,6 +1097,13 @@ void __stdcall create_instance(void** pp_out_instance)
         begin_draw,
         end_draw,
         on_draw,
+
+        get_fps,
+        get_delta_time,
+
+        begin_gdi,
+        end_gdi,
+        print_text,
 
         clear,
         draw_pixel,

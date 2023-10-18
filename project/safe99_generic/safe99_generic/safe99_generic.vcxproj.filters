@@ -24,9 +24,6 @@
     <ClInclude Include="..\..\..\source\safe99_generic\util\hash_function.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\safe99_generic\util\stop_watch.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\safe99_generic\util\timer.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -55,9 +52,6 @@
       <Filter>private</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_generic\private\util\hash_function.c">
-      <Filter>private\util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\safe99_generic\private\util\stop_watch.c">
       <Filter>private\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_generic\private\util\timer.c">

@@ -33,6 +33,8 @@ static size_t __stdcall release(i_vertex_buffer2_t* p_this)
         SAFE_FREE(p_buffer->pa_colors);
         SAFE_FREE(p_buffer->pa_texcoords);
 
+        SAFE_FREE(p_this);
+
         return 0;
     }
 

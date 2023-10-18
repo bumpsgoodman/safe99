@@ -12,45 +12,27 @@
 
 #include "precompiled.h"
 
-bool timer_init(timer_t* p_timer, const float interval)
+bool __stdcall timer_init(timer_t* p_timer)
 {
-    ASSERT(p_timer != NULL, "timer == NULL");
-    ASSERT(interval >= 0.0f, "interval < 0");
+    ASSERT(p_timer != NULL, "p_timer == NULL");
 
-    QueryPerformanceFrequency(&p_timer->frequency);
-    QueryPerformanceCounter(&p_timer->prev_counter);
-
-    p_timer->interval = interval;
-    p_timer->elapsed_tick = 0.0f;
+    QueryPerformanceFrequency((LARGE_INTEGER*)&p_timer->frequency);
+    p_timer->frequency /= 1000;
 
     return true;
 }
 
-void timer_update(timer_t* p_timer)
+void __stdcall timer_start(timer_t* p_timer)
 {
-    ASSERT(p_timer != NULL, "timer == NULL");
-
-    static LARGE_INTEGER cur_counter;
-
-    QueryPerformanceCounter(&cur_counter);
-    const double d_elapsed_tick = ((double)cur_counter.QuadPart - (double)p_timer->prev_counter.QuadPart) / (double)p_timer->frequency.QuadPart * 1000.0;
-    p_timer->elapsed_tick = (float)d_elapsed_tick;
-
-    if (timer_is_on_tick(p_timer))
-    {
-        p_timer->prev_counter = cur_counter;
-    }
+    ASSERT(p_timer != NULL, "p_timer == NULL");
+    QueryPerformanceCounter((LARGE_INTEGER*)&p_timer->prev_counter);
 }
 
-void timer_reset(timer_t* p_timer)
+float __stdcall timer_get_time(const timer_t* p_timer)
 {
-    ASSERT(p_timer != NULL, "timer == NULL");
-    QueryPerformanceCounter(&p_timer->prev_counter);
-    p_timer->elapsed_tick = 0.0f;
-}
+    ASSERT(p_timer != NULL, "p_timer == NULL");
 
-bool timer_is_on_tick(const timer_t* p_timer)
-{
-    ASSERT(p_timer != NULL, "timer == NULL");
-    return p_timer->elapsed_tick >= p_timer->interval;
+    uint64_t cur_counter;
+    QueryPerformanceCounter((LARGE_INTEGER*)&cur_counter);
+    return (float)(((float)cur_counter - (float)p_timer->prev_counter) / (float)p_timer->frequency);
 }

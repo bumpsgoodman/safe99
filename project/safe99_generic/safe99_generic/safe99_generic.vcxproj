@@ -174,7 +174,6 @@
     <ClInclude Include="..\..\..\source\safe99_generic\i_static_memory_pool.h" />
     <ClInclude Include="..\..\..\source\safe99_generic\private\precompiled.h" />
     <ClInclude Include="..\..\..\source\safe99_generic\util\hash_function.h" />
-    <ClInclude Include="..\..\..\source\safe99_generic\util\stop_watch.h" />
     <ClInclude Include="..\..\..\source\safe99_generic\util\timer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -192,7 +191,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_generic\private\util\hash_function.c" />
-    <ClCompile Include="..\..\..\source\safe99_generic\private\util\stop_watch.c" />
     <ClCompile Include="..\..\..\source\safe99_generic\private\util\timer.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
