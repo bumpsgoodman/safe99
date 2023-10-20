@@ -17,7 +17,6 @@ bool __stdcall timer_init(timer_t* p_timer)
     ASSERT(p_timer != NULL, "p_timer == NULL");
 
     QueryPerformanceFrequency((LARGE_INTEGER*)&p_timer->frequency);
-    p_timer->frequency /= 1000;
 
     return true;
 }
@@ -34,5 +33,5 @@ float __stdcall timer_get_time(const timer_t* p_timer)
 
     uint64_t cur_counter;
     QueryPerformanceCounter((LARGE_INTEGER*)&cur_counter);
-    return (float)(((float)cur_counter - (float)p_timer->prev_counter) / (float)p_timer->frequency);
+    return (float)(((double)cur_counter - (double)p_timer->prev_counter) / (double)p_timer->frequency);
 }

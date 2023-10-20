@@ -49,9 +49,6 @@ typedef interface i_soft_renderer_2d_vtbl
     void        (__stdcall*     end_draw)(i_soft_renderer_2d_t* p_this);
     void        (__stdcall*     on_draw)(i_soft_renderer_2d_t* p_this);
 
-    size_t      (__stdcall*     get_fps)(const i_soft_renderer_2d_t* p_this);
-    float       (__stdcall*     get_delta_time)(const i_soft_renderer_2d_t* p_this);
-
     bool        (__stdcall*     begin_gdi)(const i_soft_renderer_2d_t* p_this, HDC* p_out_hdc);
     void        (__stdcall*     end_gdi)(const i_soft_renderer_2d_t* p_this, const HDC hdc);
     void        (__stdcall*     print_text)(const i_soft_renderer_2d_t* p_this, const HDC hdc,

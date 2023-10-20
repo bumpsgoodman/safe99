@@ -140,7 +140,7 @@ typedef struct ecs_world
 
 static bool create_archetype(ecs_world_t* p_world, const ecs_mask_t* p_mask, archetype_t** pp_out_archetype);
 
-static FORCEINLINE entity_field_t* get_entity_field_or_null(ecs_world_t* p_world, const ecs_id_t entity);
+static FORCEINLINE entity_field_t* get_entity_field_or_null(const ecs_world_t* p_world, const ecs_id_t entity);
 
 static bool move_archetype(ecs_world_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype);
 static bool move_archetype_from_null(ecs_world_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype);
@@ -808,6 +808,36 @@ bool __stdcall set_component(i_ecs_t* p_this, const ecs_id_t entity, const ecs_i
     return true;
 }
 
+void* __stdcall get_component_or_null(const i_ecs_t* p_this, const ecs_id_t entity, const ecs_id_t component)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+    ASSERT(IS_ENTITY(entity), "Not entity");
+    ASSERT(IS_COMPONENT(component), "Not component");
+
+    const ecs_world_t* p_world = (ecs_world_t*)p_this;
+
+    if (!has_component(p_this, entity, 1, component))
+    {
+        return NULL;
+    }
+
+    entity_field_t* p_field = get_entity_field_or_null(p_world, entity);
+    if (p_field == NULL)
+    {
+        ASSERT(false, "Destroyed entity or invalid entity");
+        return false;
+    }
+
+    archetype_t* p_archetype = p_field->p_archetype;
+    const size_t component_index = *(size_t*)p_archetype->p_component_map->vtbl->get_value_or_null(p_archetype->p_component_map, &component, sizeof(ecs_id_t));
+    const size_t component_size = p_world->pa_component_size[PURE_ECS_ID(component)];
+
+    char* p_instances = p_archetype->ppa_instances_array[component_index]->vtbl->get_elements_ptr_or_null(p_archetype->ppa_instances_array[component_index]);
+    char* p_instance = p_instances + component_size * p_field->col;
+
+    return (void*)p_instance;
+}
+
 bool __cdecl remove_component(i_ecs_t* p_this, const ecs_id_t entity, const size_t num_components, ...)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
@@ -1119,7 +1149,7 @@ failed_init_component_map:
     return false;
 }
 
-static FORCEINLINE entity_field_t* get_entity_field_or_null(ecs_world_t* p_world, const ecs_id_t entity)
+static FORCEINLINE entity_field_t* get_entity_field_or_null(const ecs_world_t* p_world, const ecs_id_t entity)
 {
     ASSERT(p_world != NULL, "p_world == NULL");
 
@@ -1426,6 +1456,7 @@ void __stdcall create_instance(void** pp_out_instance)
         add_component,
         remove_component,
         set_component,
+        get_component_or_null,
 
         update_system,
 

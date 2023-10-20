@@ -72,11 +72,6 @@ typedef struct soft_renderer_2d
 
     char* p_locked_back_buffer;
     size_t locked_back_buffer_pitch;
-
-    timer_t fps_timer;
-    size_t frame_count;
-    size_t fps;
-    float delta_time;
 } soft_renderer_2d_t;
 
 enum
@@ -233,12 +228,6 @@ static bool __stdcall initialize(i_soft_renderer_2d_t* p_this, HWND hwnd)
     p_renderer->p_clipper->SetHWnd(0, hwnd);
     p_renderer->p_primary->SetClipper(p_renderer->p_clipper);
 
-    p_renderer->fps = 0;
-    p_renderer->delta_time = 0.0f;
-
-    timer_init(&p_renderer->fps_timer);
-    timer_start(&p_renderer->fps_timer);
-
     return true;
 
 failed_init:
@@ -310,36 +299,6 @@ static void __stdcall on_draw(i_soft_renderer_2d_t* p_this)
 
     soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
     p_renderer->p_primary->Blt(&p_renderer->window_rect, p_renderer->p_back, NULL, DDBLT_WAIT, NULL);
-
-    const float time = timer_get_time(&p_renderer->fps_timer);
-    if (time >= 1000.0f)
-    {
-        p_renderer->delta_time = 1.0f / (float)p_renderer->frame_count;
-        p_renderer->fps = p_renderer->frame_count;
-        p_renderer->frame_count = 0;
-
-        timer_start(&p_renderer->fps_timer);
-    }
-    else
-    {
-        ++p_renderer->frame_count;
-    }
-}
-
-size_t __stdcall get_fps(const i_soft_renderer_2d_t* p_this)
-{
-    ASSERT(p_this != NULL, "p_this == NULL");
-
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
-    return p_renderer->fps;
-}
-
-float __stdcall get_delta_time(const i_soft_renderer_2d_t* p_this)
-{
-    ASSERT(p_this != NULL, "p_this == NULL");
-
-    soft_renderer_2d_t* p_renderer = (soft_renderer_2d_t*)p_this;
-    return p_renderer->delta_time;
 }
 
 bool __stdcall begin_gdi(const i_soft_renderer_2d_t* p_this, HDC* p_out_hdc)
@@ -1097,9 +1056,6 @@ void __stdcall create_instance(void** pp_out_instance)
         begin_draw,
         end_draw,
         on_draw,
-
-        get_fps,
-        get_delta_time,
 
         begin_gdi,
         end_gdi,

@@ -84,6 +84,7 @@ typedef interface i_ecs_vtbl
     bool        (__cdecl*       add_component)(i_ecs_t* p_this, const ecs_id_t entity, const size_t num_components, ...);
     bool        (__cdecl*       remove_component)(i_ecs_t* p_this, const ecs_id_t entity, const size_t num_components, ...);
     bool        (__stdcall*     set_component)(i_ecs_t* p_this, const ecs_id_t entity, const ecs_id_t component, void* p_value);
+    void*       (__stdcall*     get_component_or_null)(const i_ecs_t* p_this, const ecs_id_t entity, const ecs_id_t component);
 
     bool        (__stdcall*     update_system)(i_ecs_t* p_this, const ecs_id_t system);
 
