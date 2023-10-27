@@ -48,7 +48,7 @@ typedef interface i_ecs i_ecs_t;
 
 typedef struct ecs_view
 {
-    i_ecs_t* p_this;
+    const i_ecs_t* p_this;
     ecs_id_t system;
     size_t num_archetypes;
 } ecs_view_t;

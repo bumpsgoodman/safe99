@@ -12,12 +12,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\source\safe99_generic\i_chunked_memory_pool.h" />
-    <ClInclude Include="..\..\..\source\safe99_generic\i_dynamic_vector.h" />
-    <ClInclude Include="..\..\..\source\safe99_generic\i_fixed_vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\chunked_memory_pool.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\dynamic_vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\fixed_vector.h" />
     <ClInclude Include="..\..\..\source\safe99_generic\list.h" />
-    <ClInclude Include="..\..\..\source\safe99_generic\i_map.h" />
-    <ClInclude Include="..\..\..\source\safe99_generic\i_static_memory_pool.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\map.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\static_memory_pool.h" />
     <ClInclude Include="..\..\..\source\safe99_generic\private\precompiled.h">
       <Filter>private</Filter>
     </ClInclude>
@@ -29,23 +29,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\source\safe99_generic\private\map.c" />
     <ClCompile Include="..\..\..\source\safe99_generic\private\chunked_memory_pool.c">
       <Filter>private</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_generic\private\dll_main.c">
       <Filter>private</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\safe99_generic\private\dynamic_vector.c">
-      <Filter>private</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\safe99_generic\private\fixed_vector.c">
-      <Filter>private</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_generic\private\precompiled.c">
-      <Filter>private</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\safe99_generic\private\static_memory_pool.c">
       <Filter>private</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_generic\private\list.c">
@@ -56,6 +46,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_generic\private\util\timer.c">
       <Filter>private\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\map.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_generic\private\static_memory_pool.c">
+      <Filter>private</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

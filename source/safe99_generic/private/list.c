@@ -11,6 +11,7 @@
 //***************************************************************************
 
 #include "precompiled.h"
+#include "list.h"
 
 void __stdcall list_add_head(list_node_t** pp_head, list_node_t** pp_tail, list_node_t* p_node)
 {

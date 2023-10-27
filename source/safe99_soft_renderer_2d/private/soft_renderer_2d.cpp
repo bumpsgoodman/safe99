@@ -82,8 +82,8 @@ enum
     REGION_BOTTOM = 0x0100
 };
 
-extern "C" void __stdcall create_vertex_buffer2_private(i_vertex_buffer2_t** pp_out_vertex_buffer);
-extern "C" void __stdcall create_index_buffer2_private(i_index_buffer2_t** pp_out_index_buffer);
+extern "C" void __stdcall create_vertex_buffer2_private(i_vertex_buffer2_t * *pp_out_vertex_buffer);
+extern "C" void __stdcall create_index_buffer2_private(i_index_buffer2_t * *pp_out_index_buffer);
 extern "C" void __stdcall create_mesh2_private(i_mesh2_t * *pp_out_mesh);
 
 static bool __stdcall create_back_buffer_private(soft_renderer_2d_t* p_renderer, const size_t width, const size_t height);
@@ -114,7 +114,7 @@ static size_t __stdcall release(i_soft_renderer_2d_t* p_this)
         SAFE_RELEASE_MS(p_renderer->p_ddraw7);
         SAFE_RELEASE_MS(p_renderer->p_ddraw);
 
-        SAFE_FREE(p_this);
+        SAFE_FREE(p_renderer);
 
         return 0;
     }
@@ -293,7 +293,7 @@ static void __stdcall end_draw(i_soft_renderer_2d_t* p_this)
     p_renderer->locked_back_buffer_pitch = 0;
 }
 
-static void __stdcall on_draw(i_soft_renderer_2d_t* p_this)
+static void __stdcall on_draw(const i_soft_renderer_2d_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -301,7 +301,7 @@ static void __stdcall on_draw(i_soft_renderer_2d_t* p_this)
     p_renderer->p_primary->Blt(&p_renderer->window_rect, p_renderer->p_back, NULL, DDBLT_WAIT, NULL);
 }
 
-bool __stdcall begin_gdi(const i_soft_renderer_2d_t* p_this, HDC* p_out_hdc)
+static bool __stdcall begin_gdi(i_soft_renderer_2d_t* p_this, HDC* p_out_hdc)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -322,7 +322,7 @@ bool __stdcall begin_gdi(const i_soft_renderer_2d_t* p_this, HDC* p_out_hdc)
     return true;
 }
 
-void __stdcall end_gdi(const i_soft_renderer_2d_t* p_this, const HDC hdc)
+static void __stdcall end_gdi(i_soft_renderer_2d_t* p_this, const HDC hdc)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -330,8 +330,8 @@ void __stdcall end_gdi(const i_soft_renderer_2d_t* p_this, const HDC hdc)
     p_renderer->p_back->ReleaseDC(hdc);
 }
 
-void __stdcall print_text(const i_soft_renderer_2d_t* p_this, const HDC hdc,
-                          const wchar_t* text, const int dx, const int dy, const size_t length, const uint32_t rgb)
+static void __stdcall print_text(i_soft_renderer_2d_t* p_this, const HDC hdc,
+                                 const wchar_t* text, const int dx, const int dy, const size_t length, const uint32_t rgb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -347,7 +347,7 @@ void __stdcall print_text(const i_soft_renderer_2d_t* p_this, const HDC hdc,
     TextOut(hdc, dx, dy, text, (int)length);
 }
 
-static void __stdcall clear(const i_soft_renderer_2d_t* p_this, const uint32_t rgb)
+static void __stdcall clear(i_soft_renderer_2d_t* p_this, const uint32_t rgb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -370,7 +370,7 @@ static void __stdcall clear(const i_soft_renderer_2d_t* p_this, const uint32_t r
     }
 }
 
-static void __stdcall draw_pixel(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const uint32_t rgb)
+static void __stdcall draw_pixel(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const uint32_t rgb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -392,7 +392,7 @@ static void __stdcall draw_pixel(const i_soft_renderer_2d_t* p_this, const int d
     *(uint32_t*)dst = rgb;
 }
 
-static void __stdcall draw_rectangle(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const size_t width, const size_t height, const uint32_t rgb)
+static void __stdcall draw_rectangle(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const size_t width, const size_t height, const uint32_t rgb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -498,7 +498,7 @@ static bool __stdcall clip_line(int* p_out_sx, int* p_out_sy, int* p_out_dx, int
     }
 }
 
-static void __stdcall draw_line(const i_soft_renderer_2d_t* p_this, const int sx, const int sy, const int dx, const int dy, const uint32_t rgb)
+static void __stdcall draw_line(i_soft_renderer_2d_t* p_this, const int sx, const int sy, const int dx, const int dy, const uint32_t rgb)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
@@ -586,7 +586,7 @@ static void __stdcall draw_line(const i_soft_renderer_2d_t* p_this, const int sx
     draw_pixel(p_this, x, y, rgb);
 }
 
-static void __stdcall draw_bitmap(const i_soft_renderer_2d_t* p_this, const int dx, const int dy, const int sx, const int sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)
+static void __stdcall draw_bitmap(i_soft_renderer_2d_t* p_this, const int dx, const int dy, const int sx, const int sy, const size_t sw, const size_t sh, const size_t width, const size_t height, const char* p_bitmap)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_bitmap != NULL, "bitmap == NULL");
@@ -764,11 +764,11 @@ static bool __stdcall create_index_buffer(const i_soft_renderer_2d_t* p_this,
     return true;
 }
 
-bool __stdcall create_mesh (const i_soft_renderer_2d_t* p_this,
-                            i_vertex_buffer2_t* p_vertex_buffer,
-                            i_index_buffer2_t* p_index_buffer,
-                            i_texture2_t* p_texture,
-                            i_mesh2_t** pp_out_mesh)
+static bool __stdcall create_mesh(const i_soft_renderer_2d_t* p_this,
+                                  i_vertex_buffer2_t* p_vertex_buffer,
+                                  i_index_buffer2_t* p_index_buffer,
+                                  i_texture2_t* p_texture,
+                                  i_mesh2_t** pp_out_mesh)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_vertex_buffer != NULL, "p_vertex_buffer == NULL");
@@ -799,7 +799,7 @@ bool __stdcall create_mesh (const i_soft_renderer_2d_t* p_this,
     return true;
 }
 
-static void __stdcall draw_mesh(const i_soft_renderer_2d_t* p_this, const i_mesh2_t* p_mesh, const matrix_t* p_transform_mat, const bool b_wireframe)
+static void __stdcall draw_mesh(i_soft_renderer_2d_t* p_this, const i_mesh2_t* p_mesh, const matrix_t* p_transform_mat, const bool b_wireframe)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_mesh != NULL, "p_mesh == NULL");

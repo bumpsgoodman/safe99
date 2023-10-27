@@ -22,7 +22,7 @@ typedef struct file_system
     i_file_system_t base;
     size_t ref_count;
 
-    i_map_t* p_registered_file;     // { uint32_t, i_texture2_t }
+    map_t registered_file;     // { uint32_t, i_texture2_t }
 } file_system_t;
 
 void __stdcall create_instance(void** pp_out_instance);
@@ -42,7 +42,7 @@ static size_t __stdcall release(i_file_system_t* p_this)
     file_system_t* p_file_system = (file_system_t*)p_this;
     if (--p_file_system->ref_count == 0)
     {
-        destroy_map(p_file_system->p_registered_file);
+        map_release(&p_file_system->registered_file);
 
         SAFE_FREE(p_file_system);
 
@@ -66,8 +66,7 @@ static bool __stdcall initialize(i_file_system_t* p_this)
 
     file_system_t* p_file_system = (file_system_t*)p_this;
 
-    create_map(&p_file_system->p_registered_file);
-    if (!p_file_system->p_registered_file->vtbl->initialize(p_file_system->p_registered_file, sizeof(uint32_t), sizeof(i_texture2_t), 100))
+    if (!map_initialize(&p_file_system->registered_file, sizeof(uint32_t), sizeof(i_texture2_t), 100))
     {
         ASSERT(false, "Failed to init registered file");
         goto failed_init_registered_file;
@@ -76,20 +75,21 @@ static bool __stdcall initialize(i_file_system_t* p_this)
     return true;
 
 failed_init_registered_file:
+    memset(p_file_system, 0, sizeof(file_system_t));
     return false;
 }
 
-static bool __stdcall load_a8r8g8b8_dds(const i_file_system_t* p_this, const char* filename, i_texture2_t** pp_out_texture2)
+static bool __stdcall load_a8r8g8b8_dds(i_file_system_t* p_this, const char* filename, i_texture2_t** pp_out_texture2)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(filename != NULL, "filename == NULL");
     ASSERT(pp_out_texture2 != NULL, "pp_out_texture2 == NULL");
 
-    const file_system_t* p_file_system = (file_system_t*)p_this;
-
+    file_system_t* p_file_system = (file_system_t*)p_this;
+    
+    // 이미 해당 텍스쳐가 있으면 등록된 텍스쳐 반환
     const uint32_t hash = hash32_fnv1a(filename, strlen(filename));
-
-    i_texture2_t** pp_texture = (i_texture2_t**)p_file_system->p_registered_file->vtbl->get_value_or_null(p_file_system->p_registered_file, &hash, sizeof(uint32_t));
+    i_texture2_t** pp_texture = (i_texture2_t**)map_get_value_or_null(&p_file_system->registered_file, &hash, sizeof(uint32_t));
     if (pp_texture != NULL)
     {
         (*pp_texture)->vtbl->add_ref(*pp_texture);
@@ -97,15 +97,6 @@ static bool __stdcall load_a8r8g8b8_dds(const i_file_system_t* p_this, const cha
 
         return true;
     }
-
-    i_texture2_t* p_texture;
-    create_texture2_private(&p_texture);
-    if (p_texture == NULL)
-    {
-        ASSERT(false, "Failed to create texture2");
-        goto failed_create_texture;
-    }
-    p_file_system->p_registered_file->vtbl->insert(p_file_system->p_registered_file, &hash, sizeof(uint32_t), p_texture, sizeof(i_texture2_t*));
 
     FILE* p_file = fopen(filename, "rb");
     if (p_file == NULL)
@@ -141,28 +132,32 @@ static bool __stdcall load_a8r8g8b8_dds(const i_file_system_t* p_this, const cha
     }
 
     fread(pa_bitmap, 1, width * height * sizeof(uint32_t), p_file);
-    
+
+    i_texture2_t* p_texture;
+    create_texture2_private(&p_texture);
     if (!initialize_texture2_private(p_texture, width, height, pa_bitmap))
     {
         ASSERT(false, "Failed to init texture");
         goto failed_init_texture;
     }
 
-    *pp_out_texture2 = p_texture;
+    map_insert(&p_file_system->registered_file, &hash, sizeof(uint32_t), p_texture, sizeof(i_texture2_t*));
 
     fclose(p_file);
+    
+    *pp_out_texture2 = p_texture;
 
     return true;
 
 failed_init_texture:
+    p_texture->vtbl->release(p_texture);
+    SAFE_FREE(pa_bitmap);
+
 failed_malloc_bitmap:
 mismatch_header:
     fclose(p_file);
 
 failed_open_file:
-    p_texture->vtbl->release(p_texture);
-
-failed_create_texture:
     *pp_out_texture2 = NULL;
     return false;
 }
@@ -185,7 +180,7 @@ void __stdcall create_instance(void** pp_out_instance)
     file_system_t* pa_file_system = malloc(sizeof(file_system_t));
     if (pa_file_system == NULL)
     {
-        ASSERT(false, "Failed to malloc world");
+        ASSERT(false, "Failed to malloc file system");
         *pp_out_instance = NULL;
     }
 

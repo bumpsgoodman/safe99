@@ -1,41 +1,34 @@
 //***************************************************************************
 // 
-// 파일: fixed_vector.c
+// 파일: fixed_vector.h
 // 
 // 설명: 고정 사이즈 벡터
 // 
 // 작성자: bumpsgoodman
 // 
-// 작성일: 2023/08/10
+// 작성일: 2023/08/09
 // 
 //***************************************************************************
 
-#include "precompiled.h"
-#include "fixed_vector.h"
+#ifndef FIXED_VECTOR_H
+#define FIXED_VECTOR_H
 
-void __stdcall create_fixed_vector(fixed_vector_t** pp_out_fixed_vector)
+#include <memory.h>
+
+#include "safe99_common/defines.h"
+
+typedef struct fixed_vector
 {
-    ASSERT(pp_out_fixed_vector != NULL, "pp_out_fixed_vector == NULL");
+    char* pa_elements;
 
-    fixed_vector_t* pa_vector = (fixed_vector_t*)malloc(sizeof(fixed_vector_t));
-    if (pa_vector == NULL)
-    {
-        ASSERT(false, "Failed to malloc fixed vector");
-        *pp_out_fixed_vector = NULL;
-    }
+    size_t element_size;
+    size_t num_elements;
+    size_t num_max_elements;
+} fixed_vector_t;
 
-    *pp_out_fixed_vector = pa_vector;
-}
+START_EXTERN_C
 
-void __stdcall destroy_fixed_vector(fixed_vector_t* p_fixed_vector)
-{
-    ASSERT(p_fixed_vector != NULL, "p_fixed_vector == NULL");
-
-    fixed_vector_release(p_fixed_vector);
-    SAFE_FREE(p_fixed_vector);
-}
-
-bool __stdcall fixed_vector_initialize(fixed_vector_t* p_vector, const size_t element_size, const size_t num_max_elements)
+FORCEINLINE bool __stdcall fixed_vector_initialize(fixed_vector_t* p_vector, const size_t element_size, const size_t num_max_elements)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(element_size > 0, "element_size == 0");
@@ -56,21 +49,26 @@ bool __stdcall fixed_vector_initialize(fixed_vector_t* p_vector, const size_t el
     return true;
 }
 
-void __stdcall fixed_vector_release(fixed_vector_t* p_vector)
+FORCEINLINE void __stdcall fixed_vector_release(fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
+
+    if (p_vector == NULL)
+    {
+        return;
+    }
 
     SAFE_FREE(p_vector->pa_elements);
     memset(p_vector, 0, sizeof(fixed_vector_t));
 }
 
-void __stdcall fixed_vector_clear(fixed_vector_t* p_vector)
+FORCEINLINE void __stdcall fixed_vector_clear(fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     p_vector->num_elements = 0;
 }
 
-void __stdcall fixed_vector_push_back(fixed_vector_t* p_vector, const void* p_element, const size_t element_size)
+FORCEINLINE void __stdcall fixed_vector_push_back(fixed_vector_t* p_vector, const void* p_element, const size_t element_size)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(p_element != NULL, "p_element == NULL");
@@ -82,7 +80,7 @@ void __stdcall fixed_vector_push_back(fixed_vector_t* p_vector, const void* p_el
     ++p_vector->num_elements;
 }
 
-void __stdcall fixed_vector_push_back_empty(fixed_vector_t* p_vector)
+FORCEINLINE void __stdcall fixed_vector_push_back_empty(fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(p_vector->num_elements < p_vector->num_max_elements, "saturate");
@@ -90,7 +88,7 @@ void __stdcall fixed_vector_push_back_empty(fixed_vector_t* p_vector)
     ++p_vector->num_elements;
 }
 
-void __stdcall fixed_vector_pop_back(fixed_vector_t* p_vector)
+FORCEINLINE void __stdcall fixed_vector_pop_back(fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(p_vector->num_elements != 0, "Empty");
@@ -98,7 +96,7 @@ void __stdcall fixed_vector_pop_back(fixed_vector_t* p_vector)
     --p_vector->num_elements;
 }
 
-void __stdcall fixed_vector_insert(fixed_vector_t* p_vector, const void* p_element, const size_t element_size, const size_t index)
+FORCEINLINE void __stdcall fixed_vector_insert(fixed_vector_t* p_vector, const void* p_element, const size_t element_size, const size_t index)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(p_element != NULL, "p_element == NULL");
@@ -117,7 +115,7 @@ void __stdcall fixed_vector_insert(fixed_vector_t* p_vector, const void* p_eleme
     ++p_vector->num_elements;
 }
 
-void __stdcall fixed_vector_insert_empty(fixed_vector_t* p_vector, const size_t index)
+FORCEINLINE void __stdcall fixed_vector_insert_empty(fixed_vector_t* p_vector, const size_t index)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(p_vector->num_elements < p_vector->num_max_elements, "saturate");
@@ -133,7 +131,7 @@ void __stdcall fixed_vector_insert_empty(fixed_vector_t* p_vector, const size_t 
     ++p_vector->num_elements;
 }
 
-void __stdcall fixed_vector_remove(fixed_vector_t* p_vector, const size_t index)
+FORCEINLINE void __stdcall fixed_vector_remove(fixed_vector_t* p_vector, const size_t index)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(p_vector->num_elements < p_vector->num_max_elements, "saturate");
@@ -148,25 +146,25 @@ void __stdcall fixed_vector_remove(fixed_vector_t* p_vector, const size_t index)
     --p_vector->num_elements;
 }
 
-size_t __stdcall fixed_vector_get_element_size(const fixed_vector_t* p_vector)
+FORCEINLINE size_t __stdcall fixed_vector_get_element_size(const fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->element_size;
 }
 
-size_t __stdcall fixed_vector_get_num_max_elements(const fixed_vector_t* p_vector)
+FORCEINLINE size_t __stdcall fixed_vector_get_num_max_elements(const fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->num_max_elements;
 }
 
-size_t __stdcall fixed_vector_get_num_elements(const fixed_vector_t* p_vector)
+FORCEINLINE size_t __stdcall fixed_vector_get_num_elements(const fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->num_elements;
 }
 
-void* __stdcall fixed_vector_get_back_or_null(const fixed_vector_t* p_vector)
+FORCEINLINE void* __stdcall fixed_vector_get_back_or_null(const fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(p_vector->num_elements != 0, "empty");
@@ -174,7 +172,7 @@ void* __stdcall fixed_vector_get_back_or_null(const fixed_vector_t* p_vector)
     return p_vector->pa_elements + p_vector->element_size * (p_vector->num_elements - 1);
 }
 
-void* __stdcall fixed_vector_get_element_or_null(const fixed_vector_t* p_vector, const size_t index)
+FORCEINLINE void* __stdcall fixed_vector_get_element_or_null(const fixed_vector_t* p_vector, const size_t index)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     ASSERT(p_vector->num_elements != 0, "empty");
@@ -183,8 +181,12 @@ void* __stdcall fixed_vector_get_element_or_null(const fixed_vector_t* p_vector,
     return p_vector->pa_elements + p_vector->element_size * index;
 }
 
-char* __stdcall fixed_vector_get_elements_ptr_or_null(const fixed_vector_t* p_vector)
+FORCEINLINE char* __stdcall fixed_vector_get_elements_ptr_or_null(const fixed_vector_t* p_vector)
 {
     ASSERT(p_vector != NULL, "p_vector == NULL");
     return p_vector->pa_elements;
 }
+
+END_EXTERN_C
+
+#endif // FIXED_VECTOR_H
