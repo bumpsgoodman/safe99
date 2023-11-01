@@ -22,7 +22,7 @@ typedef struct file_system
     i_file_system_t base;
     size_t ref_count;
 
-    map_t registered_file;     // { uint32_t, i_texture2_t }
+    map_t registered_textures;     // { uint32_t, i_texture2_t }
 } file_system_t;
 
 void __stdcall create_instance(void** pp_out_instance);
@@ -42,7 +42,7 @@ static size_t __stdcall release(i_file_system_t* p_this)
     file_system_t* p_file_system = (file_system_t*)p_this;
     if (--p_file_system->ref_count == 0)
     {
-        map_release(&p_file_system->registered_file);
+        map_release(&p_file_system->registered_textures);
 
         SAFE_FREE(p_file_system);
 
@@ -66,7 +66,7 @@ static bool __stdcall initialize(i_file_system_t* p_this)
 
     file_system_t* p_file_system = (file_system_t*)p_this;
 
-    if (!map_initialize(&p_file_system->registered_file, sizeof(uint32_t), sizeof(i_texture2_t), 100))
+    if (!map_initialize(&p_file_system->registered_textures, sizeof(uint32_t), sizeof(i_texture2_t), 100))
     {
         ASSERT(false, "Failed to init registered file");
         goto failed_init_registered_file;
@@ -89,7 +89,7 @@ static bool __stdcall load_a8r8g8b8_dds(i_file_system_t* p_this, const char* fil
     
     // 이미 해당 텍스쳐가 있으면 등록된 텍스쳐 반환
     const uint32_t hash = hash32_fnv1a(filename, strlen(filename));
-    i_texture2_t** pp_texture = (i_texture2_t**)map_get_value_or_null(&p_file_system->registered_file, &hash, sizeof(uint32_t));
+    i_texture2_t** pp_texture = (i_texture2_t**)map_get_value_or_null(&p_file_system->registered_textures, &hash, sizeof(uint32_t));
     if (pp_texture != NULL)
     {
         (*pp_texture)->vtbl->add_ref(*pp_texture);
@@ -141,7 +141,7 @@ static bool __stdcall load_a8r8g8b8_dds(i_file_system_t* p_this, const char* fil
         goto failed_init_texture;
     }
 
-    map_insert(&p_file_system->registered_file, &hash, sizeof(uint32_t), p_texture, sizeof(i_texture2_t*));
+    map_insert(&p_file_system->registered_textures, &hash, sizeof(uint32_t), p_texture, sizeof(i_texture2_t*));
 
     fclose(p_file);
     

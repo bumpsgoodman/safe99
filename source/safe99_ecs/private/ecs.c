@@ -1445,6 +1445,7 @@ void __stdcall create_instance(void** pp_out_instance)
     {
         ASSERT(false, "Failed to malloc world");
         *pp_out_instance = NULL;
+        return;
     }
 
     pa_world->base.vtbl = &vtbl;
