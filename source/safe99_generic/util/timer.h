@@ -18,7 +18,6 @@
 START_EXTERN_C
 
 SAFE99_API bool __stdcall timer_init(timer_t* p_timer);
-SAFE99_API void __stdcall timer_start(timer_t* p_timer);
 SAFE99_API float __stdcall timer_get_time(const timer_t* p_timer);
 
 END_EXTERN_C
