@@ -83,7 +83,7 @@ typedef struct ecs_mask
 typedef struct archetype
 {
     ecs_mask_t mask;
-    size_t* pa_component_indices;
+    size_t* pa_component_index;
     size_t num_instances;
 
     dynamic_vector_t* pa_instances_array;       // { char* }
@@ -194,7 +194,7 @@ size_t __stdcall release(i_ecs_t* p_this)
                 SAFE_FREE(p_instances);
 
                 dynamic_vector_release(&p_archetype->entities);
-                SAFE_FREE(p_archetype->pa_component_indices);
+                SAFE_FREE(p_archetype->pa_component_index);
             }
 
             map_release(&p_world->archetype_map);
@@ -784,7 +784,7 @@ bool __stdcall set_component(i_ecs_t* p_this, const ecs_id_t entity, const ecs_i
     archetype_t* p_archetype = p_field->p_archetype;
 
     const size_t pure_component = PURE_ECS_ID(component);
-    const size_t component_index = p_archetype->pa_component_indices[pure_component];
+    const size_t component_index = p_archetype->pa_component_index[pure_component];
     const size_t component_size = p_world->pa_component_size[pure_component];
 
     char* p_instances = dynamic_vector_get_elements_ptr_or_null(&p_archetype->pa_instances_array[component_index]);
@@ -816,7 +816,7 @@ void* __stdcall get_component_or_null(const i_ecs_t* p_this, const ecs_id_t enti
 
     archetype_t* p_archetype = p_field->p_archetype;
     const size_t pure_component = PURE_ECS_ID(component);
-    const size_t component_index = p_archetype->pa_component_indices[pure_component];
+    const size_t component_index = p_archetype->pa_component_index[pure_component];
     const size_t component_size = p_world->pa_component_size[pure_component];
 
     char* p_instances = dynamic_vector_get_elements_ptr_or_null(&p_archetype->pa_instances_array[component_index]);
@@ -966,7 +966,7 @@ void* __stdcall get_instances_or_null(const ecs_view_t* p_view, const size_t arc
     archetype_t** pp_archetypes = (archetype_t**)dynamic_vector_get_elements_ptr_or_null(&p_system->archetypes);
     archetype_t* p_archetype = pp_archetypes[archetype_index];
 
-    const size_t component_index = p_archetype->pa_component_indices[PURE_ECS_ID(component)];
+    const size_t component_index = p_archetype->pa_component_index[PURE_ECS_ID(component)];
     dynamic_vector_t* p_instances = &p_archetype->pa_instances_array[component_index];
     return dynamic_vector_get_elements_ptr_or_null(p_instances);
 }
@@ -1023,12 +1023,12 @@ static bool create_archetype(ecs_world_t* p_world, const ecs_mask_t* p_mask, arc
 
     archetype_t* p_archetype = (archetype_t*)map_get_value_by_hash_or_null(&p_world->archetype_map, p_mask->hash, &p_mask->hash, sizeof(ecs_id_t));
 
-    // component indices 생성
-    p_archetype->pa_component_indices = (size_t*)malloc(sizeof(size_t) * p_world->num_max_components);
-    if (p_archetype->pa_component_indices == NULL)
+    // component index 생성
+    p_archetype->pa_component_index = (size_t*)malloc(sizeof(size_t) * p_world->num_max_components);
+    if (p_archetype->pa_component_index == NULL)
     {
-        ASSERT(false, "Failed to malloc component indices");
-        goto failed_malloc_component_indices;
+        ASSERT(false, "Failed to malloc component index");
+        goto failed_malloc_component_index;
     }
 
     // mask 복사
@@ -1086,8 +1086,8 @@ static bool create_archetype(ecs_world_t* p_world, const ecs_mask_t* p_mask, arc
 
             ++p_instances;
 
-            // component indices 삽입
-            p_archetype->pa_component_indices[pure_component] = component_index;
+            // component index 삽입
+            p_archetype->pa_component_index[pure_component] = component_index;
 
             ++component_index;
 
@@ -1122,9 +1122,9 @@ failed_init_entities:
     SAFE_FREE(p_archetype->pa_instances_array);
 
 failed_malloc_instances_array:
-    SAFE_FREE(p_archetype->pa_component_indices);
+    SAFE_FREE(p_archetype->pa_component_index);
 
-failed_malloc_component_indices:
+failed_malloc_component_index:
     *pp_out_archetype = NULL;
     return false;
 }
@@ -1185,8 +1185,8 @@ static bool move_archetype(ecs_world_t* p_world, const ecs_id_t entity, archetyp
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
             const ecs_id_t pure_component = PURE_ECS_ID(component);
 
-            const size_t from_row = p_from_archetype->pa_component_indices[pure_component];
-            const size_t to_row = p_to_archetype->pa_component_indices[pure_component];
+            const size_t from_row = p_from_archetype->pa_component_index[pure_component];
+            const size_t to_row = p_to_archetype->pa_component_index[pure_component];
 
             const size_t component_size = p_world->pa_component_size[PURE_ECS_ID(component)];
 
@@ -1213,7 +1213,7 @@ static bool move_archetype(ecs_world_t* p_world, const ecs_id_t entity, archetyp
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
 
-            const size_t to_row = p_to_archetype->pa_component_indices[PURE_ECS_ID(component)];
+            const size_t to_row = p_to_archetype->pa_component_index[PURE_ECS_ID(component)];
 
             dynamic_vector_t* p_to_instances = &p_to_instances_array[to_row];
             dynamic_vector_push_back_empty(p_to_instances);
@@ -1228,7 +1228,7 @@ static bool move_archetype(ecs_world_t* p_world, const ecs_id_t entity, archetyp
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
 
-            const size_t from_row = p_from_archetype->pa_component_indices[PURE_ECS_ID(component)];
+            const size_t from_row = p_from_archetype->pa_component_index[PURE_ECS_ID(component)];
 
             const size_t component_size = p_world->pa_component_size[PURE_ECS_ID(component)];
 
@@ -1298,7 +1298,7 @@ static bool move_archetype_from_null(ecs_world_t* p_world, const ecs_id_t entity
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
 
-            const size_t to_row = p_to_archetype->pa_component_indices[PURE_ECS_ID(component)];
+            const size_t to_row = p_to_archetype->pa_component_index[PURE_ECS_ID(component)];
 
             dynamic_vector_t* p_to_instances = &p_to_instances_array[to_row];
             dynamic_vector_push_back_empty(p_to_instances);
@@ -1359,7 +1359,7 @@ static bool move_archetype_to_null(ecs_world_t* p_world, const ecs_id_t entity)
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
 
-            const size_t from_row = p_from_archetype->pa_component_indices[PURE_ECS_ID(component)];
+            const size_t from_row = p_from_archetype->pa_component_index[PURE_ECS_ID(component)];
 
             const size_t component_size = p_world->pa_component_size[PURE_ECS_ID(component)];
 
