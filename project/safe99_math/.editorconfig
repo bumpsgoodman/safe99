@@ -75,4 +75,4 @@ cpp_include_cleanup_add_missing_error_tag_type = suggestion
 cpp_include_cleanup_remove_unused_error_tag_type = dimmed
 
 [*]
-charset = utf-8
+charset = utf-8-bom

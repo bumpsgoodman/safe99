@@ -1,4 +1,4 @@
-#include <memory.h>
+﻿#include <memory.h>
 
 #include "safe99_common/defines.h"
 

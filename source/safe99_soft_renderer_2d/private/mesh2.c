@@ -1,4 +1,4 @@
-#include "safe99_common/defines.h"
+﻿#include "safe99_common/defines.h"
 
 typedef struct mesh2
 {
