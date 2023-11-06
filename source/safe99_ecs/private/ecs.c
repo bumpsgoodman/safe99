@@ -743,11 +743,6 @@ bool __cdecl add_component(i_ecs_t* p_this, const ecs_id_t entity, const size_t 
         chunked_memory_pool_dealloc(&p_world->mask_pool, next_mask.p_masks);
     }
 
-    if (p_archetype == p_next_archetype)
-    {
-        return false;
-    }
-
     if (p_archetype == NULL)
     {
         return move_archetype_from_null(p_world, entity, p_next_archetype);
@@ -910,11 +905,6 @@ bool __cdecl remove_component(i_ecs_t* p_this, const ecs_id_t entity, const size
     else
     {
         chunked_memory_pool_dealloc(&p_world->mask_pool, next_mask.p_masks);
-    }
-
-    if (p_archetype == p_next_archetype)
-    {
-        return false;
     }
 
     if (p_next_archetype == NULL)
