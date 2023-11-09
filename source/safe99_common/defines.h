@@ -142,20 +142,6 @@ ALIGN16 typedef struct matrix
     };
 } matrix_t;
 
-typedef struct vector3_packed
-{
-    float x;
-    float y;
-    float z;
-} vector3_packed_t;
-
-typedef struct vector3_int_packed
-{
-    int x;
-    int y;
-    int z;
-} vector3_int_packed_t;
-
 typedef interface i_safe3d i_safe3d_t;
 typedef interface i_safe3d_vtbl
 {
@@ -236,7 +222,7 @@ typedef interface i_mesh2_vtbl
     size_t                  (__stdcall*     get_ref_count)(const i_mesh2_t* p_this);
 
     i_vertex_buffer2_t*     (__stdcall*     get_vertex_buffer)(const i_mesh2_t* p_this);
-    i_index_buffer_t*      (__stdcall*     get_index_buffer)(const i_mesh2_t* p_this);
+    i_index_buffer_t*       (__stdcall*     get_index_buffer)(const i_mesh2_t* p_this);
     i_texture_t*            (__stdcall*     get_texture)(const i_mesh2_t* p_this);
     color_t                 (__stdcall*     get_wireframe_color)(const i_mesh2_t* p_this);
 } i_mesh2_vtbl_t;

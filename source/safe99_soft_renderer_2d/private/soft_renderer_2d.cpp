@@ -812,11 +812,11 @@ static void __stdcall draw_mesh(i_soft_renderer_2d_t* p_this, const i_mesh2_t* p
     const size_t window_width = p_renderer->window_width;
     const size_t window_height = p_renderer->window_height;
 
-    const vertex_buffer2_t* p_vertex_buffer = (vertex_buffer2_t*)p_mesh->vtbl->get_vertex_buffer(p_mesh);
-
-    const vector2_t* p_positions = p_vertex_buffer->pa_positions;
-    const color_t* p_colors = p_vertex_buffer->pa_colors;
-    const vector2_t* p_texcoords = p_vertex_buffer->pa_texcoords;
+    i_vertex_buffer2_t* p_vertex_buffer = (i_vertex_buffer2_t*)p_mesh->vtbl->get_vertex_buffer(p_mesh);
+    const vector2_t* p_positions = p_vertex_buffer->vtbl->get_positions(p_vertex_buffer);
+    const color_t* p_colors = p_vertex_buffer->vtbl->get_colors_or_null(p_vertex_buffer);
+    const vector2_t* p_texcoords = p_vertex_buffer->vtbl->get_tex_coord_or_null(p_vertex_buffer);
+    SAFE_RELEASE(p_vertex_buffer);
 
     const bool b_colors = (p_colors != NULL);
     const bool b_texcoords = (p_texcoords != NULL);
@@ -828,14 +828,14 @@ static void __stdcall draw_mesh(i_soft_renderer_2d_t* p_this, const i_mesh2_t* p
         return;
     }
 
-    const index_buffer_t* p_index_buffer = (index_buffer_t*)p_mesh->vtbl->get_index_buffer(p_mesh);
-
-    const uint_t* p_indices = p_index_buffer->pa_indices;
+    i_index_buffer_t* p_index_buffer = (i_index_buffer_t*)p_mesh->vtbl->get_index_buffer(p_mesh);
+    const uint_t* p_indices = p_index_buffer->vtbl->get_indices(p_index_buffer);
+    const size_t num_triangles = p_index_buffer->vtbl->get_num_indices(p_index_buffer) / 3;
+    SAFE_RELEASE(p_index_buffer);
 
     // texcoords가 들어왔으면 텍스처 불러오기
     i_texture_t* p_texture = (b_texcoords) ? p_mesh->vtbl->get_texture(p_mesh) : NULL;
 
-    const size_t num_triangles = p_index_buffer->num_indices / 3;
     for (size_t j = 0; j < num_triangles; ++j)
     {
         const size_t buffer_index = j * 3;

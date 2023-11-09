@@ -14,6 +14,20 @@
 
 #include "i_file_system.h"
 
+typedef struct vector3_packed
+{
+    float x;
+    float y;
+    float z;
+} vector3_packed_t;
+
+typedef struct vector3_int_packed
+{
+    int x;
+    int y;
+    int z;
+} vector3_int_packed_t;
+
 extern bool create_texture_private(i_texture_t** pp_out_texture);
 extern bool initialize_texture_private(i_texture_t* p_this, const size_t width, const size_t height, const char* p_bitmap);
 
