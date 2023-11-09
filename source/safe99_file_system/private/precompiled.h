@@ -20,6 +20,7 @@
 #endif // WIN32_LEAN_AND_MEAN
 
 #include <stdio.h>
+#include <string.h>
 #include <Windows.h>
 
 #include "safe99_common/defines.h"

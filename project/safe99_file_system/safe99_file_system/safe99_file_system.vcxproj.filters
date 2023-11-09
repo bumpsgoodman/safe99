@@ -15,7 +15,10 @@
     <ClCompile Include="..\..\..\source\safe99_file_system\private\file_system.c">
       <Filter>private</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\safe99_file_system\private\texture2.c">
+    <ClCompile Include="..\..\..\source\safe99_file_system\private\texture.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_file_system\private\safe3d.c">
       <Filter>private</Filter>
     </ClCompile>
   </ItemGroup>

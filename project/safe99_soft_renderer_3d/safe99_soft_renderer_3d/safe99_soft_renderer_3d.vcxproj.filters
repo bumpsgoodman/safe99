@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="safe99_soft_renderer_3d">
+      <UniqueIdentifier>{5d14fff7-4fa7-4651-8b1d-ae1c70218c57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_common">
+      <UniqueIdentifier>{7ea52847-3c16-44ef-a323-d0ec6e9a1aa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_soft_renderer_3d\private">
+      <UniqueIdentifier>{9e517867-5cb6-4a1c-b3b8-974c2b1b84d8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\safe99_common\defines.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_soft_renderer_3d\i_soft_renderer_3d.h">
+      <Filter>safe99_soft_renderer_3d</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="safe99_soft_renderer_3d.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\dll_main.c">
+      <Filter>safe99_soft_renderer_3d\private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\soft_renderer_3d.cpp">
+      <Filter>safe99_soft_renderer_3d\private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\index_buffer.c">
+      <Filter>safe99_soft_renderer_3d\private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\mesh3.c">
+      <Filter>safe99_soft_renderer_3d\private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\vertex_buffer3.c">
+      <Filter>safe99_soft_renderer_3d\private</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

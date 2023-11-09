@@ -11,6 +11,7 @@ call build_generic.bat
 call build_math.bat
 call build_file_system.bat
 call build_soft_renderer_2d.bat
+call build_soft_renderer_3d.bat
 call build_ecs.bat
 
 rem -------------------------

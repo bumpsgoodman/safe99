@@ -1,0 +1,3 @@
+﻿LIBRARY
+EXPORTS
+   create_instance       @1       PRIVATE

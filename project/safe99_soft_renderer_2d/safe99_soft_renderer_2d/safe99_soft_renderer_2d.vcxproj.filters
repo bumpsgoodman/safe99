@@ -18,7 +18,7 @@
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\vertex_buffer2.c">
       <Filter>private</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\index_buffer2.c">
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\index_buffer.c">
       <Filter>private</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\mesh2.c">

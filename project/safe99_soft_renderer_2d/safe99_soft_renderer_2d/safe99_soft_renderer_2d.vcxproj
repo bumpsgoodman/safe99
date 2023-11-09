@@ -23,7 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\dll_main.c" />
-    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\index_buffer2.c" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\index_buffer.c" />
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\mesh2.c" />
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\soft_renderer_2d.cpp" />
     <ClCompile Include="..\..\..\source\safe99_soft_renderer_2d\private\vertex_buffer2.c" />

@@ -78,11 +78,12 @@ typedef interface i_soft_renderer_2d_vtbl
                                                       i_vertex_buffer2_t** pp_out_vertex_buffer);
     bool        (__stdcall*     create_index_buffer)(const i_soft_renderer_2d_t* p_this,
                                                      const uint_t* p_indices, const size_t num_indices,
-                                                     i_index_buffer2_t** pp_out_index_buffer);
+                                                     i_index_buffer_t** pp_out_index_buffer);
     bool        (__stdcall*     create_mesh)(const i_soft_renderer_2d_t* p_this,
                                              i_vertex_buffer2_t* p_vertex_buffer,
-                                             i_index_buffer2_t* p_index_buffer,
-                                             i_texture2_t* p_texture,
+                                             i_index_buffer_t* p_index_buffer,
+                                             i_texture_t* p_texture,
+                                             const color_t wireframe_color,
                                              i_mesh2_t** pp_out_mesh);
 
     void        (__stdcall*     draw_mesh)(i_soft_renderer_2d_t* p_this,
