@@ -135,7 +135,7 @@ FORCEINLINE matrix_t __vectorcall matrix_get_translation_3d(const float x, const
     matrix_t result;
     result.r0 = vector_set(1.0f, 0.0f, x, 0);
     result.r1 = vector_set(0.0f, 1.0f, y, 0);
-    result.r2 = vector_set(0.0f, 1.0f, z, 0);
+    result.r2 = vector_set(0.0f, 0.0f, z, 0);
     result.r3 = s_identity_r3;
     return result;
 }

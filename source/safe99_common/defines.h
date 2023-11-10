@@ -269,10 +269,7 @@ typedef interface i_mesh3
     i_mesh3_vtbl_t* vtbl;
 } i_mesh3_t;
 
-// ECS 컴포넌트
-#define ecs_component struct
-
-typedef ecs_component transform2
+typedef struct transform2
 {
     vector2_t position;
     float rotation;
@@ -288,5 +285,12 @@ typedef struct camera2
 
     matrix_t view_matrix;
 } camera2_t;
+
+typedef struct transform3
+{
+    vector3_t position;
+    float rotation;
+    float scale;
+} transform3_t;
 
 #endif // DEFINES_H
