@@ -289,7 +289,7 @@ typedef struct camera2
 typedef struct transform3
 {
     vector3_t position;
-    float rotation;
+    vector3_t rotation;
     float scale;
 } transform3_t;
 
