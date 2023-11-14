@@ -1428,6 +1428,7 @@ void __stdcall create_instance(void** pp_out_instance)
     if (pa_world == NULL)
     {
         ASSERT(false, "Failed to malloc world");
+
         *pp_out_instance = NULL;
         return;
     }

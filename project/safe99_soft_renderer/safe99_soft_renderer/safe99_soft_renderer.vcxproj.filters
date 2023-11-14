@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="safe99_common">
+      <UniqueIdentifier>{5c2a8b81-5495-42b7-a512-22ca4151c380}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="private">
+      <UniqueIdentifier>{0e6048cc-df8f-4155-b25b-328533d5bd1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_math">
+      <UniqueIdentifier>{489fb928-db4a-4310-afa0-a3a23f63e1a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_generic">
+      <UniqueIdentifier>{a7eee569-3fff-4243-b5cd-6cd7e37602f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_generic\util">
+      <UniqueIdentifier>{386f6727-1c66-4b77-8845-79c8a7b2f6a1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\safe99_common\defines.h">
+      <Filter>safe99_common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_math\color.h">
+      <Filter>safe99_math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_math\math.h">
+      <Filter>safe99_math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_math\math_defines.h">
+      <Filter>safe99_math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_math\math_misc.h">
+      <Filter>safe99_math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_math\matrix.h">
+      <Filter>safe99_math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_math\vector.h">
+      <Filter>safe99_math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\chunked_memory_pool.h">
+      <Filter>safe99_generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\dynamic_vector.h">
+      <Filter>safe99_generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\fixed_vector.h">
+      <Filter>safe99_generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\list.h">
+      <Filter>safe99_generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\map.h">
+      <Filter>safe99_generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\static_memory_pool.h">
+      <Filter>safe99_generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\util\hash_function.h">
+      <Filter>safe99_generic\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_generic\util\timer.h">
+      <Filter>safe99_generic\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\safe99_soft_renderer\i_soft_renderer.h" />
+    <ClInclude Include="..\..\..\source\safe99_soft_renderer\private\precompiled.h">
+      <Filter>private</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\precompiled.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\soft_renderer.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\dll_main.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\vertex_buffer.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\index_buffer.c">
+      <Filter>private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\mesh.c">
+      <Filter>private</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="safe99_soft_renderer.def" />
+  </ItemGroup>
+</Project>

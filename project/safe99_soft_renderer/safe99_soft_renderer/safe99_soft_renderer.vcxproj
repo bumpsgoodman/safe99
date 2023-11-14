@@ -20,23 +20,44 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\safe99_common\defines.h" />
-    <ClInclude Include="..\..\..\source\safe99_soft_renderer_3d\i_soft_renderer_3d.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\chunked_memory_pool.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\dynamic_vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\fixed_vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\list.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\map.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\static_memory_pool.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\util\hash_function.h" />
+    <ClInclude Include="..\..\..\source\safe99_generic\util\timer.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\color.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\math.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\math_defines.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\math_misc.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\matrix.h" />
+    <ClInclude Include="..\..\..\source\safe99_math\vector.h" />
+    <ClInclude Include="..\..\..\source\safe99_soft_renderer\i_soft_renderer.h" />
+    <ClInclude Include="..\..\..\source\safe99_soft_renderer\private\precompiled.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="safe99_soft_renderer_3d.def" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\dll_main.c" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\index_buffer.c" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\mesh.c" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\precompiled.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\soft_renderer.c" />
+    <ClCompile Include="..\..\..\source\safe99_soft_renderer\private\vertex_buffer.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\dll_main.c" />
-    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\index_buffer.c" />
-    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\mesh3.c" />
-    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\soft_renderer_3d.cpp" />
-    <ClCompile Include="..\..\..\source\safe99_soft_renderer_3d\private\vertex_buffer3.c" />
+    <None Include="safe99_soft_renderer.def" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{674c0445-f79f-496b-8645-176403904de0}</ProjectGuid>
-    <RootNamespace>safe99softrenderer3d</RootNamespace>
+    <ProjectGuid>{84505ca7-a5d7-4a07-b747-c427908b2b54}</ProjectGuid>
+    <RootNamespace>safe99softrenderer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -109,8 +130,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer_3d;..\..\..\source\safe99_soft_renderer_3d\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer;..\..\..\source\safe99_soft_renderer\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -119,7 +140,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x86d.lib;..\..\..\output\lib\safe99_math_x86d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>safe99_soft_renderer_3d.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>safe99_soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -130,8 +151,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer_3d;..\..\..\source\safe99_soft_renderer_3d\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer;..\..\..\source\safe99_soft_renderer\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -142,7 +163,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x86.lib;..\..\..\output\lib\safe99_math_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>safe99_soft_renderer_3d.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>safe99_soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -151,8 +172,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer_3d;..\..\..\source\safe99_soft_renderer_3d\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer;..\..\..\source\safe99_soft_renderer\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -161,7 +182,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x64d.lib;..\..\..\output\lib\safe99_math_x64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>safe99_soft_renderer_3d.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>safe99_soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -172,8 +193,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);SAFE99_DLL_EXPORTS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer_3d;..\..\..\source\safe99_soft_renderer_3d\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>..\..\..\source;..\..\..\source\safe99_soft_renderer;..\..\..\source\safe99_soft_renderer\private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -184,7 +205,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x64.lib;..\..\..\output\lib\safe99_math_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>safe99_soft_renderer_3d.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>safe99_soft_renderer.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

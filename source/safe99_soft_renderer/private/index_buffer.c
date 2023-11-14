@@ -6,13 +6,11 @@
 // 
 // 작성자: bumpsgoodman
 // 
-// 작성일: 2023/11/09
+// 작성일: 2023/11/14
 // 
 //***************************************************************************
 
-#include <memory.h>
-
-#include "safe99_common/defines.h"
+#include "precompiled.h"
 
 typedef struct index_buffer
 {

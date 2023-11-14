@@ -6,13 +6,13 @@
 // 
 // 작성자: bumpsgoodman
 // 
-// 작성일: 2023/08/31
+// 작성일: 2023/11/13
 // 
 //***************************************************************************
 
-#include <Windows.h>
+#include "precompiled.h"
 
-BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
     switch (ul_reason_for_call)
     {

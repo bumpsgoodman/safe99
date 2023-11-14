@@ -81,6 +81,14 @@ typedef void (__stdcall *create_instance_func)(void**);
 #define ALIGN16 _declspec(align(16))
 #define ALIGN32 _declspec(align(32))
 
+typedef struct rect
+{
+    int left;
+    int top;
+    int right;
+    int bottom;
+} rect_t;
+
 typedef struct timer
 {
     uint64_t frequency;
@@ -179,24 +187,24 @@ typedef interface i_texture
     i_texture_vtbl_t* vtbl;
 } i_texture_t;
 
-typedef interface i_vertex_buffer2 i_vertex_buffer2_t;
-typedef interface i_vertex_buffer2_vtbl
+typedef interface i_vertex_buffer i_vertex_buffer_t;
+typedef interface i_vertex_buffer_vtbl
 {
-    size_t              (__stdcall*     add_ref)(i_vertex_buffer2_t* p_this);
-    size_t              (__stdcall*     release)(i_vertex_buffer2_t* p_this);
-    size_t              (__stdcall*     get_ref_count)(const i_vertex_buffer2_t* p_this);
+    size_t              (__stdcall*     add_ref)(i_vertex_buffer_t* p_this);
+    size_t              (__stdcall*     release)(i_vertex_buffer_t* p_this);
+    size_t              (__stdcall*     get_ref_count)(const i_vertex_buffer_t* p_this);
 
-    const vector2_t*    (__stdcall*     get_positions)(const i_vertex_buffer2_t* p_this);
-    const color_t*      (__stdcall*     get_colors_or_null)(const i_vertex_buffer2_t* p_this);
-    const vector2_t*    (__stdcall*     get_tex_coord_or_null)(const i_vertex_buffer2_t* p_this);
+    const vector3_t*    (__stdcall*     get_positions)(const i_vertex_buffer_t* p_this);
+    const color_t*      (__stdcall*     get_colors_or_null)(const i_vertex_buffer_t* p_this);
+    const vector2_t*    (__stdcall*     get_tex_coord_or_null)(const i_vertex_buffer_t* p_this);
 
-    size_t              (__stdcall*     get_num_vertices)(const i_vertex_buffer2_t* p_this);
-} i_vertex_buffer2_vtbl_t;
+    size_t              (__stdcall*     get_num_vertices)(const i_vertex_buffer_t* p_this);
+} i_vertex_buffer_vtbl_t;
 
-typedef interface i_vertex_buffer2
+typedef interface i_vertex_buffer
 {
-    i_vertex_buffer2_vtbl_t* vtbl;
-} i_vertex_buffer2_t;
+    i_vertex_buffer_vtbl_t* vtbl;
+} i_vertex_buffer_t;
 
 typedef interface i_index_buffer i_index_buffer_t;
 typedef interface i_index_buffer_vtbl
@@ -214,60 +222,23 @@ typedef interface i_index_buffer
     i_index_buffer_vtbl_t* vtbl;
 } i_index_buffer_t;
 
-typedef interface i_mesh2 i_mesh2_t;
-typedef interface i_mesh2_vtbl
+typedef interface i_mesh i_mesh_t;
+typedef interface i_mesh_vtbl
 {
-    size_t                  (__stdcall*     add_ref)(i_mesh2_t* p_this);
-    size_t                  (__stdcall*     release)(i_mesh2_t* p_this);
-    size_t                  (__stdcall*     get_ref_count)(const i_mesh2_t* p_this);
+    size_t                  (__stdcall*     add_ref)(i_mesh_t* p_this);
+    size_t                  (__stdcall*     release)(i_mesh_t* p_this);
+    size_t                  (__stdcall*     get_ref_count)(const i_mesh_t* p_this);
 
-    i_vertex_buffer2_t*     (__stdcall*     get_vertex_buffer)(const i_mesh2_t* p_this);
-    i_index_buffer_t*       (__stdcall*     get_index_buffer)(const i_mesh2_t* p_this);
-    i_texture_t*            (__stdcall*     get_texture)(const i_mesh2_t* p_this);
-    color_t                 (__stdcall*     get_wireframe_color)(const i_mesh2_t* p_this);
-} i_mesh2_vtbl_t;
+    i_vertex_buffer_t*      (__stdcall*     get_vertex_buffer)(const i_mesh_t* p_this);
+    i_index_buffer_t*       (__stdcall*     get_index_buffer)(const i_mesh_t* p_this);
+    i_texture_t*            (__stdcall*     get_texture)(const i_mesh_t* p_this);
+    color_t                 (__stdcall*     get_wireframe_color)(const i_mesh_t* p_this);
+} i_mesh_vtbl_t;
 
-typedef interface i_mesh2
+typedef interface i_mesh
 {
-    i_mesh2_vtbl_t* vtbl;
-} i_mesh2_t;
-
-typedef interface i_vertex_buffer3 i_vertex_buffer3_t;
-typedef interface i_vertex_buffer3_vtbl
-{
-    size_t              (__stdcall*     add_ref)(i_vertex_buffer3_t* p_this);
-    size_t              (__stdcall*     release)(i_vertex_buffer3_t* p_this);
-    size_t              (__stdcall*     get_ref_count)(const i_vertex_buffer3_t* p_this);
-
-    const vector3_t*    (__stdcall*     get_positions)(const i_vertex_buffer3_t* p_this);
-    const color_t*      (__stdcall*     get_colors_or_null)(const i_vertex_buffer3_t* p_this);
-    const vector3_t*    (__stdcall*     get_tex_coord_or_null)(const i_vertex_buffer3_t* p_this);
-
-    size_t              (__stdcall*     get_num_vertices)(const i_vertex_buffer3_t* p_this);
-} i_vertex_buffer3_vtbl_t;
-
-typedef interface i_vertex_buffer3
-{
-    i_vertex_buffer3_vtbl_t* vtbl;
-} i_vertex_buffer3_t;
-
-typedef interface i_mesh3 i_mesh3_t;
-typedef interface i_mesh3_vtbl
-{
-    size_t                  (__stdcall*     add_ref)(i_mesh3_t* p_this);
-    size_t                  (__stdcall*     release)(i_mesh3_t* p_this);
-    size_t                  (__stdcall*     get_ref_count)(const i_mesh3_t* p_this);
-
-    i_vertex_buffer3_t*     (__stdcall*     get_vertex_buffer)(const i_mesh3_t* p_this);
-    i_index_buffer_t*       (__stdcall*     get_index_buffer)(const i_mesh3_t* p_this);
-    i_texture_t*            (__stdcall*     get_texture)(const i_mesh3_t* p_this);
-    color_t                 (__stdcall*     get_wireframe_color)(const i_mesh3_t* p_this);
-} i_mesh3_vtbl_t;
-
-typedef interface i_mesh3
-{
-    i_mesh3_vtbl_t* vtbl;
-} i_mesh3_t;
+    i_mesh_vtbl_t* vtbl;
+} i_mesh_t;
 
 typedef struct transform2
 {
