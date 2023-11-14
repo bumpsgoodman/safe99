@@ -113,13 +113,12 @@ static size_t __stdcall release(i_soft_renderer_t* p_this)
     soft_renderer_t* p_renderer = (soft_renderer_t*)p_this;
     if (--p_renderer->ref_count == 0)
     {
-        SAFE_FREE(p_renderer->pa_buffer->pa_surface);
-        SAFE_FREE(p_renderer->pa_buffer);
-
         DeleteObject(p_renderer->hdi_bitmap);
         DeleteObject(p_renderer->hdefault_bitmap);
         ReleaseDC(p_renderer->hwnd, p_renderer->hmem_dc);
         ReleaseDC(p_renderer->hwnd, p_renderer->hdc);
+
+        SAFE_FREE(p_renderer->pa_buffer);
 
         SAFE_FREE(p_renderer);
 
@@ -552,20 +551,23 @@ static void __stdcall draw_bitmap(i_soft_renderer_t* p_this,
     const size_t end_x = MIN(x + sprite_width, p_renderer->window_width);
     const size_t end_y = MIN(y + sprite_height, p_renderer->window_height);
 
+    const size_t dest_width = end_x - start_x;
+    const size_t dest_height = end_y - start_y;
+
     buffer_t* p_buffer = p_renderer->pa_buffer;
     uint32_t* p_surface = p_buffer->pa_surface;
-    for (size_t y = start_y; y <= end_y; ++y)
+    for (size_t y = 0; y < dest_height; ++y)
     {
-        for (size_t x = start_x; x <= end_x; ++x)
+        for (size_t x = 0; x < dest_width; ++x)
         {
-            const uint32_t color = p_bitmap[y * width + x];
+            const uint32_t color = p_bitmap[(sprite_y + y) * width + (sprite_x + x)];
 
             if (GET_ALPHA_ARGB(color) == 0)
             {
                 return;
             }
 
-            p_surface[y * p_buffer->pitch + x] = color;
+            p_surface[(start_y + y) * p_buffer->pitch + (start_x + x)] = color;
         }
     }
 }
@@ -1131,35 +1133,11 @@ static bool update_buffer(soft_renderer_t* p_renderer)
 
     // 버퍼 업데이트
     buffer_t* p_buffer = p_renderer->pa_buffer;
-    uint32_t* p_surface = p_buffer->pa_surface;
-
-    uint32_t* pa_new_surface = (uint32_t*)malloc(sizeof(uint32_t) * pitch * window_height);
-    if (pa_new_surface == NULL)
-    {
-        ASSERT(false, "Failed to malloc new surface");
-        goto failed_malloc_new_surface;
-    }
-
-    if (p_surface != NULL)
-    {
-        const size_t min_pitch = MIN(pitch, p_buffer->pitch);
-        const size_t min_height = MIN(window_height, p_buffer->height);
-
-        // 가장 작은 크기의 표면 복사
-        memcpy(pa_new_surface, p_buffer->pa_surface, sizeof(uint32_t) * min_pitch * min_height);
-
-        SAFE_FREE(p_buffer->pa_surface);
-    }
-
-    p_buffer->pa_surface = pa_new_surface;
     p_buffer->width = window_width;
     p_buffer->height = window_height;
     p_buffer->pitch = pitch;
 
     return true;
-
-failed_malloc_new_surface:
-    return false;
 }
 
 static int get_region(const int x, const int y, const rect_t* p_clip_window)
