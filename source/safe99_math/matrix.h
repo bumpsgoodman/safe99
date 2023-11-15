@@ -152,12 +152,36 @@ FORCEINLINE matrix_t __vectorcall matrix_get_rotation_3d(const float yaw, const 
     get_sin_cos(pitch, &pitch_sin, &pitch_cos);
     get_sin_cos(yaw, &yaw_sin, &yaw_cos);
 
+    matrix_t yaw_mat;
+    yaw_mat.r0 = s_identity_r0;
+    yaw_mat.r1 = vector_set(0.0f, yaw_cos, -yaw_sin, 0.0f);
+    yaw_mat.r2 = vector_set(0.0f, yaw_sin, yaw_cos, 0.0f);
+    yaw_mat.r3 = s_identity_r3;
+
+    matrix_t pitch_mat;
+    pitch_mat.r0 = vector_set(pitch_cos, pitch_sin, 0.0f, 0.0f);
+    pitch_mat.r1 = s_identity_r1;
+    pitch_mat.r2 = vector_set(-pitch_sin, pitch_cos, 1.0f, 0.0f);
+    pitch_mat.r3 = s_identity_r3;
+
+    matrix_t roll_mat;
+    roll_mat.r0 = vector_set(roll_cos, -roll_sin, 0.0f, 0.0f);
+    roll_mat.r1 = vector_set(roll_sin, roll_cos, 0.0f, 0.0f);
+    roll_mat.r2 = s_identity_r2;
+    roll_mat.r3 = s_identity_r3;
+
+    matrix_t result = matrix_mul(yaw_mat, matrix_get_transpose(pitch_mat));
+    result = matrix_mul(result, matrix_get_transpose(roll_mat));
+    return result;
+
+#if 0
     matrix_t result;
     result.r0 = vector_set(yaw_cos * pitch_cos + yaw_sin * pitch_sin * roll_sin, -yaw_cos * pitch_sin + yaw_sin * pitch_sin * roll_cos, yaw_sin * pitch_cos, 0.0f);
     result.r1 = vector_set(pitch_cos * roll_sin, pitch_cos * roll_cos, -pitch_sin, 0.0f);
     result.r2 = vector_set(-yaw_sin * pitch_cos + yaw_cos * pitch_sin * roll_sin, yaw_sin * pitch_sin + yaw_cos * pitch_sin * roll_cos, yaw_cos * pitch_cos, 0.0f);
     result.r3 = s_identity_r3;
     return result;
+#endif
 }
 
 END_EXTERN_C

@@ -261,7 +261,13 @@ typedef struct transform3
 {
     vector3_t position;
     vector3_t rotation;
-    float scale;
+    vector3_t scale;
 } transform3_t;
+
+typedef struct camera3
+{
+    transform3_t transform;
+    matrix_t view_matrix;
+} camera3_t;
 
 #endif // DEFINES_H
