@@ -240,12 +240,36 @@ typedef interface i_mesh
     i_mesh_vtbl_t* vtbl;
 } i_mesh_t;
 
+// Note:
+// - 멤버 읽기/쓰기 모두 도우미 함수를 사용해야 함
+// ex) const vector2_t position = transform2_get_position(&transform);
 typedef struct transform2
 {
     vector2_t position;
     float rotation;
-    float scale;
+    vector2_t scale;
+
+    vector2_t right_vector;
+    vector2_t up_vector;
+
+    matrix_t model_matrix;
 } transform2_t;
+
+// Note:
+// - 멤버 읽기/쓰기 모두 도우미 함수를 사용해야 함
+// ex) const vector3_t position = transform3_get_position(&transform);
+typedef struct transform3
+{
+    vector3_t position;
+    vector3_t rotation;
+    vector3_t scale;
+
+    vector3_t right_vector;
+    vector3_t up_vector;
+    vector3_t forward_vector;
+
+    matrix_t model_matrix;
+} transform3_t;
 
 typedef struct camera2
 {
@@ -257,12 +281,7 @@ typedef struct camera2
     matrix_t view_matrix;
 } camera2_t;
 
-typedef struct transform3
-{
-    vector3_t position;
-    vector3_t rotation;
-    vector3_t scale;
-} transform3_t;
+
 
 typedef struct camera3
 {

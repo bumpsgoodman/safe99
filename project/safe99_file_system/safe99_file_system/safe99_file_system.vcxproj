@@ -35,7 +35,7 @@
     <ClInclude Include="..\..\..\source\safe99_file_system\private\precompiled.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="file_system.def" />
+    <None Include="safe99_file_system.def" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -124,7 +124,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x86d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>file_system.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>safe99_file_system.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -147,7 +147,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>file_system.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>safe99_file_system.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -166,7 +166,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>file_system.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>safe99_file_system.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -189,7 +189,7 @@
       <ImportLibrary>..\..\..\output\lib\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>..\..\..\output\pdb\$(TargetName).pdb</ProgramDatabaseFile>
       <AdditionalDependencies>..\..\..\output\lib\safe99_generic_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>file_system.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>safe99_file_system.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

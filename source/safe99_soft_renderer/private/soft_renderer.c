@@ -132,7 +132,7 @@ static size_t __stdcall get_ref_count(const i_soft_renderer_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    soft_renderer_t* p_renderer = (soft_renderer_t*)p_this;
+    const soft_renderer_t* p_renderer = (soft_renderer_t*)p_this;
     return p_renderer->ref_count;
 }
 

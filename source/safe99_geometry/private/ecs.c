@@ -42,7 +42,7 @@
 // struct 전방 선언
 // -----------------------------------------------------------------
 
-typedef struct ecs_world ecs_world_t;
+typedef struct ecs ecs_t;
 
 typedef struct entity_queue entity_queue_t;
 typedef struct entity_field entity_field_t;
@@ -97,7 +97,7 @@ typedef struct system
     ecs_system_func p_func;
 } system_t;
 
-typedef struct ecs_world
+typedef struct ecs
 {
     i_ecs_t base;
     size_t ref_count;
@@ -128,38 +128,38 @@ typedef struct ecs_world
     // system
     map_t registered_systems;
     system_t* pa_systems;
-} ecs_world_t;
+} ecs_t;
 
 // -----------------------------------------------------------------
 
 // 내부 함수 선언
 // -----------------------------------------------------------------
 
-static bool create_archetype(ecs_world_t* p_world, const ecs_mask_t* p_mask, archetype_t** pp_out_archetype);
+static bool create_archetype(ecs_t* p_world, const ecs_mask_t* p_mask, archetype_t** pp_out_archetype);
 
-static FORCEINLINE entity_field_t* get_entity_field_or_null(const ecs_world_t* p_world, const ecs_id_t entity);
+static FORCEINLINE entity_field_t* get_entity_field_or_null(const ecs_t* p_world, const ecs_id_t entity);
 
-static bool move_archetype(ecs_world_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype);
-static bool move_archetype_from_null(ecs_world_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype);
-static bool move_archetype_to_null(ecs_world_t* p_world, const ecs_id_t entity);
+static bool move_archetype(ecs_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype);
+static bool move_archetype_from_null(ecs_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype);
+static bool move_archetype_to_null(ecs_t* p_world, const ecs_id_t entity);
 
-void __stdcall create_instance(void** pp_out_instance);
+void __stdcall create_ecs_instance_private(i_ecs_t** pp_out_ecs_instance);
 
 // -----------------------------------------------------------------
 
-size_t __stdcall add_ref(i_ecs_t* p_this)
+static size_t __stdcall add_ref(i_ecs_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
     return ++p_world->ref_count;
 }
 
-size_t __stdcall release(i_ecs_t* p_this)
+static size_t __stdcall release(i_ecs_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     if (--p_world->ref_count == 0)
     {
@@ -224,22 +224,22 @@ size_t __stdcall release(i_ecs_t* p_this)
     return p_world->ref_count;
 }
 
-size_t __stdcall get_ref_count(const i_ecs_t* p_this)
+static size_t __stdcall get_ref_count(const i_ecs_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    const ecs_t* p_world = (ecs_t*)p_this;
     return p_world->ref_count;
 }
 
-bool __stdcall initialize(i_ecs_t* p_this, const size_t num_max_entities, const size_t num_max_components, const size_t num_max_systems)
+static bool __stdcall initialize(i_ecs_t* p_this, const size_t num_max_entities, const size_t num_max_components, const size_t num_max_systems)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(num_max_entities - 1 < ECS_NUM_MAX_ENTITIES, "Out of range");
     ASSERT(num_max_components - 1 < ECS_NUM_MAX_ENTITIES, "Out of range");
     ASSERT(num_max_systems - 1 < ECS_NUM_MAX_ENTITIES, "Out of range");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     p_world->num_max_entities = num_max_entities;
     p_world->num_max_components = num_max_components;
@@ -389,17 +389,17 @@ failed_malloc_entity_fields:
     chunked_memory_pool_release(&p_world->mask_pool);
 
 failed_init_component_mask_pool:
-    memset(p_world, 0, sizeof(ecs_world_t));
+    memset(p_world, 0, sizeof(ecs_t));
     return false;
 }
 
-ecs_id_t __stdcall register_component(i_ecs_t* p_this, const char* p_component_name, const size_t component_size)
+static ecs_id_t __stdcall register_component(i_ecs_t* p_this, const char* p_component_name, const size_t component_size)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_component_name != NULL, "p_component_name == NULL");
     ASSERT(component_size > 0, "component_size == 0");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     if (map_get_num_elements(&p_world->registered_components) >= p_world->num_max_components)
     {
@@ -423,12 +423,12 @@ ecs_id_t __stdcall register_component(i_ecs_t* p_this, const char* p_component_n
     return *p_component;
 }
 
-ecs_id_t __cdecl register_system(i_ecs_t* p_this, const char* p_system_name, ecs_system_func p_func, const size_t num_components, ...)
+static ecs_id_t __cdecl register_system(i_ecs_t* p_this, const char* p_system_name, ecs_system_func p_func, const size_t num_components, ...)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(num_components > 0, "num_components == 0");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     if (map_get_num_elements(&p_world->registered_systems) >= p_world->num_max_systems)
     {
@@ -476,12 +476,12 @@ ecs_id_t __cdecl register_system(i_ecs_t* p_this, const char* p_system_name, ecs
     return *p_ecs_id;
 }
 
-ecs_id_t __stdcall get_component_id(const i_ecs_t* p_this, const char* p_component_name)
+static ecs_id_t __stdcall get_component_id(const i_ecs_t* p_this, const char* p_component_name)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_component_name != NULL, "p_component_name == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     const size_t len = strlen(p_component_name);
     const ecs_hash_t hash = hash64_fnv1a(p_component_name, len);
@@ -494,12 +494,12 @@ ecs_id_t __stdcall get_component_id(const i_ecs_t* p_this, const char* p_compone
     return *p_component;
 }
 
-ecs_id_t __stdcall get_system_id(const i_ecs_t* p_this, const char* p_system_name)
+static ecs_id_t __stdcall get_system_id(const i_ecs_t* p_this, const char* p_system_name)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_system_name != NULL, "p_system_name == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     const size_t len = strlen(p_system_name);
     const ecs_hash_t hash = hash64_fnv1a(p_system_name, len);
@@ -512,11 +512,11 @@ ecs_id_t __stdcall get_system_id(const i_ecs_t* p_this, const char* p_system_nam
     return *p_system;
 }
 
-ecs_id_t __stdcall create_entity(i_ecs_t* p_this)
+static ecs_id_t __stdcall create_entity(i_ecs_t* p_this)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     if (p_world->num_entities >= p_world->num_max_entities)
     {
@@ -551,21 +551,21 @@ ecs_id_t __stdcall create_entity(i_ecs_t* p_this)
     return entity;
 }
 
-bool __stdcall is_alive_entity(const i_ecs_t* p_this, const ecs_id_t entity)
+static bool __stdcall is_alive_entity(const i_ecs_t* p_this, const ecs_id_t entity)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     const ecs_id_t pure_entity = PURE_ECS_ID(entity);
     return IS_ENTITY(entity) && p_world->pa_entity_fields[pure_entity].id == entity;
 }
 
-bool __stdcall destroy_entity(i_ecs_t* p_this, const ecs_id_t entity)
+static bool __stdcall destroy_entity(i_ecs_t* p_this, const ecs_id_t entity)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     if (!is_alive_entity(p_this, entity))
     {
@@ -620,11 +620,11 @@ bool __stdcall destroy_entity(i_ecs_t* p_this, const ecs_id_t entity)
     return true;
 }
 
-bool __cdecl has_component(const i_ecs_t* p_this, const ecs_id_t entity, const size_t num_components, ...)
+static bool __cdecl has_component(const i_ecs_t* p_this, const ecs_id_t entity, const size_t num_components, ...)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     entity_field_t* p_record = get_entity_field_or_null(p_world, entity);
     ASSERT(p_record != NULL, "p_field == NULL");
@@ -665,12 +665,12 @@ bool __cdecl has_component(const i_ecs_t* p_this, const ecs_id_t entity, const s
     return count == num_components;
 }
 
-bool __cdecl add_component(i_ecs_t* p_this, const ecs_id_t entity, const size_t num_components, ...)
+static bool __cdecl add_component(i_ecs_t* p_this, const ecs_id_t entity, const size_t num_components, ...)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(num_components > 0, "num_components == 0");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     entity_field_t* p_field = get_entity_field_or_null(p_world, entity);
     if (p_field == NULL)
@@ -755,14 +755,14 @@ failed_to_create_archetype:
     return false;
 }
 
-bool __stdcall set_component(i_ecs_t* p_this, const ecs_id_t entity, const ecs_id_t component, void* p_value)
+static bool __stdcall set_component(i_ecs_t* p_this, const ecs_id_t entity, const ecs_id_t component, void* p_value)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(IS_ENTITY(entity), "Not entity");
     ASSERT(IS_COMPONENT(component), "Not component");
     ASSERT(p_value != NULL, "p_value == NULL");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     if (!has_component(p_this, entity, 1, component))
     {
@@ -789,13 +789,13 @@ bool __stdcall set_component(i_ecs_t* p_this, const ecs_id_t entity, const ecs_i
     return true;
 }
 
-void* __stdcall get_component_or_null(const i_ecs_t* p_this, const ecs_id_t entity, const ecs_id_t component)
+static void* __stdcall get_component_or_null(const i_ecs_t* p_this, const ecs_id_t entity, const ecs_id_t component)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(IS_ENTITY(entity), "Not entity");
     ASSERT(IS_COMPONENT(component), "Not component");
 
-    const ecs_world_t* p_world = (ecs_world_t*)p_this;
+    const ecs_t* p_world = (ecs_t*)p_this;
 
     if (!has_component(p_this, entity, 1, component))
     {
@@ -820,12 +820,12 @@ void* __stdcall get_component_or_null(const i_ecs_t* p_this, const ecs_id_t enti
     return (void*)p_instance;
 }
 
-bool __cdecl remove_component(i_ecs_t* p_this, const ecs_id_t entity, const size_t num_components, ...)
+static bool __cdecl remove_component(i_ecs_t* p_this, const ecs_id_t entity, const size_t num_components, ...)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(num_components > 0, "num_components == 0");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
 
     entity_field_t* p_field = get_entity_field_or_null(p_world, entity);
     if (p_field == NULL)
@@ -919,12 +919,12 @@ failed_to_create_archetype:
     return false;
 }
 
-bool __stdcall update_system(i_ecs_t* p_this, const ecs_id_t system)
+static bool __stdcall update_system(i_ecs_t* p_this, const ecs_id_t system)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(IS_SYSTEM(system), "Not system");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_this;
+    ecs_t* p_world = (ecs_t*)p_this;
     ASSERT(PURE_ECS_ID(system) < map_get_num_elements(&p_world->registered_systems), "Invalid system");
 
     system_t* p_system = p_world->pa_systems + PURE_ECS_ID(system);
@@ -939,12 +939,12 @@ bool __stdcall update_system(i_ecs_t* p_this, const ecs_id_t system)
     return true;
 }
 
-void* __stdcall get_instances_or_null(const ecs_view_t* p_view, const size_t archetype_index, const ecs_id_t component)
+static void* __stdcall get_instances_or_null(const ecs_view_t* p_view, const size_t archetype_index, const ecs_id_t component)
 {
     ASSERT(p_view != NULL, "p_view == NULL");
     ASSERT(IS_COMPONENT(component), "Not component");
 
-    ecs_world_t* p_world = (ecs_world_t*)p_view->p_this;
+    ecs_t* p_world = (ecs_t*)p_view->p_this;
 
     if (archetype_index >= p_view->num_archetypes)
     {
@@ -961,7 +961,7 @@ void* __stdcall get_instances_or_null(const ecs_view_t* p_view, const size_t arc
     return dynamic_vector_get_elements_ptr_or_null(p_instances);
 }
 
-size_t __stdcall get_num_instances(const ecs_view_t* p_view, const size_t archetype_index)
+static size_t __stdcall get_num_instances(const ecs_view_t* p_view, const size_t archetype_index)
 {
     ASSERT(p_view != NULL, "p_view == NULL");
 
@@ -970,7 +970,7 @@ size_t __stdcall get_num_instances(const ecs_view_t* p_view, const size_t archet
         return 0;
     }
 
-    ecs_world_t* p_world = (ecs_world_t*)p_view->p_this;
+    ecs_t* p_world = (ecs_t*)p_view->p_this;
 
     system_t* p_system = p_world->pa_systems + PURE_ECS_ID(p_view->system);
 
@@ -980,7 +980,7 @@ size_t __stdcall get_num_instances(const ecs_view_t* p_view, const size_t archet
     return p_archetype->num_instances;
 }
 
-void* __stdcall get_entities_or_null(const ecs_view_t* p_view, const size_t archetype_index)
+static void* __stdcall get_entities_or_null(const ecs_view_t* p_view, const size_t archetype_index)
 {
     ASSERT(p_view != NULL, "p_view == NULL");
 
@@ -989,7 +989,7 @@ void* __stdcall get_entities_or_null(const ecs_view_t* p_view, const size_t arch
         return NULL;
     }
 
-    ecs_world_t* p_world = (ecs_world_t*)p_view->p_this;
+    ecs_t* p_world = (ecs_t*)p_view->p_this;
 
     system_t* p_system = p_world->pa_systems + PURE_ECS_ID(p_view->system);
 
@@ -999,7 +999,7 @@ void* __stdcall get_entities_or_null(const ecs_view_t* p_view, const size_t arch
     return dynamic_vector_get_elements_ptr_or_null(&p_archetype->entities);
 }
 
-static bool create_archetype(ecs_world_t* p_world, const ecs_mask_t* p_mask, archetype_t** pp_out_archetype)
+static bool create_archetype(ecs_t* p_world, const ecs_mask_t* p_mask, archetype_t** pp_out_archetype)
 {
     ASSERT(p_world != NULL, "p_world == NULL");
     ASSERT(p_mask != NULL, "p_component_mask == NULL");
@@ -1119,7 +1119,7 @@ failed_malloc_component_index:
     return false;
 }
 
-static FORCEINLINE entity_field_t* get_entity_field_or_null(const ecs_world_t* p_world, const ecs_id_t entity)
+static FORCEINLINE entity_field_t* get_entity_field_or_null(const ecs_t* p_world, const ecs_id_t entity)
 {
     ASSERT(p_world != NULL, "p_world == NULL");
 
@@ -1132,7 +1132,7 @@ static FORCEINLINE entity_field_t* get_entity_field_or_null(const ecs_world_t* p
     return &p_world->pa_entity_fields[PURE_ECS_ID(entity)];
 }
 
-static bool move_archetype(ecs_world_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype)
+static bool move_archetype(ecs_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype)
 {
     ASSERT(p_world != NULL, "p_world == NULL");
     ASSERT(p_to_archetype != NULL, "p_to_archetype == NULL");
@@ -1259,7 +1259,7 @@ static bool move_archetype(ecs_world_t* p_world, const ecs_id_t entity, archetyp
     return true;
 }
 
-static bool move_archetype_from_null(ecs_world_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype)
+static bool move_archetype_from_null(ecs_t* p_world, const ecs_id_t entity, archetype_t* p_to_archetype)
 {
     ASSERT(p_world != NULL, "p_world == NULL");
     ASSERT(is_alive_entity(&p_world->base, entity), "Invalid entity");
@@ -1319,7 +1319,7 @@ static bool move_archetype_from_null(ecs_world_t* p_world, const ecs_id_t entity
     return true;
 }
 
-static bool move_archetype_to_null(ecs_world_t* p_world, const ecs_id_t entity)
+static bool move_archetype_to_null(ecs_t* p_world, const ecs_id_t entity)
 {
     ASSERT(p_world != NULL, "p_world == NULL");
     ASSERT(is_alive_entity(&p_world->base, entity), "Invalid entity");
@@ -1389,9 +1389,9 @@ static bool move_archetype_to_null(ecs_world_t* p_world, const ecs_id_t entity)
     return true;
 }
 
-void __stdcall create_instance(void** pp_out_instance)
+void __stdcall create_ecs_instance_private(i_ecs_t** pp_out_ecs_instance)
 {
-    ASSERT(pp_out_instance != NULL, "pp_out_instance == NULL");
+    ASSERT(pp_out_ecs_instance != NULL, "pp_out_instance == NULL");
 
     static i_ecs_vtbl_t vtbl =
     {
@@ -1424,17 +1424,17 @@ void __stdcall create_instance(void** pp_out_instance)
         get_entities_or_null
     };
 
-    ecs_world_t* pa_world = malloc(sizeof(ecs_world_t));
+    ecs_t* pa_world = malloc(sizeof(ecs_t));
     if (pa_world == NULL)
     {
         ASSERT(false, "Failed to malloc world");
 
-        *pp_out_instance = NULL;
+        *pp_out_ecs_instance = NULL;
         return;
     }
 
     pa_world->base.vtbl = &vtbl;
     pa_world->ref_count = 1;
 
-    *pp_out_instance = pa_world;
+    *pp_out_ecs_instance = (i_ecs_t*)pa_world;
 }

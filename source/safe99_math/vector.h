@@ -23,6 +23,9 @@
 #define TO_VECTOR3(v) (*(vector3_t*)(&v))
 #define TO_VECTOR4(v) (*(vector4_t*)(&v))
 
+#define CAST_TO_VECTOR ((vector_t*)(&v))
+//#define CAST_TO_VECTOR2 ((vector2_t*)(&v))
+
 START_EXTERN_C
 
 FORCEINLINE vector_t __vectorcall vector_set(const float x, const float y, const float z, const float w)

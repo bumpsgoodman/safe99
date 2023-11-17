@@ -29,6 +29,6 @@
     <ClInclude Include="..\..\..\source\safe99_file_system\i_file_system.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="file_system.def" />
+    <None Include="safe99_file_system.def" />
   </ItemGroup>
 </Project>

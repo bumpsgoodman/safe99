@@ -40,9 +40,9 @@ FORCEINLINE matrix_t __vectorcall matrix_get_transpose(matrix_t m)
 }
 
 FORCEINLINE matrix_t __vectorcall matrix_set(const float m00, const float m01, const float m02, const float m03,
-                                           const float m10, const float m11, const float m12, const float m13,
-                                           const float m20, const float m21, const float m22, const float m23,
-                                           const float m30, const float m31, const float m32, const float m33)
+                                             const float m10, const float m11, const float m12, const float m13,
+                                             const float m20, const float m21, const float m22, const float m23,
+                                             const float m30, const float m31, const float m32, const float m33)
 {
     matrix_t result;
     result.r0 = vector_set(m00, m01, m02, m03);
