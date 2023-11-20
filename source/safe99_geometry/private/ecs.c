@@ -12,8 +12,8 @@
 
 #include "precompiled.h"
 
-#include "i_ecs.h"
 #include "safe99_common/defines.h"
+#include "i_ecs.h"
 
 // 상수 정의
 // -----------------------------------------------------------------
@@ -249,12 +249,10 @@ static bool __stdcall initialize(i_ecs_t* p_this, const size_t num_max_entities,
     // c는 component 개수
     // c = 1024일 때,
     // 한 노드 당 archetype 개수는 11 * 11 = 121
-    uint_t log2c1 = 0;
-    log2int64(&log2c1, num_max_components);
-    ++log2c1;
-    const size_t pow2_log2c1 = (size_t)log2c1 * log2c1;
+    int log2c1 = log2int64(num_max_components) + 1;
+    const int pow2_log2c1 = log2c1 * log2c1;
 
-    if (!chunked_memory_pool_initialize(&p_world->mask_pool, sizeof(uint64_t) * NUM_MASKS(num_max_components), pow2_log2c1 * 2))
+    if (!chunked_memory_pool_initialize(&p_world->mask_pool, sizeof(uint64_t) * NUM_MASKS(num_max_components), (size_t)pow2_log2c1 * 2))
     {
         ASSERT(false, "Failed to init component mask pool");
         goto failed_init_component_mask_pool;
@@ -1032,10 +1030,8 @@ static bool create_archetype(ecs_t* p_world, const ecs_mask_t* p_mask, archetype
         goto failed_malloc_instances_array;
     }
 
-    uint_t log2e1 = 0;
-    log2int64(&log2e1, p_world->num_max_entities);
-    ++log2e1;
-    const size_t pow2_log2e1 = (size_t)log2e1 * log2e1;
+    int log2e1 = log2int64(p_world->num_max_entities) + 1;
+    const int pow2_log2e1 = log2e1 * log2e1;
 
     // entities 초기화
     if (!dynamic_vector_initialize(&p_archetype->entities, sizeof(ecs_id_t), pow2_log2e1))
@@ -1052,9 +1048,10 @@ static bool create_archetype(ecs_t* p_world, const ecs_mask_t* p_mask, archetype
     for (size_t i = 0; i < num_masks; ++i)
     {
         uint64_t mask = p_mask->p_masks[i];
-        uint_t msb_index = 0;
-        while (log2int64(&msb_index, mask))
+        while (mask != 0)
         {
+            const int msb_index = log2int64(mask);
+
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = msb_index | ECS_FLAG_COMPONENT;
             const ecs_id_t pure_component = PURE_ECS_ID(component);
@@ -1165,12 +1162,12 @@ static bool move_archetype(ecs_t* p_world, const ecs_id_t entity, archetype_t* p
         const uint64_t add_mask = to_mask & xor_mask;
         const uint64_t remove_mask = from_mask & xor_mask;
 
-        uint_t msb_index = 0;
-
         // 이동
         uint64_t mask = move_mask;
-        while (log2int64(&msb_index, mask))
+        while (mask != 0)
         {
+            const int msb_index = log2int64(mask);
+
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
             const ecs_id_t pure_component = PURE_ECS_ID(component);
@@ -1198,8 +1195,10 @@ static bool move_archetype(ecs_t* p_world, const ecs_id_t entity, archetype_t* p
 
         // 추가
         mask = add_mask;
-        while (log2int64(&msb_index, mask))
+        while (mask != 0)
         {
+            const int msb_index = log2int64(mask);
+
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
 
@@ -1213,8 +1212,10 @@ static bool move_archetype(ecs_t* p_world, const ecs_id_t entity, archetype_t* p
 
         // 삭제
         mask = remove_mask;
-        while (log2int64(&msb_index, mask))
+        while (mask != 0)
         {
+            const int msb_index = log2int64(mask);
+
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
 
@@ -1280,11 +1281,12 @@ static bool move_archetype_from_null(ecs_t* p_world, const ecs_id_t entity, arch
     for (size_t i = 0; i < num_masks; ++i)
     {
         uint64_t mask = p_to_archetype->mask.p_masks[i];
-        uint_t msb_index = 0;
 
         // 추가
-        while (log2int64(&msb_index, mask))
+        while (mask != 0)
         {
+            const int msb_index = log2int64(mask);
+
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
 
@@ -1341,11 +1343,12 @@ static bool move_archetype_to_null(ecs_t* p_world, const ecs_id_t entity)
     for (size_t i = 0; i < num_masks; ++i)
     {
         uint64_t mask = p_from_archetype->mask.p_masks[i];
-        uint_t msb_index = 0;
 
         // 삭제
-        while (log2int64(&msb_index, mask))
+        while (mask != 0)
         {
+            const int msb_index = log2int64(mask);
+
             const uint64_t msb_mask = (uint64_t)1 << msb_index;
             const ecs_id_t component = ((uint64_t)msb_index + (uint64_t)64 * i) | ECS_FLAG_COMPONENT;
 

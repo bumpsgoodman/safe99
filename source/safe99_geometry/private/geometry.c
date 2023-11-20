@@ -78,7 +78,9 @@ static i_ecs_t* __stdcall get_ecs(const i_geometry_t* p_this)
     ASSERT(p_this != NULL, "p_this == NULL");
 
     const geometry_t* p_geometry = (geometry_t*)p_this;
-    return p_geometry->p_ecs;
+    i_ecs_t* p_ecs = p_geometry->p_ecs;
+    p_ecs->vtbl->add_ref(p_ecs);
+    return p_ecs;
 }
 
 void __stdcall create_instance(void** pp_out_instance)

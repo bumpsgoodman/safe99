@@ -34,7 +34,7 @@ FORCEINLINE void __stdcall transform3_update_dir_vector(transform3_t* p_transfor
 
     p_transform->right_vector.x = cy * cr + sy * sp * sr;
     p_transform->right_vector.y = cp * sr;
-    p_transform->right_vector.z = -sp * cr + cy * sp * sr;
+    p_transform->right_vector.z = -sy * cr + cy * sp * sr;
 
     p_transform->up_vector.x = cy * -sr + sy * sp * cr;
     p_transform->up_vector.y = cp * cr;

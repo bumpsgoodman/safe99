@@ -2,7 +2,7 @@
 // 
 // 파일: math.h
 // 
-// 설명: 수학 헤더 파일
+// 설명: 수학 함수
 // 
 // 작성자: bumpsgoodman
 // 
@@ -14,16 +14,18 @@
 #define SAFE99_MATH_H
 
 #include "safe99_common/defines.h"
-
 #include "color.h"
 #include "math_defines.h"
 #include "math_misc.h"
 #include "matrix.h"
 
-START_EXTERN_C
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define ABS(a) (((a) > 0) ? (a) : -(a))
 
-SAFE99_API bool __stdcall log2int64(uint32_t* p_out_index, const uint64_t num);
-
-END_EXTERN_C
+#define ROUND(x) ((x) >= 0.0f ? (float)((int)((x) + 0.5f)) : (float)((int)((x) - 0.5f)))
+#define FLOOR(x) ((x) >= 0.0f ? (float)((int)(x)) : (float)((int)(x)))
+#define ROUND_INT(x) ((x) >= 0.0f ? (int)((x) + 0.5f) : (int)((x) - 0.5f))
+#define FLOOR_INT(x) ((x) >= 0.0f ? (int)(x) : (int)(x))
 
 #endif // SAFE99_MATH_H
