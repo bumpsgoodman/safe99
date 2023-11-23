@@ -278,16 +278,20 @@ FORCEINLINE vector_t __vectorcall vector_wrap(const vector_t v, const vector_t m
     /*
     if (v > max_v)
     {
-        return min_v + mod(v - max_v, max_v);
+    return min_v + mod(v - max_v, max_v);
     }
     else if (v < min_v)
     {
-        return max_v + mod(min_v + v, max_v);
+    return max_v + mod(min_v + v, max_v);
     }
     */
 
+    //vector_t zero = vector_get_zero();
+
     // v가 최대 값보다 클 때
     const vector_t max_mask = _mm_cmpgt_ps(v, max_v);
+    //vector_t not_max = _mm_blendv_ps(v, zero, max_mask);
+    //vector_t max_result = _mm_blendv_ps(zero, v, max_mask);
     vector_t max_result = _mm_and_ps(v, max_mask);
     max_result = vector_sub(max_result, max_v);
     max_result = vector_mod(max_result, max_v);
@@ -296,15 +300,24 @@ FORCEINLINE vector_t __vectorcall vector_wrap(const vector_t v, const vector_t m
 
     // v가 최소 값보다 작을 때
     const vector_t min_mask = _mm_cmplt_ps(v, min_v);
+    //vector_t not_min = _mm_blendv_ps(v, zero, min_mask);
+    //vector_t min_result = _mm_blendv_ps(zero, v, min_mask);
     vector_t min_result = _mm_and_ps(v, min_mask);
     min_result = vector_add(min_result, min_v);
     min_result = vector_mod(min_result, max_v);
     min_result = vector_add(max_v, min_result);
     min_result = _mm_and_ps(min_result, min_mask);
 
-    // and를 하고 나면 순서가 바뀌기 때문에 역순으로 바꾸기
+    // 래핑되지 않은 값 추가 (범위 내에 있던 값 추가)
+    //vector_t no_wrap = _mm_and_ps(not_max, not_min);
     vector_t result = _mm_or_ps(min_result, max_result);
+    const vector_t zero_mask = _mm_cmpeq_ps(result, vector_get_zero());
+    result = _mm_or_ps(result, _mm_and_ps(v, zero_mask));
+    //result = _mm_or_ps(result, no_wrap);
+
+    // and를 하고 나면 순서가 바뀌기 때문에 역순으로 바꾸기
     result = _mm_shuffle_ps(result, result, _MM_SHUFFLE(3, 2, 1, 0));
+
     return result;
 }
 
