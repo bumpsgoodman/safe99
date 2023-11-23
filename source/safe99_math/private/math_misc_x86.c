@@ -15,7 +15,8 @@
 
 __declspec(naked) int __stdcall log2int64(const uint64_t num)
 {
-    // sp로 매개변수에 접근하기 때문에 함수 프롤로그/에필로그 작성 x
+    // [esp + 4] = num의 하위 32비트
+    // [esp + 8] = num의 상위 32비트
 
     __asm
     {

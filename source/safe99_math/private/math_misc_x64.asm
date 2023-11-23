@@ -10,12 +10,17 @@
 ;  
 ; ***************************************************************************
 
+; __vectorcall:
+;   매개 변수가 크기가 8바이트로 고정
+;   왼쪽에서 오른쪽으로 처음 6개 할당 (xmm0 : xmm5) 
+
 .code
 
 ; int __stdcall log2int64(const uint64_t num)
+; num = rcx
 log2int64 PROC
     bsr rax, rcx
     ret
 log2int64 ENDP
 
-end
+END

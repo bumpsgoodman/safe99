@@ -150,6 +150,29 @@ ALIGN16 typedef struct matrix
     };
 } matrix_t;
 
+typedef __m128i vector_int_t;
+
+ALIGN16 typedef struct vector2_int
+{
+    int x;
+    int y;
+} vector2_int_t;
+
+ALIGN16 typedef struct vector3_int
+{
+    int x;
+    int y;
+    int z;
+} vector3_int_t;
+
+ALIGN16 typedef struct vector4_int
+{
+    int x;
+    int y;
+    int z;
+    int w;
+} vector4_int_t;
+
 typedef interface i_safe3d i_safe3d_t;
 typedef interface i_safe3d_vtbl
 {

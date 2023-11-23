@@ -20,10 +20,9 @@ START_EXTERN_C
 
 SAFE99_API int __stdcall log2int64(const uint64_t num);
 
+// DirectXMath에서 가져옴
 FORCEINLINE void __stdcall get_sin_cos(const float rad, float* p_out_sin, float* p_out_cos)
 {
-    // DirectXMath에서 가져옴
-
     ASSERT(p_out_sin != NULL, "p_out_sin == NULL");
     ASSERT(p_out_cos != NULL, "p_out_cos == NULL");
 

@@ -26,10 +26,10 @@ START_EXTERN_C
 FORCEINLINE matrix_t __vectorcall matrix_get_identity(void)
 {
     matrix_t result;
-    result.r0 = vector_set(1.0f, 0.0f, 0.0f, 0.0f);
-    result.r1 = vector_set(0.0f, 1.0f, 0.0f, 0.0f);
-    result.r2 = vector_set(0.0f, 0.0f, 1.0f, 0.0f);
-    result.r3 = vector_set(0.0f, 0.0f, 0.0f, 1.0f);
+    result.r0 = s_identity_r0;
+    result.r1 = s_identity_r1;
+    result.r2 = s_identity_r2;
+    result.r3 = s_identity_r3;
     return result;
 }
 
