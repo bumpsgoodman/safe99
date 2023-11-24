@@ -100,52 +100,34 @@ FORCEINLINE float __vectorcall vector_get_w(const vector_t v)
 FORCEINLINE vector_t __vectorcall vector2_to_vector(const vector2_t* p_v)
 {
     ASSERT(p_v != NULL, "p_v == NULL");
-    return vector_set(p_v->x, p_v->y, 1.0f, 1.0f);
+    return _mm_set_ps(1.0f, 1.0f, p_v->y, p_v->x);
 }
 
 FORCEINLINE vector_t __vectorcall vector3_to_vector(const vector3_t* p_v)
 {
     ASSERT(p_v != NULL, "p_v == NULL");
-    return vector_set(p_v->x, p_v->y, p_v->z, 1.0f);
+    return _mm_set_ps(1.0f, p_v->z, p_v->y, p_v->x);
 }
 
 FORCEINLINE vector_t __vectorcall vector4_to_vector(const vector4_t* p_v)
 {
     ASSERT(p_v != NULL, "p_v == NULL");
-    return vector_set(p_v->x, p_v->y, p_v->z, p_v->w);
+    return _mm_set_ps(p_v->w, p_v->z, p_v->y, p_v->x);
 }
 
 FORCEINLINE vector2_t __vectorcall vector_to_vector2(const vector_t v)
 {
-    const vector2_t result =
-    {
-        vector_get_x(v),
-        vector_get_y(v)
-    };
-    return result;
+    return *(vector2_t*)&v;
 }
 
 FORCEINLINE vector3_t __vectorcall vector_to_vector3(const vector_t v)
 {
-    const vector3_t result =
-    {
-        vector_get_x(v),
-        vector_get_y(v),
-        vector_get_z(v)
-    };
-    return result;
+    return *(vector3_t*)&v;
 }
 
 FORCEINLINE vector4_t __vectorcall vector_to_vector4(const vector_t v)
 {
-    const vector4_t result =
-    {
-        vector_get_x(v),
-        vector_get_y(v),
-        vector_get_z(v),
-        vector_get_w(v)
-    };
-    return result;
+    return *(vector4_t*)&v;
 }
 
 FORCEINLINE vector_t __vectorcall vector_add(const vector_t v0, const vector_t v1)
@@ -206,8 +188,8 @@ FORCEINLINE vector_t __vectorcall vector_trunc(const vector_t v)
 FORCEINLINE vector_t __vectorcall vector_mod(const vector_t v0, const vector_t v1)
 {
     // v0 % v1 = v0 - v1 * TRUNC(v0 / v1);
-    vector_t result = vector_trunc(vector_div(v0, v1));
-    result = vector_sub(v0, vector_mul(v1, result));
+    vector_t result = _mm_trunc_ps(_mm_div_ps(v0, v1));
+    result = _mm_sub_ps(v0, _mm_mul_ps(v1, result));
     return result;
 }
 
@@ -249,7 +231,24 @@ FORCEINLINE float __vectorcall vector_cross2(const vector_t v0, const vector_t v
     result = _mm_mul_ps(v0, result);
     const vector_t temp = _mm_shuffle_ps(result, result, _MM_SHUFFLE(1, 1, 1, 1));
     result = _mm_sub_ps(result, temp);
-    return vector_get_x(result);
+    return _mm_cvtss_f32(result);
+}
+
+FORCEINLINE vector_t vector_cross3(const vector_t v0, const vector_t v1)
+{
+    // (v0.y * v1.z - v0.z * v1.y
+    //  v0.z * v1.x - v0.x * v1.z
+    //  v0.x * v1.y - v0.y * v1.x)
+
+    vector_t shuffle_v0 = _mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3, 0, 2, 1));
+    vector_t shuffle_v1 = _mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3, 1, 0, 2));
+    const vector_t result1 = _mm_mul_ps(shuffle_v0, shuffle_v1);
+
+    shuffle_v0 = _mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3, 1, 0, 2));
+    shuffle_v1 = _mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3, 0, 2, 1));
+    const vector_t result2 = _mm_mul_ps(shuffle_v0, shuffle_v1);
+
+    return _mm_sub_ps(result1, result2);
 }
 
 FORCEINLINE float __vectorcall vector_dot2(const vector_t v0, const vector_t v1)
@@ -264,13 +263,13 @@ FORCEINLINE float __vectorcall vector_dot3(const vector_t v0, const vector_t v1)
 
 FORCEINLINE vector_t __vectorcall vector_clamp(const vector_t v, const vector_t min_v, const vector_t max_v)
 {
-    vector_t result = vector_min(v, max_v);
-    return vector_max(result, min_v);
+    vector_t result = _mm_min_ps(v, max_v);
+    return _mm_max_ps(result, min_v);
 }
 
 FORCEINLINE vector_t __vectorcall vector_clamp_scalar(const vector_t v, const float min, const float max)
 {
-    return vector_clamp(v, vector_set1(min), vector_set1(max));
+    return vector_clamp(v, _mm_set_ps1(min), _mm_set_ps1(max));
 }
 
 FORCEINLINE vector_t __vectorcall vector_wrap(const vector_t v, const vector_t min_v, const vector_t max_v)
@@ -278,52 +277,43 @@ FORCEINLINE vector_t __vectorcall vector_wrap(const vector_t v, const vector_t m
     /*
     if (v > max_v)
     {
-    return min_v + mod(v - max_v, max_v);
+        return min_v + mod(v - max_v, max_v);
     }
     else if (v < min_v)
     {
-    return max_v + mod(min_v + v, max_v);
+        return max_v + mod(min_v + v, max_v);
     }
     */
 
-    //vector_t zero = vector_get_zero();
-
     // v가 최대 값보다 클 때
     const vector_t max_mask = _mm_cmpgt_ps(v, max_v);
-    //vector_t not_max = _mm_blendv_ps(v, zero, max_mask);
-    //vector_t max_result = _mm_blendv_ps(zero, v, max_mask);
     vector_t max_result = _mm_and_ps(v, max_mask);
-    max_result = vector_sub(max_result, max_v);
+    max_result = _mm_sub_ps(max_result, max_v);
     max_result = vector_mod(max_result, max_v);
-    max_result = vector_add(min_v, max_result);
+    max_result = _mm_add_ps(min_v, max_result);
     max_result = _mm_and_ps(max_result, max_mask);
 
     // v가 최소 값보다 작을 때
     const vector_t min_mask = _mm_cmplt_ps(v, min_v);
-    //vector_t not_min = _mm_blendv_ps(v, zero, min_mask);
-    //vector_t min_result = _mm_blendv_ps(zero, v, min_mask);
     vector_t min_result = _mm_and_ps(v, min_mask);
-    min_result = vector_add(min_result, min_v);
+    min_result = _mm_add_ps(min_result, min_v);
     min_result = vector_mod(min_result, max_v);
-    min_result = vector_add(max_v, min_result);
+    min_result = _mm_add_ps(max_v, min_result);
     min_result = _mm_and_ps(min_result, min_mask);
 
     // 래핑되지 않은 값 추가 (범위 내에 있던 값 추가)
-    //vector_t no_wrap = _mm_and_ps(not_max, not_min);
     vector_t result = _mm_or_ps(min_result, max_result);
     const vector_t zero_mask = _mm_cmpeq_ps(result, vector_get_zero());
     result = _mm_or_ps(result, _mm_and_ps(v, zero_mask));
-    //result = _mm_or_ps(result, no_wrap);
 
     // and를 하고 나면 순서가 바뀌기 때문에 역순으로 바꾸기
     result = _mm_shuffle_ps(result, result, _MM_SHUFFLE(3, 2, 1, 0));
-
     return result;
 }
 
 FORCEINLINE vector_t __vectorcall vector_wrap_scalar(const vector_t v, const float min, const float max)
 {
-    return vector_wrap(v, vector_set1(min), vector_set1(max));
+    return vector_wrap(v, _mm_set_ps1(min), _mm_set_ps1(max));
 }
 
 END_EXTERN_C

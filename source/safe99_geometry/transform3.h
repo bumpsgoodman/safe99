@@ -30,7 +30,7 @@ FORCEINLINE void __stdcall transform3_update_dir_vector(transform3_t* p_transfor
     float cr;   // cos(roll)
     get_sin_cos(p_transform->rotation.y * (float)PI_DIV_180, &sy, &cy);
     get_sin_cos(p_transform->rotation.x * (float)PI_DIV_180, &sp, &cp);
-    get_sin_cos(p_transform->rotation.z * (float)PI_DIV_180, &sr, &cr);
+    get_sin_cos(-p_transform->rotation.z * (float)PI_DIV_180, &sr, &cr);
 
 #if 1
     p_transform->right_vector.x = cy * cr + sy * sp * sr;
@@ -70,7 +70,7 @@ FORCEINLINE void __stdcall transform3_set_position(transform3_t* p_transform, co
 FORCEINLINE void __stdcall transform3_set_rotation(transform3_t* p_transform, const vector3_t rotation)
 {
     ASSERT(p_transform != NULL, "p_transform == NULL");
-    p_transform->rotation = rotation;
+    p_transform->rotation = vector_to_vector3(vector_wrap_scalar(vector3_to_vector(&rotation), 0.0f, 360.0f));
     transform3_update_dir_vector(p_transform);
 }
 
@@ -122,9 +122,9 @@ FORCEINLINE matrix_t __stdcall transform3_get_model_matrix(const transform3_t* p
 
 #if 1
     matrix_t result;
-    result.r0 = vector_mul_scalar(TO_VECTOR(r), s.x);
-    result.r1 = vector_mul_scalar(TO_VECTOR(u), s.y);
-    result.r2 = vector_mul_scalar(TO_VECTOR(f), s.z);
+    result.r0 = vector_mul_scalar(vector3_to_vector(&r), s.x);
+    result.r1 = vector_mul_scalar(vector3_to_vector(&u), s.y);
+    result.r2 = vector_mul_scalar(vector3_to_vector(&f), s.z);
     result.r3 = vector3_to_vector(&t);
 #endif
 
@@ -145,51 +145,55 @@ FORCEINLINE matrix_t __stdcall transform3_get_view_matrix(const transform3_t* p_
     const vector3_t u = p_transform->up_vector;
     const vector3_t f = p_transform->forward_vector;
     const vector3_t t = p_transform->position;
-    matrix_t result = matrix_set(r.x, u.x, f.x, -vector_dot3(TO_VECTOR(r), TO_VECTOR(t)),
-                                 r.y, u.y, f.y, -vector_dot3(TO_VECTOR(u), TO_VECTOR(t)),
-                                 r.z, u.z, f.z, -vector_dot3(TO_VECTOR(f), TO_VECTOR(t)),
-                                 0.0f, 0.0f, 0.0f, 1.0f);
+    const vector_t tv = vector3_to_vector(&t);
+
+    const matrix_t result = matrix_set(r.x, r.y, r.z, -vector_dot3(vector3_to_vector(&r), tv),
+                                       u.x, u.y, u.z, -vector_dot3(vector3_to_vector(&u), tv),
+                                       f.x, f.y, f.z, -vector_dot3(vector3_to_vector(&f), tv),
+                                       0.0f, 0.0f, 0.0f, 1.0f);
     return result;
 }
 
 FORCEINLINE void __stdcall transform3_add_position(transform3_t* p_transform, const vector3_t position)
 {
     ASSERT(p_transform != NULL, "p_transform == NULL");
-    *((__m128*)&p_transform->position) = _mm_add_ps(TO_VECTOR(p_transform->position), TO_VECTOR(position));
+    const vector_t origin = vector3_to_vector(&p_transform->position);
+    const vector_t add = vector3_to_vector(&position);
+    *((__m128*) & p_transform->position) = _mm_add_ps(origin, add);
 }
 
 FORCEINLINE void __stdcall transform3_add_rotation(transform3_t* p_transform, const vector3_t rotation)
 {
     ASSERT(p_transform != NULL, "p_transform == NULL");
-    *((__m128*)&p_transform->rotation) = _mm_add_ps(TO_VECTOR(p_transform->rotation), TO_VECTOR(rotation));
+    *((__m128*) & p_transform->rotation) = _mm_add_ps(vector3_to_vector(&p_transform->rotation), vector3_to_vector(&rotation));
     transform3_update_dir_vector(p_transform);
 }
 
 FORCEINLINE void __stdcall transform3_add_rotation_pitch(transform3_t* p_transform, const float degree)
 {
     ASSERT(p_transform != NULL, "p_transform == NULL");
-    p_transform->rotation.x += degree;
+    p_transform->rotation.x = wrap(p_transform->rotation.x + degree, 0.0f, 360.0f);
     transform3_update_dir_vector(p_transform);
 }
 
 FORCEINLINE void __stdcall transform3_add_rotation_yaw(transform3_t* p_transform, const float degree)
 {
     ASSERT(p_transform != NULL, "p_transform == NULL");
-    p_transform->rotation.y += degree;
+    p_transform->rotation.y = wrap(p_transform->rotation.y + degree, 0.0f, 360.0f);
     transform3_update_dir_vector(p_transform);
 }
 
 FORCEINLINE void __stdcall transform3_add_rotation_roll(transform3_t* p_transform, const float degree)
 {
     ASSERT(p_transform != NULL, "p_transform == NULL");
-    p_transform->rotation.z += degree;
+    p_transform->rotation.z = wrap(p_transform->rotation.z + degree, 0.0f, 360.0f);
     transform3_update_dir_vector(p_transform);
 }
 
 FORCEINLINE void __stdcall transform3_add_scale(transform3_t* p_transform, const vector3_t scale)
 {
     ASSERT(p_transform != NULL, "p_transform == NULL");
-    *((__m128*)&p_transform->scale) = _mm_add_ps(TO_VECTOR(p_transform->scale), TO_VECTOR(scale));
+    *((__m128*) & p_transform->scale) = _mm_add_ps(vector3_to_vector(&p_transform->scale), vector3_to_vector(&scale));
 }
 
 END_EXTERN_C
