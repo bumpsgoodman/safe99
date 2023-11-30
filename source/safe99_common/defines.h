@@ -297,19 +297,12 @@ typedef struct transform3
 typedef struct camera2
 {
     transform2_t transform;
-
-    vector2_t view_port_left_top;
-    vector2_t view_port_right_bottom;
-
     matrix_t view_matrix;
 } camera2_t;
-
-
 
 typedef struct camera3
 {
     transform3_t transform;
-    matrix_t view_matrix;
 } camera3_t;
 
 #endif // DEFINES_H

@@ -79,9 +79,12 @@ typedef interface i_soft_renderer_vtbl
                                              i_mesh_t** pp_out_mesh);
 
     void        (__stdcall*     draw_mesh2)(i_soft_renderer_t* p_this,
-                                            const i_mesh_t* p_mesh, const matrix_t* p_transform_mat, const bool b_wireframe);
+                                            const i_mesh_t* p_mesh, const matrix_t* p_transform_mat);
     void        (__stdcall*     draw_mesh3)(i_soft_renderer_t* p_this,
-                                            const i_mesh_t* p_mesh, const matrix_t* p_transform_mat, const bool b_wireframe);
+                                            const i_mesh_t* p_mesh, const matrix_t* p_transform_mat);
+
+    void        (__stdcall*     toggle_wireframe)(i_soft_renderer_t* p_this);
+    void        (__stdcall*     toggle_backface_culling)(i_soft_renderer_t* p_this);
 } i_soft_renderer_vtbl_t;
 
 typedef interface i_soft_renderer

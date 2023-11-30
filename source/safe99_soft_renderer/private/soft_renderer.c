@@ -76,6 +76,10 @@ typedef struct soft_renderer
 
     HBITMAP hdi_bitmap;
     HBITMAP hdefault_bitmap;
+
+    // 렌더링 옵션
+    bool b_wireframe;
+    bool b_backface_culling;
 } soft_renderer_t;
 
 enum
@@ -244,6 +248,10 @@ static bool __stdcall initialize(i_soft_renderer_t* p_this, HWND hwnd, const boo
     p_renderer->b_full_screen = b_full_screen;
 
     clear(p_this, color_set(1.0f, 1.0f, 1.0f, 1.0f));
+
+    // 렌더링 옵션
+    p_renderer->b_wireframe = false;
+    p_renderer->b_backface_culling = false;
 
     return true;
 
@@ -772,7 +780,7 @@ static bool __stdcall create_mesh(const i_soft_renderer_t* p_this,
     return true;
 }
 
-static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_mesh, const matrix_t* p_transform_mat, const bool b_wireframe)
+static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_mesh, const matrix_t* p_transform_mat_tr)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_mesh != NULL, "p_mesh == NULL");
@@ -792,7 +800,7 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
     const bool b_texcoords = (p_texcoords != NULL);
 
     // color, texcoord 둘 다 없으면 그릴 수 없음
-    if (!b_wireframe && !b_colors && !b_texcoords)
+    if (!p_renderer->b_wireframe && !b_colors && !b_texcoords)
     {
         ASSERT(false, "Invalid mesh");
         return;
@@ -811,9 +819,9 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
         const size_t buffer_index = j * 3;
 
         // 버텍스 셰이더 적용
-        const vector_t temp_v0 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index]]), *p_transform_mat);
-        const vector_t temp_v1 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 1]]), *p_transform_mat);
-        const vector_t temp_v2 = matrix_mul_vector(vector2_to_vector(&p_positions[p_indices[buffer_index + 2]]), *p_transform_mat);
+        const vector_t temp_v0 = matrix_mul_vector(vector2_to_vector(p_positions[p_indices[buffer_index]]), *p_transform_mat_tr);
+        const vector_t temp_v1 = matrix_mul_vector(vector2_to_vector(p_positions[p_indices[buffer_index + 1]]), *p_transform_mat_tr);
+        const vector_t temp_v2 = matrix_mul_vector(vector2_to_vector(p_positions[p_indices[buffer_index + 2]]), *p_transform_mat_tr);
 
         vector3_t v0 = to_screen_coord(vector_to_vector3(temp_v0), window_width, window_height);
         vector3_t v1 = to_screen_coord(vector_to_vector3(temp_v1), window_width, window_height);
@@ -827,7 +835,7 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
         }
 
         // 와이어프레임 모드
-        if (b_wireframe)
+        if (p_renderer->b_wireframe)
         {
             const color_t color = p_mesh->vtbl->get_wireframe_color(p_mesh);
 
@@ -881,9 +889,9 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
             max.x = MAX(MAX(v0.x, v1.x), v2.x);
             max.y = MAX(MAX(v0.y, v1.y), v2.y);
 
-            const vector_t tv0 = vector3_to_vector(&v0);
-            const vector_t tv1 = vector3_to_vector(&v1);
-            const vector_t tv2 = vector3_to_vector(&v2);
+            const vector_t tv0 = vector3_to_vector(v0);
+            const vector_t tv1 = vector3_to_vector(v1);
+            const vector_t tv2 = vector3_to_vector(v2);
 
             const float cross = vector_cross2(vector_sub(tv0, tv1), vector_sub(tv1, tv2));
 
@@ -892,7 +900,7 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
                 for (int x = (int)min.x; x <= (int)max.x; ++x)
                 {
                     const vector3_t temp_p = { (float)x, (float)y };
-                    const vector_t p = vector3_to_vector(&temp_p);
+                    const vector_t p = vector3_to_vector(temp_p);
 
                     const float area0 = vector_cross2(vector_sub(p, tv2), vector_sub(tv1, tv2));
                     const float area1 = vector_cross2(vector_sub(p, tv0), vector_sub(tv2, tv0));
@@ -926,9 +934,9 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
                     }
                     else
                     {
-                        vector_t cv0 = vector4_to_vector((vector4_t*)&color0);
-                        vector_t cv1 = vector4_to_vector((vector4_t*)&color1);
-                        vector_t cv2 = vector4_to_vector((vector4_t*)&color2);
+                        vector_t cv0 = vector4_to_vector(*(vector4_t*)&color0);
+                        vector_t cv1 = vector4_to_vector(*(vector4_t*)&color1);
+                        vector_t cv2 = vector4_to_vector(*(vector4_t*)&color2);
 
                         cv0 = vector_mul_scalar(cv0, w0);
                         cv1 = vector_mul_scalar(cv1, w1);
@@ -947,7 +955,7 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
     }
 }
 
-static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_mesh, const matrix_t* p_transform_mat, const bool b_wireframe)
+static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_mesh, const matrix_t* p_transform_mat_tr)
 {
     ASSERT(p_this != NULL, "p_this == NULL");
     ASSERT(p_mesh != NULL, "p_mesh == NULL");
@@ -967,7 +975,7 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
     const bool b_texcoords = (p_texcoords != NULL);
 
     // color, texcoord 둘 다 없으면 그릴 수 없음
-    if (!b_wireframe && !b_colors && !b_texcoords)
+    if (!p_renderer->b_wireframe && !b_colors && !b_texcoords)
     {
         ASSERT(false, "Invalid mesh");
         return;
@@ -975,7 +983,7 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
 
     i_index_buffer_t* p_index_buffer = (i_index_buffer_t*)p_mesh->vtbl->get_index_buffer(p_mesh);
     const uint_t* p_indices = p_index_buffer->vtbl->get_indices(p_index_buffer);
-    const size_t num_triangles = p_index_buffer->vtbl->get_num_indices(p_index_buffer);
+    const size_t num_triangles = p_index_buffer->vtbl->get_num_indices(p_index_buffer) / 3;
     SAFE_RELEASE(p_index_buffer);
 
     // texcoords가 들어왔으면 텍스처 불러오기
@@ -986,9 +994,9 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
         const size_t buffer_index = j * 3;
 
         // 버텍스 셰이더 적용
-        const vector_t temp_v0 = matrix_mul_vector(vector3_to_vector(&p_positions[p_indices[buffer_index]]), *p_transform_mat);
-        const vector_t temp_v1 = matrix_mul_vector(vector3_to_vector(&p_positions[p_indices[buffer_index + 1]]), *p_transform_mat);
-        const vector_t temp_v2 = matrix_mul_vector(vector3_to_vector(&p_positions[p_indices[buffer_index + 2]]), *p_transform_mat);
+        const vector_t temp_v0 = matrix_mul_vector(vector3_to_vector(p_positions[p_indices[buffer_index]]), *p_transform_mat_tr);
+        const vector_t temp_v1 = matrix_mul_vector(vector3_to_vector(p_positions[p_indices[buffer_index + 1]]), *p_transform_mat_tr);
+        const vector_t temp_v2 = matrix_mul_vector(vector3_to_vector(p_positions[p_indices[buffer_index + 2]]), *p_transform_mat_tr);
 
         vector3_t v0 = to_screen_coord(vector_to_vector3(temp_v0), window_width, window_height);
         vector3_t v1 = to_screen_coord(vector_to_vector3(temp_v1), window_width, window_height);
@@ -1000,9 +1008,23 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
         {
             continue;
         }
+        
+        // 백페이스 컬링
+        if (p_renderer->b_backface_culling)
+        {
+            const vector_t edge1 = vector_sub(vector3_to_vector(v1), vector3_to_vector(v0));
+            const vector_t edge2 = vector_sub(vector3_to_vector(v2), vector3_to_vector(v0));
+            const vector_t face_normal = vector_cross3(edge1, edge2);
+            const vector_t view_direction = s_identity_r2;
+            const float dot = vector_dot3(face_normal, view_direction);
+            if (dot >= 0.0f)
+            {
+                continue;
+            }
+        }
 
         // 와이어프레임 모드
-        if (b_wireframe)
+        if (p_renderer->b_wireframe)
         {
             const color_t color = p_mesh->vtbl->get_wireframe_color(p_mesh);
 
@@ -1056,9 +1078,9 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
             max.x = MAX(MAX(v0.x, v1.x), v2.x);
             max.y = MAX(MAX(v0.y, v1.y), v2.y);
 
-            const vector_t tv0 = vector3_to_vector(&v0);
-            const vector_t tv1 = vector3_to_vector(&v1);
-            const vector_t tv2 = vector3_to_vector(&v2);
+            const vector_t tv0 = vector2_to_vector_zero(TO_VECTOR2(v0));
+            const vector_t tv1 = vector2_to_vector_zero(TO_VECTOR2(v1));
+            const vector_t tv2 = vector2_to_vector_zero(TO_VECTOR2(v2));
 
             const float cross = vector_cross2(vector_sub(tv0, tv1), vector_sub(tv1, tv2));
 
@@ -1067,7 +1089,7 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
                 for (int x = (int)min.x; x <= (int)max.x; ++x)
                 {
                     const vector3_t temp_p = { (float)x, (float)y };
-                    const vector_t p = vector3_to_vector(&temp_p);
+                    const vector_t p = vector2_to_vector_zero(TO_VECTOR2(temp_p));
 
                     const float area0 = vector_cross2(vector_sub(p, tv2), vector_sub(tv1, tv2));
                     const float area1 = vector_cross2(vector_sub(p, tv0), vector_sub(tv2, tv0));
@@ -1101,9 +1123,9 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
                     }
                     else
                     {
-                        vector_t cv0 = vector4_to_vector((vector4_t*)&color0);
-                        vector_t cv1 = vector4_to_vector((vector4_t*)&color1);
-                        vector_t cv2 = vector4_to_vector((vector4_t*)&color2);
+                        vector_t cv0 = vector4_to_vector(*(vector4_t*)&color0);
+                        vector_t cv1 = vector4_to_vector(*(vector4_t*)&color1);
+                        vector_t cv2 = vector4_to_vector(*(vector4_t*)&color2);
 
                         cv0 = vector_mul_scalar(cv0, w0);
                         cv1 = vector_mul_scalar(cv1, w1);
@@ -1120,6 +1142,22 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
             }
         }
     }
+}
+
+static void __stdcall toggle_wireframe(i_soft_renderer_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_t* p_renderer = (soft_renderer_t*)p_this;
+    p_renderer->b_wireframe = !p_renderer->b_wireframe;
+}
+
+static void __stdcall toggle_backface_culling(i_soft_renderer_t* p_this)
+{
+    ASSERT(p_this != NULL, "p_this == NULL");
+
+    soft_renderer_t* p_renderer = (soft_renderer_t*)p_this;
+    p_renderer->b_backface_culling = !p_renderer->b_backface_culling;
 }
 
 static bool update_buffer(soft_renderer_t* p_renderer)
@@ -1211,7 +1249,10 @@ void __stdcall create_instance(void** pp_out_instance)
         create_mesh,
 
         draw_mesh2,
-        draw_mesh3
+        draw_mesh3,
+
+        toggle_wireframe,
+        toggle_backface_culling
     };
 
     soft_renderer_t* pa_renderer = (soft_renderer_t*)malloc(sizeof(soft_renderer_t));

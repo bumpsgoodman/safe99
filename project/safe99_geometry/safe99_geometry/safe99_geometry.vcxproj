@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\safe99_common\defines.h" />
+    <ClInclude Include="..\..\..\source\safe99_geometry\camera3.h" />
     <ClInclude Include="..\..\..\source\safe99_geometry\i_ecs.h" />
     <ClInclude Include="..\..\..\source\safe99_geometry\i_geometry.h" />
     <ClInclude Include="..\..\..\source\safe99_geometry\private\precompiled.h" />

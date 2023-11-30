@@ -16,6 +16,7 @@
 #include "i_ecs.h"
 #include "transform2.h"
 #include "transform3.h"
+#include "camera3.h"
 
 typedef interface i_geometry i_geometry_t;
 typedef interface i_geometry_vtbl

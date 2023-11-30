@@ -97,22 +97,29 @@ FORCEINLINE float __vectorcall vector_get_w(const vector_t v)
     return _mm_cvtss_f32(temp);
 }
 
-FORCEINLINE vector_t __vectorcall vector2_to_vector(const vector2_t* p_v)
+FORCEINLINE vector_t __vectorcall vector2_to_vector(const vector2_t v)
 {
-    ASSERT(p_v != NULL, "p_v == NULL");
-    return _mm_set_ps(1.0f, 1.0f, p_v->y, p_v->x);
+    return _mm_set_ps(1.0f, 1.0f, v.y, v.x);
 }
 
-FORCEINLINE vector_t __vectorcall vector3_to_vector(const vector3_t* p_v)
+FORCEINLINE vector_t __vectorcall vector2_to_vector_zero(const vector2_t v)
 {
-    ASSERT(p_v != NULL, "p_v == NULL");
-    return _mm_set_ps(1.0f, p_v->z, p_v->y, p_v->x);
+    return _mm_set_ps(0.0f, 0.0f, v.y, v.x);
 }
 
-FORCEINLINE vector_t __vectorcall vector4_to_vector(const vector4_t* p_v)
+FORCEINLINE vector_t __vectorcall vector3_to_vector(const vector3_t v)
 {
-    ASSERT(p_v != NULL, "p_v == NULL");
-    return _mm_set_ps(p_v->w, p_v->z, p_v->y, p_v->x);
+    return _mm_set_ps(1.0f, v.z, v.y, v.x);
+}
+
+FORCEINLINE vector_t __vectorcall vector3_to_vector_zero(const vector3_t v)
+{
+    return _mm_set_ps(0.0f, v.z, v.y, v.x);
+}
+
+FORCEINLINE vector_t __vectorcall vector4_to_vector(const vector4_t v)
+{
+    return _mm_set_ps(v.w, v.z, v.y, v.x);
 }
 
 FORCEINLINE vector2_t __vectorcall vector_to_vector2(const vector_t v)
@@ -148,6 +155,12 @@ FORCEINLINE vector_t __vectorcall vector_mul(const vector_t v0, const vector_t v
 FORCEINLINE vector_t __vectorcall vector_mul_scalar(const vector_t v, const float scalar)
 {
     return _mm_mul_ps(v, _mm_set_ps1(scalar));
+}
+
+FORCEINLINE vector_t __vectorcall vector_negate(const vector_t v)
+{
+    const vector_t zero = _mm_setzero_ps();
+    return _mm_sub_ps(zero, v);
 }
 
 FORCEINLINE vector_t __vectorcall vector_div(const vector_t v0, const vector_t v1)
@@ -213,12 +226,12 @@ FORCEINLINE float __vectorcall vector_get_length3_sqaured(const vector_t v)
     return _mm_cvtss_f32(_mm_dp_ps(v, v, 0x7f));
 }
 
-FORCEINLINE vector_t __vectorcall vector_get_norm2(const vector_t v)
+FORCEINLINE vector_t __vectorcall vector_get_unit2(const vector_t v)
 {
     return _mm_mul_ps(v, _mm_rsqrt_ps(_mm_dp_ps(v, v, 0x3f)));
 }
 
-FORCEINLINE vector_t __vectorcall vector_get_norm3(const vector_t v)
+FORCEINLINE vector_t __vectorcall vector_get_unit3(const vector_t v)
 {
     return _mm_mul_ps(v, _mm_rsqrt_ps(_mm_dp_ps(v, v, 0x7f)));
 }
@@ -240,15 +253,15 @@ FORCEINLINE vector_t vector_cross3(const vector_t v0, const vector_t v1)
     //  v0.z * v1.x - v0.x * v1.z
     //  v0.x * v1.y - v0.y * v1.x)
 
-    vector_t shuffle_v0 = _mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3, 0, 2, 1));
-    vector_t shuffle_v1 = _mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3, 1, 0, 2));
-    const vector_t result1 = _mm_mul_ps(shuffle_v0, shuffle_v1);
+    vector_t shuffle_v0 = _mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3, 0, 2, 1)); // (z, x, y)
+    vector_t shuffle_v1 = _mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3, 1, 0, 2)); // (y, z, x)
+    const vector_t temp1 = _mm_mul_ps(shuffle_v0, shuffle_v1);
 
-    shuffle_v0 = _mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3, 1, 0, 2));
-    shuffle_v1 = _mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3, 0, 2, 1));
-    const vector_t result2 = _mm_mul_ps(shuffle_v0, shuffle_v1);
+    shuffle_v0 = _mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3, 1, 0, 2)); // (y, z, x)
+    shuffle_v1 = _mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3, 0, 2, 1)); // (z, x, y)
+    const vector_t temp2 = _mm_mul_ps(shuffle_v0, shuffle_v1);
 
-    return _mm_sub_ps(result1, result2);
+    return _mm_sub_ps(temp1, temp2);
 }
 
 FORCEINLINE float __vectorcall vector_dot2(const vector_t v0, const vector_t v1)

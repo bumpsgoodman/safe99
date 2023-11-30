@@ -14,6 +14,7 @@
     <ClInclude Include="..\..\..\source\safe99_geometry\transform2.h" />
     <ClInclude Include="..\..\..\source\safe99_geometry\transform3.h" />
     <ClInclude Include="..\..\..\source\safe99_geometry\i_geometry.h" />
+    <ClInclude Include="..\..\..\source\safe99_geometry\camera3.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="safe99_common">

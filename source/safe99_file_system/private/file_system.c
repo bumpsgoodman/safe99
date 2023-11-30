@@ -266,7 +266,7 @@ bool __stdcall load_safe3d(i_file_system_t* p_this, const char* filename, i_safe
 
     i_safe3d_t* p_safe3d;
     create_safe3d_private(&p_safe3d);
-    if (!initialize_safe3d_private(p_safe3d, pa_vertices, num_vertices, pa_indices, num_indices, wireframe_color))
+    if (!initialize_safe3d_private(p_safe3d, pa_vertices, num_vertices, pa_indices, num_indices * 3, wireframe_color))
     {
         ASSERT(false, "Failed to init texture");
         SAFE_FREE(p_safe3d);
