@@ -34,23 +34,23 @@ FORCEINLINE void __stdcall transform3_update_dir_vector(transform3_t* p_transfor
 
     p_transform->right_vector = (vector3_t)
     {
-        cr * cy + sr * sp * sy,
-        sr * cp,
-        cr * -sy + sr * sp * cy
+        cy * cr + -sy * -sp * -sr,
+        cy * sr + -sy * -sp * cr,
+        -sy * cp
     };
 
     p_transform->up_vector = (vector3_t)
     {
-        -sr * cy + cr * sp * sy,
-        cr * cp,
-        -sr * -sy + cr * sp * cy
+        cp * -sr,
+        cp * cr,
+        sp
     };
 
     p_transform->forward_vector = (vector3_t)
     {
-        cp * sy,
-        -sp,
-        cp * cy
+        sy * cr + cy * -sp * -sr,
+        sy * sr + cy * -sp * cr,
+        cy * cp
     };
 }
 
@@ -127,16 +127,16 @@ FORCEINLINE vector3_t __stdcall transform3_get_forward_vector(const transform3_t
     return p_transform->forward_vector;
 }
 
-FORCEINLINE matrix_t __stdcall transform3_get_model_matrix(const transform3_t* p_transform)
+FORCEINLINE matrix_t __stdcall transform3_get_world_matrix(const transform3_t* p_transform)
 {
     ASSERT(p_transform != NULL, "p_transform == NULL");
 
     vector3_t s = p_transform->scale;
 
     matrix_t result;
-    result.r0 = vector_mul_scalar(vector3_to_vector(p_transform->right_vector), s.x);
-    result.r1 = vector_mul_scalar(vector3_to_vector(p_transform->up_vector), s.y);
-    result.r2 = vector_mul_scalar(vector3_to_vector(p_transform->forward_vector), s.z);
+    result.r0 = vector_mul_scalar(vector3_to_vector_zero(p_transform->right_vector), s.x);
+    result.r1 = vector_mul_scalar(vector3_to_vector_zero(p_transform->up_vector), s.y);
+    result.r2 = vector_mul_scalar(vector3_to_vector_zero(p_transform->forward_vector), s.z);
     result.r3 = vector3_to_vector(p_transform->position);
     return result;
 }

@@ -13,6 +13,8 @@
 #ifndef SAFE99_MATH_H
 #define SAFE99_MATH_H
 
+#include <math.h>
+
 #include "safe99_common/defines.h"
 #include "color.h"
 #include "math_defines.h"

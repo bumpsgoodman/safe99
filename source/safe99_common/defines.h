@@ -294,6 +294,14 @@ typedef struct transform3
     matrix_t model_matrix;
 } transform3_t;
 
+typedef struct view_port
+{
+    float top_left_x;
+    float top_left_y;
+    float width;
+    float height;
+} view_port_t;
+
 typedef struct camera2
 {
     transform2_t transform;
@@ -303,6 +311,10 @@ typedef struct camera2
 typedef struct camera3
 {
     transform3_t transform;
+    view_port_t view_port;
+    float fov;
+    float near_z;
+    float far_z;
 } camera3_t;
 
 #endif // DEFINES_H

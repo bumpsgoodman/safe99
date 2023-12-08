@@ -790,6 +790,7 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
     const size_t window_width = p_renderer->window_width;
     const size_t window_height = p_renderer->window_height;
 
+    // 버텍스 버퍼 불러오기
     i_vertex_buffer_t* p_vertex_buffer = (i_vertex_buffer_t*)p_mesh->vtbl->get_vertex_buffer(p_mesh);
     const vector2_t* p_positions = (vector2_t*)p_vertex_buffer->vtbl->get_positions(p_vertex_buffer);
     const color_t* p_colors = p_vertex_buffer->vtbl->get_colors_or_null(p_vertex_buffer);
@@ -806,6 +807,7 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
         return;
     }
 
+    // 인덱스 버퍼 불러오기
     i_index_buffer_t* p_index_buffer = (i_index_buffer_t*)p_mesh->vtbl->get_index_buffer(p_mesh);
     const uint_t* p_indices = p_index_buffer->vtbl->get_indices(p_index_buffer);
     const size_t num_triangles = p_index_buffer->vtbl->get_num_indices(p_index_buffer) / 3;
@@ -818,7 +820,7 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
     {
         const size_t buffer_index = j * 3;
 
-        // 버텍스 셰이더 적용
+        // 버텍스 셰이더 적용 (Model View Projection)
         const vector_t temp_v0 = matrix_mul_vector(vector2_to_vector(p_positions[p_indices[buffer_index]]), *p_transform_mat_tr);
         const vector_t temp_v1 = matrix_mul_vector(vector2_to_vector(p_positions[p_indices[buffer_index + 1]]), *p_transform_mat_tr);
         const vector_t temp_v2 = matrix_mul_vector(vector2_to_vector(p_positions[p_indices[buffer_index + 2]]), *p_transform_mat_tr);
@@ -827,6 +829,7 @@ static void __stdcall draw_mesh2(i_soft_renderer_t* p_this, const i_mesh_t* p_me
         vector3_t v1 = to_screen_coord(vector_to_vector3(temp_v1), window_width, window_height);
         vector3_t v2 = to_screen_coord(vector_to_vector3(temp_v2), window_width, window_height);
 
+        // 삼각형을 이루는 모든 직선이 화면 밖에 있으면 그리지 않음
         if ((v0.x < 0 || v0.x >= window_width || v0.y < 0 || v0.y >= window_height)
             && (v1.x < 0 || v1.x >= window_width || v1.y < 0 || v1.y >= window_height)
             && (v2.x < 0 || v2.x >= window_width || v2.y < 0 || v2.y >= window_height))
@@ -994,13 +997,36 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
         const size_t buffer_index = j * 3;
 
         // 버텍스 셰이더 적용
-        const vector_t temp_v0 = matrix_mul_vector(vector3_to_vector(p_positions[p_indices[buffer_index]]), *p_transform_mat_tr);
-        const vector_t temp_v1 = matrix_mul_vector(vector3_to_vector(p_positions[p_indices[buffer_index + 1]]), *p_transform_mat_tr);
-        const vector_t temp_v2 = matrix_mul_vector(vector3_to_vector(p_positions[p_indices[buffer_index + 2]]), *p_transform_mat_tr);
+        vector_t temp_v0 = matrix_mul_vector(vector3_to_vector(p_positions[p_indices[buffer_index]]), *p_transform_mat_tr);
+        vector_t temp_v1 = matrix_mul_vector(vector3_to_vector(p_positions[p_indices[buffer_index + 1]]), *p_transform_mat_tr);
+        vector_t temp_v2 = matrix_mul_vector(vector3_to_vector(p_positions[p_indices[buffer_index + 2]]), *p_transform_mat_tr);
 
-        vector3_t v0 = to_screen_coord(vector_to_vector3(temp_v0), window_width, window_height);
-        vector3_t v1 = to_screen_coord(vector_to_vector3(temp_v1), window_width, window_height);
-        vector3_t v2 = to_screen_coord(vector_to_vector3(temp_v2), window_width, window_height);
+        // clip -> NDC
+        float inv_z0 = 1.0f / vector_get_z(temp_v0);
+        temp_v0 = vector_mul_scalar(temp_v0, inv_z0);
+
+        float inv_z1 = 1.0f / vector_get_z(temp_v1);
+        temp_v1 = vector_mul_scalar(temp_v1, inv_z1);
+
+        float inv_z2 = 1.0f / vector_get_z(temp_v2);
+        temp_v2 = vector_mul_scalar(temp_v2, inv_z2);
+
+        // NDC -> 스크린
+        vector3_t v0 = vector_to_vector3(temp_v0);
+        v0.x *= 800.0f * 0.5f;
+        v0.y *= 600.0f * 0.5f;
+
+        vector3_t v1 = vector_to_vector3(temp_v1);
+        v1.x *= 800.0f * 0.5f;
+        v1.y *= 600.0f * 0.5f;
+
+        vector3_t v2 = vector_to_vector3(temp_v2);
+        v2.x *= 800.0f * 0.5f;
+        v2.y *= 600.0f * 0.5f;
+
+        v0 = to_screen_coord(v0, window_width, window_height);
+        v1 = to_screen_coord(v1, window_width, window_height);
+        v2 = to_screen_coord(v2, window_width, window_height);
 
         if ((v0.x < 0 || v0.x >= window_width || v0.y < 0 || v0.y >= window_height)
             && (v1.x < 0 || v1.x >= window_width || v1.y < 0 || v1.y >= window_height)
@@ -1012,10 +1038,10 @@ static void __stdcall draw_mesh3(i_soft_renderer_t* p_this, const i_mesh_t* p_me
         // 백페이스 컬링
         if (p_renderer->b_backface_culling)
         {
-            const vector_t edge1 = vector_sub(vector3_to_vector(v1), vector3_to_vector(v0));
-            const vector_t edge2 = vector_sub(vector3_to_vector(v2), vector3_to_vector(v0));
-            const vector_t face_normal = vector_cross3(edge1, edge2);
-            const vector_t view_direction = s_identity_r2;
+            const vector_t edge1 = vector_sub(temp_v1, temp_v0);
+            const vector_t edge2 = vector_sub(temp_v2, temp_v0);
+            const vector_t face_normal = vector_negate(vector_cross3(edge1, edge2));
+            const vector_t view_direction = vector_negate(s_identity_r2);
             const float dot = vector_dot3(face_normal, view_direction);
             if (dot >= 0.0f)
             {
@@ -1210,7 +1236,7 @@ static vector3_t to_screen_coord(const vector3_t cartesian_coord, const size_t s
 
 static vector3_t to_cartesian_coord(const vector3_t screen_coord, const size_t screen_width, const size_t screen_height)
 {
-    const vector3_t v = { screen_coord.x - (float)screen_width * 0.5f + 0.5f, -(screen_coord.y + 0.5f) + (float)screen_height * 0.5f };
+    const vector3_t v = { screen_coord.x + (float)screen_width * 0.5f + 0.5f, -(screen_coord.y + 0.5f) + (float)screen_height * 0.5f };
     return v;
 }
 

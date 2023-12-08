@@ -99,7 +99,7 @@ FORCEINLINE float __vectorcall vector_get_w(const vector_t v)
 
 FORCEINLINE vector_t __vectorcall vector2_to_vector(const vector2_t v)
 {
-    return _mm_set_ps(1.0f, 1.0f, v.y, v.x);
+    return _mm_set_ps(1.0f, 0.0f, v.y, v.x);
 }
 
 FORCEINLINE vector_t __vectorcall vector2_to_vector_zero(const vector2_t v)
