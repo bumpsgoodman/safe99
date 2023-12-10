@@ -76,3 +76,6 @@ cpp_include_cleanup_remove_unused_error_tag_type = dimmed
 
 [*]
 charset = utf-8-bom
+
+[*.asm]
+charset = utf-8
