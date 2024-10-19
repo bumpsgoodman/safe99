@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="safe99_Common">
+      <UniqueIdentifier>{b2ab7e6f-675e-4379-94c1-064e95eeabba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Common\Container">
+      <UniqueIdentifier>{a69fec9e-fe61-4e7c-984f-f069cecd74ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Common\Interface">
+      <UniqueIdentifier>{2eac217e-2f1d-46ce-9fa1-bf0cdc7c201f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EntryPoint">
+      <UniqueIdentifier>{656ad589-f25b-42ec-a734-6488e9cd523c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Math">
+      <UniqueIdentifier>{c526a858-afa0-497e-bb0a-9f6705450c85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Common\Util">
+      <UniqueIdentifier>{7f316dc1-f762-40b2-aee5-fbc36b02f05d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Interface\IMemPool.h">
+      <Filter>safe99_Common\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Interface\IRenderer.h">
+      <Filter>safe99_Common\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Container\FixedVector.h">
+      <Filter>safe99_Common\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Container\LinkedList.h">
+      <Filter>safe99_Common\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Assert.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Common.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Descriptor.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\ErrorCode.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Platform.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\PrimitiveType.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\SafeDelete.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_SoftRenderer\EntryPoint\Precompiled.h">
+      <Filter>EntryPoint</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Math\safe99_MathDefine.h">
+      <Filter>safe99_Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Util\HighPerformanceTimer.h">
+      <Filter>safe99_Common\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_SoftRenderer\Clipping.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Container\FixedVector.c">
+      <Filter>safe99_Common\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Container\LinkedList.c">
+      <Filter>safe99_Common\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Descriptor.c">
+      <Filter>safe99_Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\ErrorCode.c">
+      <Filter>safe99_Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_SoftRenderer\SoftRenderer.c" />
+    <ClCompile Include="..\..\..\Source\safe99_SoftRenderer\EntryPoint\DllMain.c">
+      <Filter>EntryPoint</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_SoftRenderer\EntryPoint\Precompiled.c">
+      <Filter>EntryPoint</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Util\HighPerformanceTimer.c">
+      <Filter>safe99_Common\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_SoftRenderer\Clipping.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="safe99_SoftRenderer.def" />
+    <None Include="..\..\..\Source\safe99_Math\safe99_Math.inl">
+      <Filter>safe99_Math</Filter>
+    </None>
+    <None Include="..\..\..\Source\safe99_Math\safe99_MathMisc.inl">
+      <Filter>safe99_Math</Filter>
+    </None>
+  </ItemGroup>
+</Project>

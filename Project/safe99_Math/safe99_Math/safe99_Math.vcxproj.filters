@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="safe99_Common">
+      <UniqueIdentifier>{e5ab9dea-efd2-41af-8a31-15c094bc5126}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EntryPoint">
+      <UniqueIdentifier>{c13374f4-0a7e-4407-95c3-e043887bf7da}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Assert.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Common.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Descriptor.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\ErrorCode.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Platform.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\PrimitiveType.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\SafeDelete.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Math\EntryPoint\Precompiled.h">
+      <Filter>EntryPoint</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Math\safe99_Math.inl" />
+    <ClInclude Include="..\..\..\Source\safe99_Math\safe99_MathMisc.inl" />
+    <ClInclude Include="..\..\..\Source\safe99_Math\safe99_MathDefine.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Descriptor.c">
+      <Filter>safe99_Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\ErrorCode.c">
+      <Filter>safe99_Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Math\EntryPoint\DllMain.c">
+      <Filter>EntryPoint</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Math\EntryPoint\Precompiled.c">
+      <Filter>EntryPoint</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Math\safe99_MathMisc_x86.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Source\safe99_Math\safe99_MathMisc_x64.asm" />
+  </ItemGroup>
+</Project>

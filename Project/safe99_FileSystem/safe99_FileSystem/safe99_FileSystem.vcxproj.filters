@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="EntryPoint">
+      <UniqueIdentifier>{d00cc15b-de69-4457-b7dd-d75e0bb9a93d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Common">
+      <UniqueIdentifier>{4d853a30-89dc-4550-9f67-6edcb1c5906f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Common\Interface">
+      <UniqueIdentifier>{80e0fccc-c87e-4da1-9736-a5175052cb36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Common\Container">
+      <UniqueIdentifier>{532937e0-7e23-41e3-a443-271bec11adce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Common\Util">
+      <UniqueIdentifier>{9eab5c1c-51ee-441f-8d05-f9ba227cec88}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="safe99_FileSystem.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\Source\safe99_FileSystem\EntryPoint\DllMain.c">
+      <Filter>EntryPoint</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_FileSystem\EntryPoint\Precompiled.c">
+      <Filter>EntryPoint</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Descriptor.c">
+      <Filter>safe99_Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\ErrorCode.c">
+      <Filter>safe99_Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Container\FixedVector.c">
+      <Filter>safe99_Common\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Container\LinkedList.c">
+      <Filter>safe99_Common\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Util\HighPerformanceTimer.c">
+      <Filter>safe99_Common\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_FileSystem\FileSystem.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Source\safe99_FileSystem\EntryPoint\Precompiled.h">
+      <Filter>EntryPoint</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Assert.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Common.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Descriptor.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\ErrorCode.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Platform.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\PrimitiveType.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\SafeDelete.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Interface\IMemPool.h">
+      <Filter>safe99_Common\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Interface\IRenderer.h">
+      <Filter>safe99_Common\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Container\FixedVector.h">
+      <Filter>safe99_Common\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Container\LinkedList.h">
+      <Filter>safe99_Common\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Util\HighPerformanceTimer.h">
+      <Filter>safe99_Common\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Interface\IFileSystem.h">
+      <Filter>safe99_Common\Interface</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

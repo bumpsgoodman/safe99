@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="safe99_Common">
+      <UniqueIdentifier>{6976e08e-887e-42eb-acfc-a392ab8581ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Common\Container">
+      <UniqueIdentifier>{d12bc44a-fcca-4ce2-ba5c-44d13c85161e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="safe99_Common\Interface">
+      <UniqueIdentifier>{e18e8d64-f632-4b71-a97d-f78fd662df1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{9b96a6b3-495f-4021-8898-a982f7d185de}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Interface\IMemPool.h">
+      <Filter>safe99_Common\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Interface\IRenderer.h">
+      <Filter>safe99_Common\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Container\FixedVector.h">
+      <Filter>safe99_Common\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Assert.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Common.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\ErrorCode.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\Platform.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\PrimitiveType.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_Common\SafeDelete.h">
+      <Filter>safe99_Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\safe99_3dsMaxMeshExporter\Precompiled.h" />
+    <ClInclude Include="..\..\..\Source\safe99_3dsMaxMeshExporter\MeshExporter.h" />
+    <ClInclude Include="resource.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\Source\safe99_Common\Container\FixedVector.c">
+      <Filter>safe99_Common\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_Common\ErrorCode.c">
+      <Filter>safe99_Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\safe99_3dsMaxMeshExporter\Precompiled.cpp" />
+    <ClCompile Include="..\..\..\Source\safe99_3dsMaxMeshExporter\MeshExporter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="safe99_3dsMaxMeshExporter.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="safe99_3dsMaxMeshExporter.rc">
+      <Filter>Resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
